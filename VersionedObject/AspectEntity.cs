@@ -48,7 +48,7 @@ namespace VersionedObject
         public JObject ToJsonldJObject() =>
             new()
             {
-                Content.Append(new JProperty("@id", PersistentIRI.ToString()))
+                Content.Append(new JProperty("@id", PersistentIRI.ToJValue()))
             };
 
 
