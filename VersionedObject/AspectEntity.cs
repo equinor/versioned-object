@@ -48,7 +48,7 @@ namespace VersionedObject
         public JObject ToJsonldJObject() =>
             new()
             {
-                Content.Append(new JProperty("@id", PersistentIRI))
+                Content.Append(new JProperty("@id", PersistentIRI.ToString()))
             };
 
 
@@ -72,7 +72,7 @@ namespace VersionedObject
         public string Version { get; }
         public AspectEntity Entity { get; }
         public IEnumerable<JProperty> GetContent() =>
-            Entity.Content.Append(new JProperty("@id", GetVersionedIRI()));
+            Entity.Content.Append(new JProperty("@id", GetVersionedIRI().ToJValue()));
 
         public VersionedEntity(AspectEntity persistent)
         {

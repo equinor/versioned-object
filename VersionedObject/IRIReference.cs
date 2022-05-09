@@ -1,5 +1,5 @@
-﻿using System;
-using System.Linq;
+﻿using System.Runtime.Serialization;
+using Newtonsoft.Json.Linq;
 
 namespace VersionedObject;
 
@@ -11,26 +11,28 @@ namespace VersionedObject;
 /// Also useful for other IRIs because a fragment is not part of a URI, and URI.Equals ignores the fragment.
 /// A URI Reference includes the fragment
 /// </summary>
-public class IRIReference : Uri
+[Serializable]
+public class IRIReference : IEquatable<IRIReference>
 {
-    //public Uri uri { get; set; }
+    public Uri uri { get; set; }
 
-    //public static implicit operator IRIReference(Uri uri) => new(uri);
-    //public static implicit operator IRIReference(string uri) => new(uri);
-    //public static implicit operator Uri(IRIReference r) => r.uri;
+    public static implicit operator IRIReference(Uri uri) => new(uri);
+    public static implicit operator IRIReference(string uri) => new(uri);
+    public static implicit operator Uri(IRIReference r) => r.uri;
 
-    public override bool Equals(object? o)
-    {
-        if (o != null && o is IRIReference r)
-            return ToString().Equals(r.ToString());
-        return false;
-    }
+    public static implicit operator JValue(IRIReference r) => r.ToJValue();
 
+    bool IEquatable<IRIReference>.Equals(IRIReference? other) =>
+        (other != null) && ToString().Equals(other.ToString());
+    
+    public override string ToString() => uri.ToString();
+
+    public JValue ToJValue() => new (uri);
+    public JValue ToJToken() => ToJValue();
     /// <summary>
     /// Adds version suffix to IRI to create an identifier for an immutable version object
     /// The inverse operation is GetPersistentUri below
     /// </summary>
-    /// <param name="persistentUri"></param>
     public IRIReference AddVersionToUri(string version) =>
         new($"{this}/{version}");
 
@@ -44,20 +46,19 @@ public class IRIReference : Uri
     /// </summary>
     public IRIReference GetPersistentUri() =>
         new(ToString().Split("/").SkipLast(1).Aggregate((x, y) => $"{x}/{y}"));
-    
+
     /// <summary>
     /// Cannot use Uri.getHashCode since that ignores the fragment
     /// </summary>
-    /// <returns></returns>
     public override int GetHashCode() => ToString().GetHashCode();
 
-    //[Newtonsoft.Json.JsonConstructor]
-    //public IRIReference(Uri uri)
-    //{
-    //    this.uri = uri;
-    //}
-    public IRIReference(string uriString) : base(uriString)
+    [Newtonsoft.Json.JsonConstructor]
+    public IRIReference(Uri uri)
     {
-        //uri = new Uri(uriString);
+        this.uri = uri;
+    }
+    public IRIReference(string uriString)
+    {
+        uri = new Uri(uriString);
     }
 }

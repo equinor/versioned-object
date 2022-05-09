@@ -134,7 +134,7 @@ namespace VersionedObject
         }
 
         public static JArray MakeDeleteGraph(this IEnumerable<IRIReference> deleteList) =>
-            new(deleteList.Select(x => new JValue(x)));
+            new(deleteList.Select(x => x.ToJValue()));
         
         /// <summary>
         /// Creates a list of objects that should  be deleted from the aspect api, based on an assumed complete list of "new objects"
