@@ -29,23 +29,13 @@ public class IRIReference : IEquatable<IRIReference>
 
     public JValue ToJValue() => new (uri);
     public JValue ToJToken() => ToJValue();
+
     /// <summary>
     /// Adds version suffix to IRI to create an identifier for an immutable version object
     /// The inverse operation is GetPersistentUri below
     /// </summary>
-    public IRIReference AddVersionToUri(string version) =>
+    public VersionedIRIReference AddVersionToUri(string version) =>
         new($"{this}/{version}");
-
-    /// <summary>
-    /// Gets the version part of the versioned URI (See also AddVersionToUri above)
-    /// </summary>
-    public string GetUriVersion() => ToString().Split("/").Last();
-
-    /// <summary>
-    /// Gets the persistent URI part of the versioned URI. This is the inverse of AddVersionToUri above
-    /// </summary>
-    public IRIReference GetPersistentUri() =>
-        new(ToString().Split("/").SkipLast(1).Aggregate((x, y) => $"{x}/{y}"));
 
     /// <summary>
     /// Cannot use Uri.getHashCode since that ignores the fragment
@@ -61,4 +51,25 @@ public class IRIReference : IEquatable<IRIReference>
     {
         uri = new Uri(uriString);
     }
+}
+/// <summary>
+/// Represents IRIs that reference versioned, immutable objects
+/// </summary>
+public class VersionedIRIReference : IRIReference
+{
+    public VersionedIRIReference(Uri uri) : base(uri)
+    { }
+    public VersionedIRIReference(string UriString) : base(UriString)
+    { }
+
+    /// <summary>
+    /// Gets the version part of the versioned URI (See also AddVersionToUri above)
+    /// </summary>
+    public string GetUriVersion() => ToString().Split("/").Last();
+
+    /// <summary>
+    /// Gets the persistent URI part of the versioned URI. This is the inverse of AddVersionToUri above
+    /// </summary>
+    public IRIReference GetPersistentUri() =>
+        new(ToString().Split("/").SkipLast(1).Aggregate((x, y) => $"{x}/{y}"));
 }
