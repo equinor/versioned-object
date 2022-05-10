@@ -22,7 +22,7 @@ namespace VersionedObject
             var existingList = existing.GetExistingGraphAsEntities(GetAllPersistentIris(input, existing));
             var updateList = inputList.MakeUpdateList(existingList);
             var allEntities = existingList.Union(updateList);
-    
+
             var deleteList = inputList.MakeDeleteList(existingList);
             return CreateUpdateJObject(updateList, deleteList, x => x.AddVersionToUris(allEntities));
         }
@@ -49,7 +49,7 @@ namespace VersionedObject
             jsonld.RemoveContext()
                 .GetJsonLdGraph()
                 .Values<JObject>()
-                .Select(x => 
+                .Select(x =>
                     new AspectEntity(
                         x.GetJsonLdIRI(),
                         x)
@@ -59,9 +59,9 @@ namespace VersionedObject
         {
             if (jsonld.ContainsKey("@graph"))
                 return jsonld.SelectToken("@graph").Value<JArray>();
-            if(jsonld.Type == JTokenType.Array)
+            if (jsonld.Type == JTokenType.Array)
                 return jsonld.Value<JArray>();
-            return new JArray(){jsonld};
+            return new JArray() { jsonld };
         }
 
         public static JObject RemoveContext(this JObject jsonld)
@@ -69,7 +69,7 @@ namespace VersionedObject
             var expanderOptions = new JsonLdProcessorOptions()
             {
                 ProcessingMode = VDS.RDF.JsonLd.Syntax.JsonLdProcessingMode.JsonLd11
-                
+
             };
             var expanderContext = jsonld.SelectToken("@context");
 
@@ -104,8 +104,8 @@ namespace VersionedObject
             {
                 ["update"] = new JObject()
                 {
-                    ["@graph"]  = updateList.MakeUpdateGraph(outputModifier),
-                    ["@context"] = new JObject(){["@version"] = "1.1"}
+                    ["@graph"] = updateList.MakeUpdateGraph(outputModifier),
+                    ["@context"] = new JObject() { ["@version"] = "1.1" }
                 },
                 ["delete"] = deleteList.MakeDeleteGraph(),
             };
@@ -127,7 +127,7 @@ namespace VersionedObject
                 .Select(i => new VersionedEntity(i.input))
                 .Union(
                     oldNewMap
-                        .Where(i => i.old.Any() 
+                        .Where(i => i.old.Any()
                                     && !i.input.Equals(i.old.First().Entity))
                         .Select(i => new ProvenanceEntity(i.input, i.old.First()))
                 );
@@ -135,7 +135,7 @@ namespace VersionedObject
 
         public static JArray MakeDeleteGraph(this IEnumerable<IRIReference> deleteList) =>
             new(deleteList.Select(x => x.ToJValue()));
-        
+
         /// <summary>
         /// Creates a list of objects that should  be deleted from the aspect api, based on an assumed complete list of "new objects"
         /// </summary>
