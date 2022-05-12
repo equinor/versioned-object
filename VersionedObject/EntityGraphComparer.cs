@@ -49,7 +49,7 @@ namespace VersionedObject
             jsonld.RemoveContext()
                 .GetJsonLdGraph()?
                 .Values<JObject>()
-                .Select(x => 
+                .Select(x =>
                     new AspectObject(
                         x.GetJsonLdIRI(),
                         x)
@@ -129,7 +129,7 @@ namespace VersionedObject
                 .Select(i => new VersionedObject(i.input))
                 .Union(
                     oldNewMap
-                        .Where(i => i.old.Any() 
+                        .Where(i => i.old.Any()
                                     && !i.input.Equals(i.old.First().Object))
                         .Select(i => new ProvenanceObject(i.input, i.old.First()))
                 );
