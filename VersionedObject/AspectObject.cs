@@ -12,28 +12,28 @@ using VersionedObject;
 
 namespace VersionedObject
 {
-    public class AspectEntity
+    public class AspectObject
     {
         public IRIReference PersistentIRI { get; }
         public IEnumerable<JProperty> Content { get; }
 
         public string[] filter = { "@id", "http://www.w3.org/ns/prov#wasDerivedFrom", "asa:hasVersion" };
 
-        public AspectEntity(JObject jsonLdJObject) : this(jsonLdJObject.SelectToken("@id"), jsonLdJObject)
+        public AspectObject(JObject jsonLdJObject) : this(jsonLdJObject.SelectToken("@id"), jsonLdJObject)
         { }
-        public AspectEntity(IRIReference persistentIRI, JObject content)
+        public AspectObject(IRIReference persistentIRI, JObject content)
         {
             PersistentIRI = persistentIRI;
             Content = content.Children<JProperty>().Where(
                 child => !filter.Contains(child.Name));
         }
 
-        public AspectEntity(JToken persistentIRI, JObject content) : this(new IRIReference(persistentIRI.ToString()), content)
+        public AspectObject(JToken persistentIRI, JObject content) : this(new IRIReference(persistentIRI.ToString()), content)
         {
             ;
         }
 
-        public bool SamePersistentIRI(AspectEntity other) =>
+        public bool SamePersistentIRI(AspectObject other) =>
             PersistentIRI.ToString().Equals(other.PersistentIRI.ToString());
 
         public JObject ToJsonldGraph() =>
@@ -56,9 +56,9 @@ namespace VersionedObject
 
         public override bool Equals(object obj)
         {
-            if (obj is VersionedEntity versioned)
-                obj = versioned.Entity;
-            if (obj is AspectEntity other)
+            if (obj is VersionedObject versioned)
+                obj = versioned.Object;
+            if (obj is AspectObject other)
             {
                 return ToJsonldGraph().AspectEquals(other.ToJsonldGraph(), JsonLdHelper.RdfEqualsTriples);
             }
@@ -71,44 +71,44 @@ namespace VersionedObject
         }
     }
 
-    public class VersionedEntity
+    public class VersionedObject
     {
         public string Version { get; }
-        public AspectEntity Entity { get; }
+        public AspectObject Object { get; }
         public IEnumerable<JProperty> GetContent() =>
-            Entity.Content.Append(new JProperty("@id", GetVersionedIRI().ToJValue()));
+            Object.Content.Append(new JProperty("@id", GetVersionedIRI().ToJValue()));
 
-        public VersionedEntity(AspectEntity persistent)
+        public VersionedObject(AspectObject persistent)
         {
-            this.Entity = persistent;
+            this.Object = persistent;
             this.Version = persistent.GetNewVersion();
         }
 
-        public VersionedEntity(IRIReference _VersionedIri, JObject content, IEnumerable<IRIReference> persistentIris)
+        public VersionedObject(IRIReference _VersionedIri, JObject content, IEnumerable<IRIReference> persistentIris)
         {
-            this.Entity = new AspectEntity(_VersionedIri.GetPersistentUri(), content.RemoveVersionFromUris(persistentIris));
+            this.Object = new AspectObject(_VersionedIri.GetPersistentUri(), content.RemoveVersionFromUris(persistentIris));
             this.Version = _VersionedIri.GetUriVersion();
         }
 
-        public VersionedEntity(JToken _VersionedIri, JObject content, IEnumerable<IRIReference> persistentIris) : this(new IRIReference(_VersionedIri.ToString()), content, persistentIris)
+        public VersionedObject(JToken _VersionedIri, JObject content, IEnumerable<IRIReference> persistentIris) : this(new IRIReference(_VersionedIri.ToString()), content, persistentIris)
         { }
         public IRIReference GetVersionedIRI() =>
-            new($"{this.Entity.PersistentIRI}/{this.Version}");
+            new($"{this.Object.PersistentIRI}/{this.Version}");
 
         public IRIReference GetPersistentIRI() =>
-            Entity.PersistentIRI;
+            Object.PersistentIRI;
 
         public JObject ToJObject() =>
             new(GetContent());
     }
 
-    public class ProvenanceEntity : VersionedEntity
+    public class ProvenanceObject : VersionedObject
     {
-        public VersionedEntity WasDerivedFrom { get; }
+        public VersionedObject WasDerivedFrom { get; }
         public new IEnumerable<JProperty> GetContent() =>
             base.GetContent().Append(new JProperty("http://www.w3.org/ns/prov#wasDerivedFrom", WasDerivedFrom));
 
-        public ProvenanceEntity(AspectEntity persistent, VersionedEntity _WasDerivedFrom) : base(persistent)
+        public ProvenanceObject(AspectObject persistent, VersionedObject _WasDerivedFrom) : base(persistent)
         {
             this.WasDerivedFrom = _WasDerivedFrom;
         }

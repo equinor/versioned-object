@@ -52,7 +52,7 @@ namespace VersionedObject
         /// <summary>
         /// Adds the version suffix to all persistent URIs in the JObject
         /// </summary>
-        public static JObject AddVersionToUris(this JObject persistentEntity, IEnumerable<VersionedEntity> entities) =>
+        public static JObject AddVersionToUris(this JObject persistentEntity, IEnumerable<VersionedObject> entities) =>
             JObject.Parse(entities
                 .Aggregate(persistentEntity.ToString(),
                     (ent, versioned) =>
@@ -98,10 +98,10 @@ namespace VersionedObject
         /**
         * Creates a new version string usable for this aspect object
         */
-        public static string GetNewVersion(this AspectEntity entity)
+        public static string GetNewVersion(this AspectObject @object)
         {
             var timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
-            var graph = LoadGraph(entity.ToJsonldGraph().ToString());
+            var graph = LoadGraph(@object.ToJsonldGraph().ToString());
             var hash = graph.GetHash();
             return $"{timestamp}-{hash}";
         }
