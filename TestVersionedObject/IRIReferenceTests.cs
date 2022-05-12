@@ -10,7 +10,7 @@ namespace VersionedObject.Tests
         [Fact]
         public void TestHandmadeVersionedUri()
         {
-            var uri = new IRIReference("http://rdf.equinor.com/data/objectx/12345");
+            var uri = new VersionedIRIReference("http://rdf.equinor.com/data/objectx/12345");
             var uri2 = new Uri("http://rdf.equinor.com/data/objectx/12345");
             var grafuri = new Uri("asa:Scope");
             var grafiri = new IRIReference("asa:Scope");
@@ -26,7 +26,7 @@ namespace VersionedObject.Tests
         [Fact]
         public void TestFragmentVersionedUri()
         {
-            var uri = new IRIReference("http://rdf.equinor.com/data#objectx/12345");
+            var uri = new VersionedIRIReference("http://rdf.equinor.com/data#objectx/12345");
             var version = "12345";
             Assert.Equal(version, uri.GetUriVersion());
             Assert.Equal(new IRIReference("http://rdf.equinor.com/data#objectx"), uri.GetPersistentUri());

@@ -57,6 +57,9 @@ public class IRIReference : IEquatable<IRIReference>
 /// </summary>
 public class VersionedIRIReference : IRIReference
 {
+    public static implicit operator VersionedIRIReference(Uri uri) => new(uri);
+    public static implicit operator VersionedIRIReference(string uriString) => new(uriString);
+
     public VersionedIRIReference(Uri uri) : base(uri)
     { }
     public VersionedIRIReference(string UriString) : base(UriString)

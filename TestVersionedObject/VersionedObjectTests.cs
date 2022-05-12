@@ -327,7 +327,7 @@ namespace VersionedObject.Tests
             var expanded = row2_jsonld.RemoveContext();
             Assert.NotNull(expanded);
             var second = expanded.RemoveContext();
-            Assert.Equal(new IRIReference("http://rdf.equinor.com/ontology/sor#Row2"), second.GetJsonLdGraph().Values<JObject>().First().GetJsonLdIRI());
+            Assert.Equal(new IRIReference("http://rdf.equinor.com/ontology/sor#Row2"), new IRIReference(second.GetJsonLdGraph().Values<JObject>().First().GetJsonLdIRI()));
         }
 
 
@@ -403,7 +403,7 @@ namespace VersionedObject.Tests
         [Fact]
         public void TestVersionedUri()
         {
-            var uri = new IRIReference("http://rdf.equinor.com/data/objectx/12345");
+            var uri = new VersionedIRIReference("http://rdf.equinor.com/data/objectx/12345");
             Assert.Equal("12345", uri.GetUriVersion());
             Assert.Equal(new IRIReference("http://rdf.equinor.com/data/objectx"), uri.GetPersistentUri());
         }

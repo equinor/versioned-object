@@ -89,16 +89,17 @@ namespace VersionedObject
         public static IEnumerable<IRIReference>? GetAllPersistentIris(JObject input, JObject existing) =>
             input
                 .GetAllEntityIds()?
+                .Select(x => new IRIReference(x))
                 .Union(
                     existing
                         .GetAllEntityIds()?
-                        .Select(s => s.GetPersistentUri())
+                        .Select(s => new VersionedIRIReference(s).GetPersistentUri())
                 );
-        public static IEnumerable<IRIReference>? GetAllEntityIds(this JObject input) =>
+        public static IEnumerable<Uri>? GetAllEntityIds(this JObject input) =>
             input
                 .RemoveContext()
                 .GetJsonLdGraph()?.Values<JObject>()
-                .Select(s => new IRIReference(s.SelectToken("@id").Value<string>()));
+                .Select(s => new Uri(s.SelectToken("@id").Value<string>()));
 
         public static JObject CreateUpdateJObject(IEnumerable<VersionedObject> updateList,
             IEnumerable<IRIReference> deleteList, Func<JObject, JObject> outputModifier) =>
