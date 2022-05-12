@@ -10,13 +10,13 @@ namespace VersionedObject
     {
 
 
-        public static JObject MakeGraphUpdate(this JObject input, JObject existing) =>
+        public static JObject? MakeGraphUpdate(this JObject input, JObject existing) =>
             input.MakeGraphUpdate(existing, x => x);
         /// <summary>
         /// Creates update object for use with the put method on the Aspect API graph endpoint
         /// Takes in full json-ld objects of input and existing snapshot
         /// </summary>
-        public static JObject MakeGraphUpdate(this JObject input, JObject existing, Func<IEnumerable<AspectEntity>, IEnumerable<AspectEntity>> inputModifier)
+        public static JObject? MakeGraphUpdate(this JObject input, JObject existing, Func<IEnumerable<AspectEntity>?, IEnumerable<AspectEntity>?> inputModifier)
         {
             var inputList = inputModifier(input.GetInputGraphAsEntities());
             var existingList = existing.GetExistingGraphAsEntities(GetAllPersistentIris(input, existing));
@@ -34,9 +34,9 @@ namespace VersionedObject
         /// </summary>
         /// <param name="jsonld"></param>
         /// <param name="persistentUris"></param>
-        public static IEnumerable<VersionedEntity> GetExistingGraphAsEntities(this JObject jsonld, IEnumerable<IRIReference> persistentUris) =>
+        public static IEnumerable<VersionedEntity>? GetExistingGraphAsEntities(this JObject jsonld, IEnumerable<IRIReference> persistentUris) =>
             jsonld.RemoveContext()
-                .GetJsonLdGraph()
+                .GetJsonLdGraph()?
                 .Values<JObject>()
                 .Select(x =>
                     new VersionedEntity(
@@ -45,9 +45,9 @@ namespace VersionedObject
                         persistentUris)
                     );
 
-        public static IEnumerable<AspectEntity> GetInputGraphAsEntities(this JObject jsonld) =>
+        public static IEnumerable<AspectEntity>? GetInputGraphAsEntities(this JObject jsonld) =>
             jsonld.RemoveContext()
-                .GetJsonLdGraph()
+                .GetJsonLdGraph()?
                 .Values<JObject>()
                 .Select(x =>
                     new AspectEntity(
@@ -57,10 +57,12 @@ namespace VersionedObject
 
         public static JArray GetJsonLdGraph(this JObject jsonld)
         {
-            if (jsonld.ContainsKey("@graph"))
-                return jsonld.SelectToken("@graph").Value<JArray>();
-            if (jsonld.Type == JTokenType.Array)
-                return jsonld.Value<JArray>();
+            if (jsonld.ContainsKey("@graph") && jsonld.SelectToken("@graph") != null)
+            {
+                var graphArray = jsonld.SelectToken("@graph").Value<JArray>();
+                if (graphArray != null)
+                    return graphArray;
+            }
             return new JArray() { jsonld };
         }
 
@@ -84,18 +86,18 @@ namespace VersionedObject
                     compacterOptions
                 );
         }
-        public static IEnumerable<IRIReference> GetAllPersistentIris(JObject input, JObject existing) =>
+        public static IEnumerable<IRIReference>? GetAllPersistentIris(JObject input, JObject existing) =>
             input
-                .GetAllEntityIds()
+                .GetAllEntityIds()?
                 .Union(
                     existing
-                        .GetAllEntityIds()
+                        .GetAllEntityIds()?
                         .Select(s => s.GetPersistentUri())
                 );
-        public static IEnumerable<IRIReference> GetAllEntityIds(this JObject input) =>
+        public static IEnumerable<IRIReference>? GetAllEntityIds(this JObject input) =>
             input
                 .RemoveContext()
-                .GetJsonLdGraph().Values<JObject>()
+                .GetJsonLdGraph()?.Values<JObject>()
                 .Select(s => new IRIReference(s.SelectToken("@id").Value<string>()));
 
         public static JObject CreateUpdateJObject(IEnumerable<VersionedEntity> updateList,

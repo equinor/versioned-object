@@ -262,6 +262,7 @@ namespace VersionedObject.Tests
         [Fact()]
         public void AspectEntityEqualsTest()
         {
+            var simple_object = simple_jsonld.RemoveContext();
             var simple_entity = simple_jsonld.GetInputGraphAsEntities().First();
             var aspect_entity = aspect_jsonld.GetExistingGraphAsEntities(new[] { new IRIReference("http://rdf.equinor.com/ontology/sor#Row1") }).First();
             Assert.Equal(simple_entity, aspect_entity.Entity);
