@@ -12,13 +12,13 @@ namespace VersionedObject.Tests
         {
             var uri = new IRIReference("http://rdf.equinor.com/data/objectx/12345");
             var uri2 = new Uri("http://rdf.equinor.com/data/objectx/12345");
-            var grafuri = new Uri("asa:Graph");
-            var grafiri = new IRIReference("asa:Graph");
-            var uri_in_iri = new IRIReference(new Uri("asa:Graph"));
+            var grafuri = new Uri("asa:Scope");
+            var grafiri = new IRIReference("asa:Scope");
+            var uri_in_iri = new IRIReference(new Uri("asa:Scope"));
             Assert.Equal(grafuri, grafiri.uri);
             Assert.Equal(uri_in_iri, grafiri);
             var version = "12345";
-            Assert.Equal(uri, (IRIReference) uri2);
+            Assert.Equal(uri, (IRIReference)uri2);
             Assert.Equal(version, uri.GetUriVersion());
             Assert.Equal(new IRIReference("http://rdf.equinor.com/data/objectx"), uri.GetPersistentUri());
         }
@@ -48,7 +48,7 @@ namespace VersionedObject.Tests
         {
             var uri = new IRIReference("http://rdf.equinor.com/data/objectx/12345");
             var uri2 = new Uri("http://rdf.equinor.com/data/objectx/12345");
-            var uri3 = (IRIReference) "http://rdf.equinor.com/data/objectx/12345";
+            var uri3 = (IRIReference)"http://rdf.equinor.com/data/objectx/12345";
             var uriJson = JsonConvert.SerializeObject(uri);
             var uri2Json = JsonConvert.SerializeObject(uri2);
 
