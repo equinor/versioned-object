@@ -16,9 +16,23 @@ jobs:
         dotnet-version: 6.0.x
     - name: Restore dependencies
       run: dotnet restore
-    - name: Format
-      run: dotnet format --
     - name: Build
       run: dotnet format --verify-no-changes --verbosity diagnostic --no-restore
     - name: Test
       run: dotnet test --no-build --verbosity normal
+
+  format:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 6.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Format
+      run: dotnet format --
+    
