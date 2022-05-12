@@ -54,6 +54,7 @@ public class IRIReference : IEquatable<IRIReference>
 }
 /// <summary>
 /// Represents IRIs that reference versioned, immutable objects
+/// Theses IRIs consist of a first part, that is a normal IRIReference, followed by a / and then the part identifying the version
 /// </summary>
 public class VersionedIRIReference : IRIReference
 {
