@@ -16,7 +16,7 @@ namespace VersionedObject
         /// Creates update object for use with the put method on the Aspect API graph endpoint
         /// Takes in full json-ld objects of input and existing snapshot
         /// </summary>
-        public static JObject MakeGraphUpdate(this JObject input, JObject existing, Func<IEnumerable<AspectEntity>, IEnumerable<AspectEntity>> inputModifier)
+        public static JObject MakeGraphUpdate(this JObject input, JObject existing, Func<IEnumerable<AspectObject>, IEnumerable<AspectObject>> inputModifier)
         {
             var inputList = inputModifier(input.GetInputGraphAsEntities());
             var existingList = existing.GetExistingGraphAsEntities(GetAllPersistentIris(input, existing));
@@ -29,28 +29,28 @@ namespace VersionedObject
 
         /// <summary>
         /// Translates JSON-LD coming from Aspect-API (so using versioned IRIs)
-        /// into list of VersionedEntity objects
+        /// into list of VersionedObject objects
         /// The list of persistent iris is used to translate the versioned IRIs inside the json so it can be matched with the incoming json
         /// </summary>
         /// <param name="jsonld"></param>
         /// <param name="persistentUris"></param>
-        public static IEnumerable<VersionedEntity> GetExistingGraphAsEntities(this JObject jsonld, IEnumerable<IRIReference> persistentUris) =>
+        public static IEnumerable<VersionedObject> GetExistingGraphAsEntities(this JObject jsonld, IEnumerable<IRIReference> persistentUris) =>
             jsonld.RemoveContext()
                 .GetJsonLdGraph()
                 .Values<JObject>()
                 .Select(x =>
-                    new VersionedEntity(
+                    new VersionedObject(
                         x.GetJsonLdIRI(),
                         x,
                         persistentUris)
                     );
 
-        public static IEnumerable<AspectEntity> GetInputGraphAsEntities(this JObject jsonld) =>
+        public static IEnumerable<AspectObject> GetInputGraphAsEntities(this JObject jsonld) =>
             jsonld.RemoveContext()
                 .GetJsonLdGraph()
                 .Values<JObject>()
                 .Select(x => 
-                    new AspectEntity(
+                    new AspectObject(
                         x.GetJsonLdIRI(),
                         x)
                     );
@@ -98,7 +98,7 @@ namespace VersionedObject
                 .GetJsonLdGraph().Values<JObject>()
                 .Select(s => new IRIReference(s.SelectToken("@id").Value<string>()));
 
-        public static JObject CreateUpdateJObject(IEnumerable<VersionedEntity> updateList,
+        public static JObject CreateUpdateJObject(IEnumerable<VersionedObject> updateList,
             IEnumerable<IRIReference> deleteList, Func<JObject, JObject> outputModifier) =>
             new()
             {
@@ -110,26 +110,26 @@ namespace VersionedObject
                 ["delete"] = deleteList.MakeDeleteGraph(),
             };
 
-        public static JArray MakeUpdateGraph(this IEnumerable<VersionedEntity> updateList, Func<JObject, JObject> outputModifier) =>
+        public static JArray MakeUpdateGraph(this IEnumerable<VersionedObject> updateList, Func<JObject, JObject> outputModifier) =>
             new(updateList.Select(o => outputModifier(o.ToJObject())));
 
-        public static IEnumerable<VersionedEntity> MakeUpdateList(this IEnumerable<AspectEntity> inputList,
-            IEnumerable<VersionedEntity> existingList)
+        public static IEnumerable<VersionedObject> MakeUpdateList(this IEnumerable<AspectObject> inputList,
+            IEnumerable<VersionedObject> existingList)
         {
             var oldNewMap = inputList.Select(
                 i => (
                     input: i,
-                    old: existingList.Where(x => i.SamePersistentIRI(x.Entity))
+                    old: existingList.Where(x => i.SamePersistentIRI(x.Object))
                 )
             );
             return oldNewMap
                 .Where(i => !i.old.Any())
-                .Select(i => new VersionedEntity(i.input))
+                .Select(i => new VersionedObject(i.input))
                 .Union(
                     oldNewMap
                         .Where(i => i.old.Any() 
-                                    && !i.input.Equals(i.old.First().Entity))
-                        .Select(i => new ProvenanceEntity(i.input, i.old.First()))
+                                    && !i.input.Equals(i.old.First().Object))
+                        .Select(i => new ProvenanceObject(i.input, i.old.First()))
                 );
         }
 
@@ -139,10 +139,10 @@ namespace VersionedObject
         /// <summary>
         /// Creates a list of objects that should  be deleted from the aspect api, based on an assumed complete list of "new objects"
         /// </summary>
-        public static IEnumerable<IRIReference> MakeDeleteList(this IEnumerable<AspectEntity> input,
-            IEnumerable<VersionedEntity> existing) =>
+        public static IEnumerable<IRIReference> MakeDeleteList(this IEnumerable<AspectObject> input,
+            IEnumerable<VersionedObject> existing) =>
             existing
-                .Where(x => !input.Any(i => x.Entity.SamePersistentIRI(i)))
+                .Where(x => !input.Any(i => x.Object.SamePersistentIRI(i)))
                 .Select(x => x.GetVersionedIRI());
     }
 }
