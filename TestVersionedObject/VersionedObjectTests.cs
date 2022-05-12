@@ -262,6 +262,7 @@ namespace VersionedObject.Tests
         [Fact()]
         public void AspectEntityEqualsTest()
         {
+            var simple_object = simple_jsonld.RemoveContext();
             var simple_entity = simple_jsonld.GetInputGraphAsEntities().First();
             var aspect_entity = aspect_jsonld.GetExistingGraphAsEntities(new[] { new IRIReference("http://rdf.equinor.com/ontology/sor#Row1") }).First();
             Assert.Equal(simple_entity, aspect_entity.Object);
@@ -288,7 +289,7 @@ namespace VersionedObject.Tests
         {
             var input = row2_jsonld.GetInputGraphAsEntities();
             Assert.NotNull(input);
-            Assert.Equal(1, input.Count());
+            Assert.Single(input);
             var iri = input.First().PersistentIRI;
             Assert.Equal("http://rdf.equinor.com/ontology/sor#Row2", iri.ToString());
             Assert.NotEqual("http://rdf.equinor.com/ontology/sor#Row1", iri.ToString());
@@ -300,7 +301,7 @@ namespace VersionedObject.Tests
             var persistentIris = GetAllPersistentIris(row2_jsonld, expanded_jsonld);
             var existing = expanded_jsonld.GetExistingGraphAsEntities(persistentIris);
             Assert.NotNull(existing);
-            Assert.Equal(1, existing.Count());
+            Assert.Single(existing);
             var iri = existing.First().GetPersistentIRI();
             Assert.Equal("http://rdf.equinor.com/ontology/sor#Row1", iri.ToString());
             Assert.NotEqual("http://rdf.equinor.com/ontology/sor#Row2", iri.ToString());
@@ -316,7 +317,7 @@ namespace VersionedObject.Tests
             var deletelist = input.MakeDeleteList(existing);
             Assert.NotNull(deletelist);
             Assert.True(deletelist.Any());
-            Assert.Equal(1, deletelist.Count());
+            Assert.Single(deletelist);
             Assert.Equal(new IRIReference("http://rdf.equinor.com/ontology/sor#Row1/123456789").ToString(), deletelist.First().ToString());
         }
 
@@ -335,12 +336,12 @@ namespace VersionedObject.Tests
         {
             var persistentIris = row2_jsonld.GetAllEntityIds();
             Assert.NotNull(persistentIris);
-            Assert.Equal(1, persistentIris.Count());
+            Assert.Single(persistentIris);
             Assert.Contains("http://rdf.equinor.com/ontology/sor#Row2", persistentIris.Select(x => x.ToString()));
 
             persistentIris = expanded_jsonld.GetAllEntityIds();
             Assert.NotNull(persistentIris);
-            Assert.Equal(1, persistentIris.Count());
+            Assert.Single(persistentIris);
             Assert.Contains("http://rdf.equinor.com/ontology/sor#Row1/123456789", persistentIris.Select(x => x.ToString()));
 
         }
@@ -384,7 +385,7 @@ namespace VersionedObject.Tests
 
             var persistent_diff_iri = diff_iri.GetPersistentUri();
             Assert.Equal(row2_iri, persistent_diff_iri);
-            Assert.Equal(1, diff_object.SelectToken("update").Value<JObject>().GetJsonLdGraph().Count());
+            Assert.Single(diff_object.SelectToken("update").Value<JObject>().GetJsonLdGraph());
         }
 
 
@@ -398,7 +399,7 @@ namespace VersionedObject.Tests
 #pragma warning restore CS8604 // Possible null reference argument.
             Assert.Equal(num_items, simple_list.Count());
         }
-        
+
         [Fact]
         public void TestVersionedUri()
         {

@@ -35,7 +35,7 @@ namespace VersionedObject
 
         public bool SamePersistentIRI(AspectObject other) =>
             PersistentIRI.ToString().Equals(other.PersistentIRI.ToString());
-        
+
         public JObject ToJsonldGraph() =>
             new()
             {
@@ -65,6 +65,10 @@ namespace VersionedObject
             return false;
         }
 
+        public override int GetHashCode()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class VersionedObject

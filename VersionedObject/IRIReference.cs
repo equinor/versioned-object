@@ -24,10 +24,10 @@ public class IRIReference : IEquatable<IRIReference>
 
     bool IEquatable<IRIReference>.Equals(IRIReference? other) =>
         (other != null) && ToString().Equals(other.ToString());
-    
+
     public override string ToString() => uri.ToString();
 
-    public JValue ToJValue() => new (uri);
+    public JValue ToJValue() => new(uri);
     public JValue ToJToken() => ToJValue();
     /// <summary>
     /// Adds version suffix to IRI to create an identifier for an immutable version object
