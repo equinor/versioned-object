@@ -1,0 +1,48 @@
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - 'VersionedObject'
+
+pr: none
+
+pool: 
+  vmImage: 'windows-latest'
+
+variables:
+  buildConfiguration: 'Release'
+
+steps:
+
+  - task: UseDotNet@2
+    inputs:
+      version: '6.0.103'
+
+  - script: dotnet --version
+    displayName: 'Check .Net version'
+
+  - script: dotnet nuget locals all -c
+    displayName: 'Clearing nugets cache packages'
+  
+  - task: DotNetCoreCLI@2
+    inputs:
+      command: 'build'
+      projects: 'VersionedObject/VersionedObject.csproj'
+      arguments: '--configuration $(buildConfiguration)'
+
+  - task: DotNetCoreCLI@2
+    inputs:
+      command: 'pack'
+      packagesToPack: 'VersionedObject/VersionedObject.csproj'
+      includeReferencedProjects: false
+      versioningScheme: 'off'
+
+  - task: NuGetCommand@2
+    inputs:
+      command: 'push'
+      packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
+      nuGetFeedType: 'internal'
+      publishVstsFeed: '6503fe8e-34c7-4b66-902f-892c4bef4b45/de8f8c5a-eef9-4608-8ecb-e80e83354392'
+      allowPackageConflicts: true

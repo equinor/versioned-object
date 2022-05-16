@@ -5,7 +5,12 @@ VisualStudioVersion = 17.1.32228.430
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VersionedObject", "VersionedObject\VersionedObject.csproj", "{708B947F-8B70-4B4E-8121-AC3FA36DC05A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestVersionedObject", "TestVersionedObject\TestVersionedObject.csproj", "{3CF5E328-F50F-4D8A-97C7-1C8C185018BA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestVersionedObject", "TestVersionedObject\TestVersionedObject.csproj", "{3CF5E328-F50F-4D8A-97C7-1C8C185018BA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3E5A0A9D-B063-465A-B19F-4EE7490BC7B5}"
+	ProjectSection(SolutionItems) = preProject
+		aspect-azure-pipelines.yml = aspect-azure-pipelines.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
