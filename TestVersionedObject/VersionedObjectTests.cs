@@ -83,7 +83,7 @@ namespace VersionedObject.Tests
                 {
                     new JObject()
                     {
-                        ["@id"] = "sor:Row1/123456789",
+                        ["@id"] = "sor:Row1/version/123456789/2022-05-01",
                         ["@type"] = new JArray(){ "http://rdf.equinor.com/ontology/mel#MelRow", "asa:Object" },
                         ["rdfs:label"] = "An empty MEL Row"
                     }
@@ -123,7 +123,7 @@ namespace VersionedObject.Tests
                 {
                     new JObject()
                     {
-                        ["@id"] = "http://rdf.equinor.com/ontology/sor#Row1/123456789",
+                        ["@id"] = "http://rdf.equinor.com/ontology/sor#Row1/version/123456789/2022-05-01",
                         ["@type"] = new JArray(){ "http://rdf.equinor.com/ontology/mel#MelRow", "asa:Object" },
                         ["rdfs:label"] = "An empty MEL Row"
                     }
@@ -403,8 +403,8 @@ namespace VersionedObject.Tests
         [Fact]
         public void TestVersionedUri()
         {
-            var uri = new VersionedIRIReference("http://rdf.equinor.com/data/objectx/12345");
-            Assert.Equal("12345", uri.GetUriVersion());
+            var uri = new VersionedIRIReference("http://rdf.equinor.com/data/objectx/version/12345/2022-05-01");
+            Assert.Equal("12345", uri.VersionHash);
             Assert.Equal(new IRIReference("http://rdf.equinor.com/data/objectx"), uri.GetPersistentUri());
         }
         [Fact]

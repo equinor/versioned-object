@@ -1,4 +1,5 @@
-﻿using System.Runtime.Serialization;
+﻿using System.Runtime.CompilerServices;
+using System.Runtime.Serialization;
 using Newtonsoft.Json.Linq;
 
 namespace VersionedObject;
@@ -34,8 +35,12 @@ public class IRIReference : IEquatable<IRIReference>
     /// Adds version suffix to IRI to create an identifier for an immutable version object
     /// The inverse operation is GetPersistentUri below
     /// </summary>
-    public VersionedIRIReference AddVersionToUri(string version) =>
-        new($"{this}/{version}");
+    public VersionedIRIReference AddVersionToUri(string versionHash, DateTime time) =>
+        new($"{this}/version/{versionHash}/{time.ToString()}");
+
+
+    public VersionedIRIReference AddDatedVersionToUri(string versionHash) =>
+        AddVersionToUri(versionHash, DateTime.Now);
 
     /// <summary>
     /// Cannot use Uri.getHashCode since that ignores the fragment
@@ -54,26 +59,34 @@ public class IRIReference : IEquatable<IRIReference>
 }
 /// <summary>
 /// Represents IRIs that reference versioned, immutable objects
-/// Theses IRIs consist of a first part, that is a normal IRIReference, followed by a / and then the part identifying the version
+/// Theses IRIs consist of a first part, that is a normal IRIReference, followed by "/version/" then a hash of the object and finally "/" and an arbitrary version string (f.ex. a date)
 /// </summary>
 public class VersionedIRIReference : IRIReference
 {
     public static implicit operator VersionedIRIReference(Uri uri) => new(uri);
     public static implicit operator VersionedIRIReference(string uriString) => new(uriString);
 
-    public VersionedIRIReference(Uri uri) : base(uri)
-    { }
-    public VersionedIRIReference(string UriString) : base(UriString)
+    public string VersionDate { get; }
+    public string VersionHash { get;  }
+
+    public VersionedIRIReference(Uri uri) : this(uri.ToString())
     { }
 
-    /// <summary>
-    /// Gets the version part of the versioned URI (See also AddVersionToUri above)
-    /// </summary>
-    public string GetUriVersion() => ToString().Split("/").Last();
+    public VersionedIRIReference(string uriString) : base(uriString)
+    {
+        var segments = uriString.Split("/");
+        if(segments.Count() < 4 || !segments.ElementAt(-3).Equals("version"))
+            throw new ArgumentException("Invalid syntax for versioned IRI");
+        VersionDate = segments.ElementAt(-1);
+        VersionHash = segments.ElementAt(-2);
+    }
 
+    
     /// <summary>
     /// Gets the persistent URI part of the versioned URI. This is the inverse of AddVersionToUri above
     /// </summary>
     public IRIReference GetPersistentUri() =>
         new(ToString().Split("/").SkipLast(1).Aggregate((x, y) => $"{x}/{y}"));
+
+
 }

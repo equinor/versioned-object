@@ -146,6 +146,6 @@ namespace VersionedObject
             IEnumerable<VersionedObject> existing) =>
             existing
                 .Where(x => !input.Any(i => x.Object.SamePersistentIRI(i)))
-                .Select(x => x.GetVersionedIRI());
+                .Select(x => x.VersionedIRI);
     }
 }

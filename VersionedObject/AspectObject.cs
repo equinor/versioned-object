@@ -73,27 +73,27 @@ namespace VersionedObject
 
     public class VersionedObject
     {
-        public string Version { get; }
+        public VersionedIRIReference VersionedIRI { get; }
         public AspectObject Object { get; }
         public IEnumerable<JProperty> GetContent() =>
-            Object.Content.Append(new JProperty("@id", GetVersionedIRI().ToJValue()));
+            Object.Content.Append(new JProperty("@id", VersionedIRI.ToJValue()));
 
         public VersionedObject(AspectObject persistent)
         {
             this.Object = persistent;
-            this.Version = persistent.GetNewVersion();
+            var versionHash = persistent.GetHash().ToString();
+            this.VersionedIRI = persistent.PersistentIRI.AddDatedVersionToUri(versionHash);
         }
 
         public VersionedObject(VersionedIRIReference _VersionedIri, JObject content, IEnumerable<IRIReference> persistentIris)
         {
             this.Object = new AspectObject(_VersionedIri.GetPersistentUri(), content.RemoveVersionFromUris(persistentIris));
-            this.Version = _VersionedIri.GetUriVersion();
+            VersionedIRI = _VersionedIri;
         }
 
         public VersionedObject(JToken _VersionedIri, JObject content, IEnumerable<IRIReference> persistentIris) : this(new VersionedIRIReference(_VersionedIri.ToString()), content, persistentIris)
         { }
-        public VersionedIRIReference GetVersionedIRI() =>
-            new($"{this.Object.PersistentIRI}/{this.Version}");
+        
 
         public IRIReference GetPersistentIRI() =>
             Object.PersistentIRI;
@@ -110,7 +110,7 @@ namespace VersionedObject
 
         public ProvenanceObject(AspectObject persistent, VersionedObject _WasDerivedFrom) : base(persistent)
         {
-            this.WasDerivedFrom = _WasDerivedFrom.GetVersionedIRI();
+            this.WasDerivedFrom = _WasDerivedFrom.VersionedIRI;
         }
 
         /// <summary>

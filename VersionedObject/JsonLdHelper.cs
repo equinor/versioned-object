@@ -57,7 +57,7 @@ namespace VersionedObject
                 .Aggregate(persistentEntity.ToString(),
                     (ent, versioned) =>
                         new Regex($"{versioned.GetPersistentIRI().ToString().Replace(".", "\\.")}/\\w+")
-                            .Replace(ent, versioned.GetVersionedIRI().ToString())
+                            .Replace(ent, versioned.VersionedIRI.ToString())
                         )
                 );
 
@@ -98,12 +98,10 @@ namespace VersionedObject
         /**
         * Creates a new version string usable for this aspect object
         */
-        public static string GetNewVersion(this AspectObject @object)
+        public static byte[] GetHash(this AspectObject @object)
         {
-            var timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
             var graph = LoadGraph(@object.ToJsonldGraph().ToString());
-            var hash = graph.GetHash();
-            return $"{timestamp}-{hash}";
+            return graph.GetHash();
         }
 
         public static Uri GetJsonLdIRI(this JToken jsonld) =>

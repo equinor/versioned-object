@@ -10,25 +10,27 @@ namespace VersionedObject.Tests
         [Fact]
         public void TestHandmadeVersionedUri()
         {
-            var uri = new VersionedIRIReference("http://rdf.equinor.com/data/objectx/12345");
-            var uri2 = new Uri("http://rdf.equinor.com/data/objectx/12345");
+            var uri = new VersionedIRIReference("http://rdf.equinor.com/data/objectx/version/12345/2022-05-01");
+            var uri2 = new Uri("http://rdf.equinor.com/data/objectx/version/12345/2022-05-01");
             var grafuri = new Uri("asa:Scope");
             var grafiri = new IRIReference("asa:Scope");
             var uri_in_iri = new IRIReference(new Uri("asa:Scope"));
             Assert.Equal(grafuri, grafiri.uri);
             Assert.Equal(uri_in_iri, grafiri);
-            var version = "12345";
+            var versionHash = "12345";
+            var versionDate = "2022-05-01";
             Assert.Equal(uri, (IRIReference)uri2);
-            Assert.Equal(version, uri.GetUriVersion());
+            Assert.Equal(versionHash, uri.VersionHash);
+            Assert.Equal(versionDate, uri.VersionDate);
             Assert.Equal(new IRIReference("http://rdf.equinor.com/data/objectx"), uri.GetPersistentUri());
         }
 
         [Fact]
         public void TestFragmentVersionedUri()
         {
-            var uri = new VersionedIRIReference("http://rdf.equinor.com/data#objectx/12345");
+            var uri = new VersionedIRIReference("http://rdf.equinor.com/data#objectx/version/12345/2022-05-01");
             var version = "12345";
-            Assert.Equal(version, uri.GetUriVersion());
+            Assert.Equal(version, uri.VersionHash);
             Assert.Equal(new IRIReference("http://rdf.equinor.com/data#objectx"), uri.GetPersistentUri());
         }
 
@@ -36,9 +38,10 @@ namespace VersionedObject.Tests
         public void TestGeneratedVersionedUri()
         {
             var persistentIri = new IRIReference("http://rdf.equinor.com/data/objectx");
-            var versionedIri = persistentIri.AddVersionToUri("12345");
-            var version = versionedIri.GetUriVersion();
-            var composedIri = new Uri($"{persistentIri}/{version}");
+            var versionedIri = persistentIri.AddVersionToUri("12345", DateTime.Now);
+            var versionDate = versionedIri.VersionDate;
+            var versionHash = versionedIri.VersionHash;
+            var composedIri = new Uri($"{persistentIri}/{versionHash}/{versionDate}");
             Assert.Equal((IRIReference)composedIri, versionedIri);
             Assert.Equal(persistentIri, versionedIri.GetPersistentUri());
         }
@@ -46,9 +49,9 @@ namespace VersionedObject.Tests
         [Fact]
         public void TestHandmadeSerialization()
         {
-            var uri = new IRIReference("http://rdf.equinor.com/data/objectx/12345");
-            var uri2 = new Uri("http://rdf.equinor.com/data/objectx/12345");
-            var uri3 = (IRIReference)"http://rdf.equinor.com/data/objectx/12345";
+            var uri = new IRIReference("http://rdf.equinor.com/data/objectx/version/12345/2022-06-08");
+            var uri2 = new Uri("http://rdf.equinor.com/data/objectx/version/12345/2022-06-08");
+            var uri3 = (IRIReference)"http://rdf.equinor.com/data/objectx/version/12345/2022-06-08";
             var uriJson = JsonConvert.SerializeObject(uri);
             var uri2Json = JsonConvert.SerializeObject(uri2);
 
