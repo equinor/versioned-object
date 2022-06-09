@@ -82,12 +82,12 @@ namespace VersionedObject
         {
             Object = persistent;
             var versionHash = persistent.GetHash();
-            VersionedIRI = persistent.PersistentIRI.AddDatedVersionToUri(versionHash);
+            VersionedIRI = new(persistent.PersistentIRI,versionHash);
         }
 
         public VersionedObject(VersionedIRIReference _VersionedIri, JObject content, IEnumerable<IRIReference> persistentIris)
         {
-            this.Object = new AspectObject(_VersionedIri.GetPersistentUri(), content.RemoveVersionFromUris(persistentIris));
+            this.Object = new AspectObject(_VersionedIri.PersistentIRI, content.RemoveVersionFromUris(persistentIris));
             VersionedIRI = _VersionedIri;
         }
 

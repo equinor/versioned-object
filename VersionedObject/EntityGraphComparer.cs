@@ -94,7 +94,7 @@ namespace VersionedObject
                 .Union(
                     existing
                         .GetAllEntityIds()?
-                        .Select(s => new VersionedIRIReference(s).GetPersistentUri())
+                        .Select(s => new VersionedIRIReference(s).PersistentIRI)
                 );
         public static IEnumerable<Uri>? GetAllEntityIds(this JObject input) =>
             input

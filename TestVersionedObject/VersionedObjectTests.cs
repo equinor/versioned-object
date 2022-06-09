@@ -384,7 +384,7 @@ namespace VersionedObject.Tests
                 .First()
                 .GetJsonLdIRI();
 
-            var persistent_diff_iri = diff_iri.GetPersistentUri();
+            var persistent_diff_iri = diff_iri.PersistentIRI;
             Assert.Equal(row2_iri, persistent_diff_iri);
             Assert.Single(diff_object.SelectToken("update").Value<JObject>().GetJsonLdGraph());
         }
@@ -405,8 +405,8 @@ namespace VersionedObject.Tests
         public void TestVersionedUri()
         {
             var uri = new VersionedIRIReference("http://rdf.equinor.com/data/objectx/version/12345/2022-05-01");
-            Assert.Equal("12345", Encoding.UTF8.GetString(uri.VersionHash));
-            Assert.Equal(new IRIReference("http://rdf.equinor.com/data/objectx"), uri.GetPersistentUri());
+            Assert.Equal("12345", uri.VersionHash);
+            Assert.Equal(new IRIReference("http://rdf.equinor.com/data/objectx"), uri.PersistentIRI);
         }
         [Fact]
         public void TestRemoveVersionFromUris()

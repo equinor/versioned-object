@@ -32,16 +32,6 @@ public class IRIReference : IEquatable<IRIReference>
     public JValue ToJValue() => new(uri);
     public JValue ToJToken() => ToJValue();
 
-    /// <summary>
-    /// Adds version suffix to IRI to create an identifier for an immutable version object
-    /// The inverse operation is GetPersistentUri below
-    /// </summary>
-    public VersionedIRIReference AddVersionToUri(byte[] versionHash, long versionInfo) =>
-        new($"{this}/version/{string.Join("",versionHash)}/{versionInfo}");
-
-
-    public VersionedIRIReference AddDatedVersionToUri(byte[] versionHash) =>
-        AddVersionToUri(versionHash, DateTimeOffset.Now.ToUnixTimeSeconds());
 
     /// <summary>
     /// Cannot use Uri.getHashCode since that ignores the fragment
@@ -68,7 +58,8 @@ public class VersionedIRIReference : IRIReference
     public static implicit operator VersionedIRIReference(string uriString) => new(uriString);
 
     public string VersionInfo { get; }
-    public byte[] VersionHash { get;  }
+    public string VersionHash { get;  }
+    public IRIReference PersistentIRI { get;  }
 
     public VersionedIRIReference(Uri uri) : this(uri.ToString())
     { }
@@ -79,15 +70,18 @@ public class VersionedIRIReference : IRIReference
         if(segments.Count() < 4 || !segments.ElementAt(2).Equals("version"))
             throw new ArgumentException($"Invalid syntax for versioned IRI: {uriString}");
         VersionInfo = segments.ElementAt(0);
-        VersionHash = Encoding.UTF8.GetBytes(segments.ElementAt(1));
+        VersionHash = segments.ElementAt(1);
+        PersistentIRI = new(ToString().Split("/").SkipLast(3).Aggregate((x, y) => $"{x}/{y}"));
     }
 
-    
-    /// <summary>
-    /// Gets the persistent URI part of the versioned URI. This is the inverse of AddVersionToUri above
-    /// </summary>
-    public IRIReference GetPersistentUri() =>
-        new(ToString().Split("/").SkipLast(3).Aggregate((x, y) => $"{x}/{y}"));
+    public VersionedIRIReference(IRIReference uri, byte[] versionHash, long versionInfo) : base($"{uri}/version/{string.Join("", versionHash)}/{versionInfo}")
+    {
+        VersionHash = string.Join("", versionHash);
+        VersionInfo = versionInfo.ToString();
+        PersistentIRI = uri;
+    }
 
-
+    public VersionedIRIReference(IRIReference uri, byte[] versionHash) : this(uri, versionHash,
+        DateTimeOffset.Now.ToUnixTimeSeconds())
+    { }
 }

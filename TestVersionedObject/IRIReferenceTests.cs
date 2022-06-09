@@ -18,33 +18,33 @@ namespace VersionedObject.Tests
             var uri_in_iri = new IRIReference(new Uri("asa:Scope"));
             Assert.Equal(grafuri, grafiri.uri);
             Assert.Equal(uri_in_iri, grafiri);
-            var versionHash = Encoding.UTF8.GetBytes("12345");
+            var versionHash = "12345";
             var versionDate = "2022-05-01";
             Assert.Equal(uri, (IRIReference)uri2);
             Assert.Equal(versionHash, uri.VersionHash);
             Assert.Equal(versionDate, uri.VersionInfo);
-            Assert.Equal(new IRIReference("http://rdf.equinor.com/data/objectx"), uri.GetPersistentUri());
+            Assert.Equal(new IRIReference("http://rdf.equinor.com/data/objectx"), uri.PersistentIRI);
         }
 
         [Fact]
         public void TestFragmentVersionedUri()
         {
             var uri = new VersionedIRIReference("http://rdf.equinor.com/data#objectx/version/12345/2022-05-01");
-            var version = Encoding.UTF8.GetBytes("12345");
+            var version = "12345";
             Assert.Equal(version, uri.VersionHash);
-            Assert.Equal(new IRIReference("http://rdf.equinor.com/data#objectx"), uri.GetPersistentUri());
+            Assert.Equal(new IRIReference("http://rdf.equinor.com/data#objectx"), uri.PersistentIRI);
         }
 
         [Fact]
         public void TestGeneratedVersionedUri()
         {
             var persistentIri = new IRIReference("http://rdf.equinor.com/data/objectx");
-            var versionedIri = persistentIri.AddVersionToUri(Encoding.UTF8.GetBytes("12345"), DateTimeOffset.Now.ToUnixTimeSeconds());
+            var versionedIri = new VersionedIRIReference(persistentIri, Encoding.UTF8.GetBytes("12345"), DateTimeOffset.Now.ToUnixTimeSeconds());
             var versionDate = versionedIri.VersionInfo;
             var versionHash = versionedIri.VersionHash;
-            var composedIri = new Uri($"{persistentIri}/version/{Encoding.ASCII.GetString(versionHash)}/{versionDate}");
+            var composedIri = new Uri($"{persistentIri}/version/{versionHash}/{versionDate}");
             Assert.Equal((IRIReference)composedIri, versionedIri);
-            Assert.Equal(persistentIri, versionedIri.GetPersistentUri());
+            Assert.Equal(persistentIri, versionedIri.PersistentIRI);
         }
 
         [Fact]
