@@ -80,9 +80,9 @@ namespace VersionedObject
 
         public VersionedObject(AspectObject persistent)
         {
-            this.Object = persistent;
+            Object = persistent;
             var versionHash = persistent.GetHash();
-            this.VersionedIRI = persistent.PersistentIRI.AddDatedVersionToUri(versionHash);
+            VersionedIRI = persistent.PersistentIRI.AddDatedVersionToUri(versionHash);
         }
 
         public VersionedObject(VersionedIRIReference _VersionedIri, JObject content, IEnumerable<IRIReference> persistentIris)
@@ -110,7 +110,7 @@ namespace VersionedObject
 
         public ProvenanceObject(AspectObject persistent, VersionedObject _WasDerivedFrom) : base(persistent)
         {
-            this.WasDerivedFrom = _WasDerivedFrom.VersionedIRI;
+            WasDerivedFrom = _WasDerivedFrom.VersionedIRI;
         }
 
         /// <summary>

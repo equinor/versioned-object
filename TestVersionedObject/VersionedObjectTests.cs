@@ -343,7 +343,7 @@ namespace VersionedObject.Tests
             persistentIris = expanded_jsonld.GetAllEntityIds();
             Assert.NotNull(persistentIris);
             Assert.Single(persistentIris);
-            Assert.Contains("http://rdf.equinor.com/ontology/sor#Row1/123456789", persistentIris.Select(x => x.ToString()));
+            Assert.Contains("http://rdf.equinor.com/ontology/sor#Row1/version/123456789/2022-05-01", persistentIris.Select(x => x.ToString()));
 
         }
 
@@ -377,7 +377,7 @@ namespace VersionedObject.Tests
             var diff_object = row2_jsonld.MakeGraphUpdate(expanded_jsonld);
             Assert.NotNull(diff_object);
             var row2_iri = new IRIReference(row2_jsonld.RemoveContext().GetJsonLdGraph().Values<JObject>().First().SelectToken("@id").Value<string>());
-            var diff_iri = (VersionedIRIReference)diff_object
+            var diff_iri = (VersionedIRIReference) diff_object
                 .SelectToken("update").Value<JObject>()
                 .GetJsonLdGraph()
                 .Values<JObject>()

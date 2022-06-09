@@ -39,10 +39,10 @@ namespace VersionedObject.Tests
         public void TestGeneratedVersionedUri()
         {
             var persistentIri = new IRIReference("http://rdf.equinor.com/data/objectx");
-            var versionedIri = persistentIri.AddVersionToUri(Encoding.UTF8.GetBytes("12345"), DateTime.Now.ToString());
+            var versionedIri = persistentIri.AddVersionToUri(Encoding.UTF8.GetBytes("12345"), DateTimeOffset.Now.ToUnixTimeSeconds());
             var versionDate = versionedIri.VersionInfo;
             var versionHash = versionedIri.VersionHash;
-            var composedIri = new Uri($"{persistentIri}/{versionHash}/{versionDate}");
+            var composedIri = new Uri($"{persistentIri}/version/{Encoding.ASCII.GetString(versionHash)}/{versionDate}");
             Assert.Equal((IRIReference)composedIri, versionedIri);
             Assert.Equal(persistentIri, versionedIri.GetPersistentUri());
         }

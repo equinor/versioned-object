@@ -24,7 +24,8 @@ namespace VersionedObject
             var allEntities = existingList.Union(updateList);
 
             var deleteList = inputList.MakeDeleteList(existingList);
-            return CreateUpdateJObject(updateList, deleteList, x => x.AddVersionToUris(allEntities));
+            //return CreateUpdateJObject(updateList, deleteList, x => x.AddVersionToUris(allEntities));
+            return CreateUpdateJObject(updateList, deleteList, x => x);
         }
 
         /// <summary>

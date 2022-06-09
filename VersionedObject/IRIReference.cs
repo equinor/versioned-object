@@ -36,12 +36,12 @@ public class IRIReference : IEquatable<IRIReference>
     /// Adds version suffix to IRI to create an identifier for an immutable version object
     /// The inverse operation is GetPersistentUri below
     /// </summary>
-    public VersionedIRIReference AddVersionToUri(byte[] versionHash, string versionInfo) =>
-        new($"{this}/version/{Encoding.ASCII.GetString(versionHash)}/{versionInfo}");
+    public VersionedIRIReference AddVersionToUri(byte[] versionHash, long versionInfo) =>
+        new($"{this}/version/{string.Join("",versionHash)}/{versionInfo}");
 
 
     public VersionedIRIReference AddDatedVersionToUri(byte[] versionHash) =>
-        AddVersionToUri(versionHash, DateTime.Now.UnixSeconds());
+        AddVersionToUri(versionHash, DateTimeOffset.Now.ToUnixTimeSeconds());
 
     /// <summary>
     /// Cannot use Uri.getHashCode since that ignores the fragment

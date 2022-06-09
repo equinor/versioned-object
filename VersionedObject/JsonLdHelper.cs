@@ -104,7 +104,7 @@ namespace VersionedObject
             return graph.GetHash();
         }
 
-        public static IRIReference GetJsonLdIRI(this JToken jsonld) =>
+        public static Uri GetJsonLdIRI(this JToken jsonld) =>
             jsonld.SelectToken("@id") == null ? new("") : new(jsonld.SelectToken("@id").ToString());
 
     }
