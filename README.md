@@ -6,6 +6,11 @@ Drop-in replacement for System.Uri for use with RDF. This is needed because URIs
 
 #VersionedIRIReference
 This is used for IRIs that refer to immutable versioned objects. It is useful to separate this in a subclass of IRIReference since parsing of the IRI itself is not always enough. 
+These IRIs are of the following form: 
+{persistent base IRI}/version/{bytes of hash of object}/{arbitrary version numbering system}
+The method for calculating the hash is in JsonLdHelper.GetHash
+
 
 #EntityGraphComparer
-Library for comparing unversioned (persistent) input graph with versioned (existing) graph and creates update command for the aspect api
+Library for comparing unversioned (persistent) input graph with versioned (existing) graph and creates update command for the aspect api.
+The versioned objects that are created have only persistent IRIs inside them.
