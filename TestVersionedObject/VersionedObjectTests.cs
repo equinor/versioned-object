@@ -162,7 +162,7 @@ namespace VersionedObject.Tests
                 "Equality test on input and aspect jsonld failed");
             Assert.False(
                 aspect_jsonld.GetExistingGraphAsEntities(new[] { new IRIReference("http://rdf.equinor.com/ontology/sor#Row1") }).First().Object
-                .Equals(different_jsonld.GetExistingGraphAsEntities(new[] { new IRIReference("http://rdf.equinor.com/ontology/sor#Row1") }).First()), "Equality test on input and aspect jsonld failed");
+                .Equals(different_jsonld.GetInputGraphAsEntities().First()), "Equality test on input and aspect jsonld failed");
         }
 
         [Fact()]
@@ -318,7 +318,7 @@ namespace VersionedObject.Tests
             Assert.NotNull(deletelist);
             Assert.True(deletelist.Any());
             Assert.Single(deletelist);
-            Assert.Equal(new IRIReference("http://rdf.equinor.com/ontology/sor#Row1/123456789").ToString(), deletelist.First().ToString());
+            Assert.Equal(new IRIReference("http://rdf.equinor.com/ontology/sor#Row1/version/123456789/2022-05-01").ToString(), deletelist.First().ToString());
         }
 
         [Fact()]

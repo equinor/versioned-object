@@ -36,7 +36,7 @@ public class IRIReference : IEquatable<IRIReference>
     /// The inverse operation is GetPersistentUri below
     /// </summary>
     public VersionedIRIReference AddVersionToUri(string versionHash, DateTime time) =>
-        new($"{this}/version/{versionHash}/{time.ToString()}");
+        new($"{this}/version/{versionHash}/{time}");
 
 
     public VersionedIRIReference AddDatedVersionToUri(string versionHash) =>
@@ -74,11 +74,11 @@ public class VersionedIRIReference : IRIReference
 
     public VersionedIRIReference(string uriString) : base(uriString)
     {
-        var segments = uriString.Split("/");
-        if(segments.Count() < 4 || !segments.ElementAt(-3).Equals("version"))
-            throw new ArgumentException("Invalid syntax for versioned IRI");
-        VersionDate = segments.ElementAt(-1);
-        VersionHash = segments.ElementAt(-2);
+        var segments = uriString.Split("/").Reverse();
+        if(segments.Count() < 4 || !segments.ElementAt(2).Equals("version"))
+            throw new ArgumentException($"Invalid syntax for versioned IRI: {uriString}");
+        VersionDate = segments.ElementAt(0);
+        VersionHash = segments.ElementAt(1);
     }
 
     
@@ -86,7 +86,7 @@ public class VersionedIRIReference : IRIReference
     /// Gets the persistent URI part of the versioned URI. This is the inverse of AddVersionToUri above
     /// </summary>
     public IRIReference GetPersistentUri() =>
-        new(ToString().Split("/").SkipLast(1).Aggregate((x, y) => $"{x}/{y}"));
+        new(ToString().Split("/").SkipLast(3).Aggregate((x, y) => $"{x}/{y}"));
 
 
 }
