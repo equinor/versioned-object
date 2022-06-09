@@ -81,7 +81,7 @@ namespace VersionedObject
         public VersionedObject(AspectObject persistent)
         {
             this.Object = persistent;
-            var versionHash = persistent.GetHash().ToString();
+            var versionHash = persistent.GetHash();
             this.VersionedIRI = persistent.PersistentIRI.AddDatedVersionToUri(versionHash);
         }
 

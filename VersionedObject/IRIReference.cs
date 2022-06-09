@@ -1,5 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
+using System.Text;
 using Newtonsoft.Json.Linq;
 
 namespace VersionedObject;
@@ -35,12 +36,12 @@ public class IRIReference : IEquatable<IRIReference>
     /// Adds version suffix to IRI to create an identifier for an immutable version object
     /// The inverse operation is GetPersistentUri below
     /// </summary>
-    public VersionedIRIReference AddVersionToUri(string versionHash, DateTime time) =>
-        new($"{this}/version/{versionHash}/{time}");
+    public VersionedIRIReference AddVersionToUri(byte[] versionHash, string versionInfo) =>
+        new($"{this}/version/{Encoding.ASCII.GetString(versionHash)}/{versionInfo}");
 
 
-    public VersionedIRIReference AddDatedVersionToUri(string versionHash) =>
-        AddVersionToUri(versionHash, DateTime.Now);
+    public VersionedIRIReference AddDatedVersionToUri(byte[] versionHash) =>
+        AddVersionToUri(versionHash, DateTime.Now.UnixSeconds());
 
     /// <summary>
     /// Cannot use Uri.getHashCode since that ignores the fragment
@@ -66,8 +67,8 @@ public class VersionedIRIReference : IRIReference
     public static implicit operator VersionedIRIReference(Uri uri) => new(uri);
     public static implicit operator VersionedIRIReference(string uriString) => new(uriString);
 
-    public string VersionDate { get; }
-    public string VersionHash { get;  }
+    public string VersionInfo { get; }
+    public byte[] VersionHash { get;  }
 
     public VersionedIRIReference(Uri uri) : this(uri.ToString())
     { }
@@ -77,8 +78,8 @@ public class VersionedIRIReference : IRIReference
         var segments = uriString.Split("/").Reverse();
         if(segments.Count() < 4 || !segments.ElementAt(2).Equals("version"))
             throw new ArgumentException($"Invalid syntax for versioned IRI: {uriString}");
-        VersionDate = segments.ElementAt(0);
-        VersionHash = segments.ElementAt(1);
+        VersionInfo = segments.ElementAt(0);
+        VersionHash = Encoding.UTF8.GetBytes(segments.ElementAt(1));
     }
 
     

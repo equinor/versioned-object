@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using Xunit;
 using Newtonsoft.Json;
 using VersionedObject;
@@ -17,11 +18,11 @@ namespace VersionedObject.Tests
             var uri_in_iri = new IRIReference(new Uri("asa:Scope"));
             Assert.Equal(grafuri, grafiri.uri);
             Assert.Equal(uri_in_iri, grafiri);
-            var versionHash = "12345";
+            var versionHash = Encoding.UTF8.GetBytes("12345");
             var versionDate = "2022-05-01";
             Assert.Equal(uri, (IRIReference)uri2);
             Assert.Equal(versionHash, uri.VersionHash);
-            Assert.Equal(versionDate, uri.VersionDate);
+            Assert.Equal(versionDate, uri.VersionInfo);
             Assert.Equal(new IRIReference("http://rdf.equinor.com/data/objectx"), uri.GetPersistentUri());
         }
 
@@ -29,7 +30,7 @@ namespace VersionedObject.Tests
         public void TestFragmentVersionedUri()
         {
             var uri = new VersionedIRIReference("http://rdf.equinor.com/data#objectx/version/12345/2022-05-01");
-            var version = "12345";
+            var version = Encoding.UTF8.GetBytes("12345");
             Assert.Equal(version, uri.VersionHash);
             Assert.Equal(new IRIReference("http://rdf.equinor.com/data#objectx"), uri.GetPersistentUri());
         }
@@ -38,8 +39,8 @@ namespace VersionedObject.Tests
         public void TestGeneratedVersionedUri()
         {
             var persistentIri = new IRIReference("http://rdf.equinor.com/data/objectx");
-            var versionedIri = persistentIri.AddVersionToUri("12345", DateTime.Now);
-            var versionDate = versionedIri.VersionDate;
+            var versionedIri = persistentIri.AddVersionToUri(Encoding.UTF8.GetBytes("12345"), DateTime.Now.ToString());
+            var versionDate = versionedIri.VersionInfo;
             var versionHash = versionedIri.VersionHash;
             var composedIri = new Uri($"{persistentIri}/{versionHash}/{versionDate}");
             Assert.Equal((IRIReference)composedIri, versionedIri);

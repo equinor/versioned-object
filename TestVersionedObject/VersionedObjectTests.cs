@@ -1,6 +1,7 @@
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Xunit;
 using static VersionedObject.EntityGraphComparer;
 using static VersionedObject.JsonLdHelper;
@@ -404,7 +405,7 @@ namespace VersionedObject.Tests
         public void TestVersionedUri()
         {
             var uri = new VersionedIRIReference("http://rdf.equinor.com/data/objectx/version/12345/2022-05-01");
-            Assert.Equal("12345", uri.VersionHash);
+            Assert.Equal("12345", Encoding.UTF8.GetString(uri.VersionHash));
             Assert.Equal(new IRIReference("http://rdf.equinor.com/data/objectx"), uri.GetPersistentUri());
         }
         [Fact]
