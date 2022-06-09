@@ -82,7 +82,7 @@ namespace VersionedObject
         {
             Object = persistent;
             var versionHash = persistent.GetHash();
-            VersionedIRI = new(persistent.PersistentIRI,versionHash);
+            VersionedIRI = new(persistent.PersistentIRI, versionHash);
         }
 
         public VersionedObject(VersionedIRIReference _VersionedIri, JObject content, IEnumerable<IRIReference> persistentIris)
@@ -93,7 +93,7 @@ namespace VersionedObject
 
         public VersionedObject(JToken _VersionedIri, JObject content, IEnumerable<IRIReference> persistentIris) : this(new VersionedIRIReference(_VersionedIri.ToString()), content, persistentIris)
         { }
-        
+
 
         public IRIReference GetPersistentIRI() =>
             Object.PersistentIRI;

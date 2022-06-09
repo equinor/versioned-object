@@ -58,8 +58,8 @@ public class VersionedIRIReference : IRIReference
     public static implicit operator VersionedIRIReference(string uriString) => new(uriString);
 
     public string VersionInfo { get; }
-    public string VersionHash { get;  }
-    public IRIReference PersistentIRI { get;  }
+    public string VersionHash { get; }
+    public IRIReference PersistentIRI { get; }
 
     public VersionedIRIReference(Uri uri) : this(uri.ToString())
     { }
@@ -67,7 +67,7 @@ public class VersionedIRIReference : IRIReference
     public VersionedIRIReference(string uriString) : base(uriString)
     {
         var segments = uriString.Split("/").Reverse();
-        if(segments.Count() < 4 || !segments.ElementAt(2).Equals("version"))
+        if (segments.Count() < 4 || !segments.ElementAt(2).Equals("version"))
             throw new ArgumentException($"Invalid syntax for versioned IRI: {uriString}");
         VersionInfo = segments.ElementAt(0);
         VersionHash = segments.ElementAt(1);
