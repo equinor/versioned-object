@@ -51,9 +51,6 @@ namespace VersionedObject
                 Content.Append(new JProperty("@id", PersistentIRI.ToJValue()))
             };
 
-
-
-
         public override bool Equals(object obj)
         {
             if (obj is VersionedObject versioned)

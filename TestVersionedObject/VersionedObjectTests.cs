@@ -251,7 +251,7 @@ namespace VersionedObject.Tests
             var updatelist = different_jsonld.GetInputGraphAsEntities().MakeUpdateList(aspect_jsonld.GetExistingGraphAsEntities(new[] { new IRIReference("http://rdf.equinor.com/ontology/sor#Row1") }));
             Assert.True(updatelist.Any());
             Assert.Single(updatelist);
-            Assert.Equal(different_jsonld.GetInputGraphAsEntities().First().PersistentIRI, updatelist.First().GetPersistentIRI());
+            Assert.Equal(different_jsonld.GetInputGraphAsEntities().First().PersistentIRI, updatelist.Values.First().GetPersistentIRI());
         }
 
         [Fact()]

@@ -35,9 +35,9 @@ namespace VersionedObject
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
-        public static IEnumerable<VersionedIRIReference> GetExternalIriReferences(this VersionedObject entity)
+        public static IEnumerable<VersionedIRIReference> GetExternalIriReferences(this IDictionary<IRIReference, VersionedObject> updateList)
         {
-            return entity.
+            return updateList.Values.Select(v => v.GetA)
         }
 
         /// <summary>
