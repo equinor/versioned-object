@@ -104,8 +104,8 @@ namespace VersionedObject
             return graph.GetHash();
         }
 
-        public static Uri GetJsonLdIRI(this JToken jsonld) =>
-            jsonld.SelectToken("@id") == null ? new("") : new(jsonld.SelectToken("@id").ToString());
+        public static Uri GetJsonLdIRI(this JToken jsonld)  =>
+            new(jsonld.SelectToken("@id")?.ToString() ?? throw new GraphEntityComparerException($"No @id field in object {jsonld}"));
 
     }
 }
