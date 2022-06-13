@@ -14,6 +14,7 @@ namespace VersionedObject.Tests
         JObject different_jsonld;
         JObject row2_jsonld;
         JObject aspect_jsonld;
+        JObject edge_jsonld;
         private JObject aspect_persistent_jsonld;
         JObject expanded_jsonld;
 
@@ -78,6 +79,35 @@ namespace VersionedObject.Tests
                     ["@version"] = "1.1"
                 }
             };
+
+            edge_jsonld = new JObject()
+            {
+                ["@graph"] = new JArray()
+                {
+                    new JObject()
+                    {
+                        ["@id"] = "sor:Row1",
+                        ["@type"] = "MelRow",
+                        ["rdfs:label"] = "An empty MEL Row",
+                        ["imf:hasChild"] = "sor:Row2"
+                    },
+                    new JObject()
+                    {
+                        ["@id"] = "sor:Row2",
+                        ["@type"] = "MelRow",
+                        ["rdfs:label"] = "The second MEL Row"
+                    }
+                },
+                ["@context"] = new JObject()
+                {
+                    ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",
+                    ["@vocab"] = "http://rdf.equinor.com/ontology/mel#",
+                    ["sor"] = "http://rdf.equinor.com/ontology/sor#",
+                    ["imf"] = "http://imf.imfid.org/ontology/imf#",
+                    ["@version"] = "1.1"
+                }
+            };
+
             aspect_jsonld = new JObject()
             {
                 ["@graph"] = new JArray()
@@ -416,6 +446,16 @@ namespace VersionedObject.Tests
             Assert.Equal("http://rdf.equinor.com/ontology/sor#Row1", removed_versions["@id"]);
         }
 
+        [Fact]
+        public void TestGetExternalIRIs()
+        {
+            var simple_list = simple_jsonld.GetInputGraphAsEntities();
+            var refs = simple_list.First().GetExternalIriReferences();
+            Assert.Empty(refs);
+            var edged_list = simple_jsonld.GetInputGraphAsEntities();
+            refs = edged_list.First().GetExternalIriReferences();
+            Assert.NotEmpty(refs);
 
+        }
     }
 }

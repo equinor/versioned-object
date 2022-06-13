@@ -19,13 +19,25 @@ namespace VersionedObject
         public static JObject? MakeGraphUpdate(this JObject input, JObject existing, Func<IEnumerable<AspectObject>?, IEnumerable<AspectObject>?> inputModifier)
         {
             var inputList = inputModifier(input.GetInputGraphAsEntities());
-            var existingList = existing.GetExistingGraphAsEntities(GetAllPersistentIris(input, existing));
+            var persistentEntities = GetAllPersistentIris(input, existing);
+            //var reifiedInput = inputList.reifyEdges(input, existing);
+            var existingList = existing.GetExistingGraphAsEntities(persistentEntities);
             var updateList = inputList.MakeUpdateList(existingList);
-            var allEntities = existingList.Union(updateList);
+            var allEntities = existingList.Union(updateList.Values);
 
             var deleteList = inputList.MakeDeleteList(existingList);
             //return CreateUpdateJObject(updateList, deleteList, x => x.AddVersionToUris(allEntities));
-            return CreateUpdateJObject(updateList, deleteList, x => x);
+            return CreateUpdateJObject(updateList.Values, deleteList, x => x);
+        }
+
+        /// <summary>
+        /// Returns all IRIs to objects not inside this entity. These should be reified edges
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public static IEnumerable<VersionedIRIReference> GetExternalIriReferences(this VersionedObject entity)
+        {
+            return entity.
         }
 
         /// <summary>
@@ -117,7 +129,7 @@ namespace VersionedObject
         public static JArray MakeUpdateGraph(this IEnumerable<VersionedObject> updateList, Func<JObject, JObject> outputModifier) =>
             new(updateList.Select(o => outputModifier(o.ToJObject())));
 
-        public static IEnumerable<VersionedObject> MakeUpdateList(this IEnumerable<AspectObject> inputList,
+        public static IDictionary<IRIReference, VersionedObject> MakeUpdateList(this IEnumerable<AspectObject> inputList,
             IEnumerable<VersionedObject> existingList)
         {
             var oldNewMap = inputList.Select(
@@ -126,14 +138,17 @@ namespace VersionedObject
                     old: existingList.Where(x => i.SamePersistentIRI(x.Object))
                 )
             );
-            return oldNewMap
-                .Where(i => !i.old.Any())
-                .Select(i => new VersionedObject(i.input))
-                .Union(
-                    oldNewMap
-                        .Where(i => i.old.Any()
-                                    && !i.input.Equals(i.old.First().Object))
-                        .Select(i => new ProvenanceObject(i.input, i.old.First()))
+            return new Dictionary<IRIReference, VersionedObject>(
+                oldNewMap
+                    .Where(i => !i.old.Any())
+                    .Select(i => new KeyValuePair<IRIReference, VersionedObject>(i.input.PersistentIRI, new VersionedObject(i.input)))
+                    .Union(
+                        oldNewMap
+                            .Where(i => i.old.Any()
+                                        && !i.input.Equals(i.old.First().Object))
+                            .Select(i => new KeyValuePair<IRIReference, VersionedObject>(i.input.PersistentIRI, new ProvenanceObject(i.input, i.old.First()))
+                            )
+                        )
                 );
         }
 
