@@ -37,7 +37,14 @@ namespace VersionedObject
         /// <returns></returns>
         public static IEnumerable<VersionedIRIReference> GetExternalIriReferences(this IDictionary<IRIReference, VersionedObject> updateList)
         {
-            return updateList.Values.Select(v => v.GetA)
+            public static JObject RemoveVersionFromUris(this JObject versionedEntity, IEnumerable<IRIReference> persistentUris) =>
+                JObject.Parse(persistentUris
+                    .Aggregate(versionedEntity.ToString(),
+                        (ent, persistent) =>
+                            new Regex($"{persistent.ToString().Replace(".", "\\.")}/\\w+")
+                                .Replace(ent, persistent.ToString())
+                    )
+                );
         }
 
         /// <summary>

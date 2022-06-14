@@ -14,3 +14,5 @@ The method for calculating the hash is in JsonLdHelper.GetHash
 #EntityGraphComparer
 Library for comparing unversioned (persistent) input graph with versioned (existing) graph and creates update command for the aspect api.
 The versioned objects that are created have only persistent IRIs inside them.
+
+Edge reification: Any reference to a different object is removed and replaced with an object that represents that relation. The relation-object gets the persistent IRI : <property-IRI>/
