@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -7,7 +7,24 @@
 	  <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 	  <Version>$(VersionPrefix)0.0.1</Version>
 	  <Description>A c# library for handling versioned objects and IRIs.</Description>
+	  <Authors>daghovland</Authors>
+	  <Company>Equinor</Company>
+	  <Copyright>Equinor</Copyright>
+	  <PackageReadmeFile>README.md</PackageReadmeFile>
+	  <RepositoryUrl>https://github.com/equinor/versioned-object</RepositoryUrl>
+	  <RepositoryType>git</RepositoryType>
+	  <PackageTags>semantic technology;rdf</PackageTags>
+	  <PackageReleaseNotes>Initial release without edge reification</PackageReleaseNotes>
+	  <PackageLicenseExpression>LGPL-3.0-only</PackageLicenseExpression>
+	  <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="dotNetRDF" Version="2.7.4" />
