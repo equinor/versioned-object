@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json.Linq;
+using System.Data.HashFunction.CRC;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -57,7 +58,7 @@ namespace VersionedObject
                 .Aggregate(persistentEntity.ToString(),
                     (ent, versioned) =>
                         new Regex($"{versioned.GetPersistentIRI().ToString().Replace(".", "\\.")}/\\w+")
-                            .Replace(ent, versioned.GetVersionedIRI().ToString())
+                            .Replace(ent, versioned.VersionedIRI.ToString())
                         )
                 );
 
@@ -72,10 +73,11 @@ namespace VersionedObject
         {
             var writer = new NTriplesWriter();
             var graphString = VDS.RDF.Writing.StringWriter.Write(g, writer);
-            var hasher = MD5.Create();
+            var crcFactory = CRCFactory.Instance;
+            var hasher = crcFactory.Create(CRCConfig.CRC64);
             var triplesHash = graphString
                 .Split(new[] { '\r', '\n' }, System.StringSplitOptions.RemoveEmptyEntries)
-                .Select(x => (IEnumerable<byte>)hasher.ComputeHash(Encoding.UTF8.GetBytes(x)))
+                .Select(x => (IEnumerable<byte>)hasher.ComputeHash(Encoding.UTF8.GetBytes(x)).Hash)
                 .Aggregate((x, y) => x.Zip(y, (l1, l2) => (byte)(l1 ^ l2)));
             return triplesHash.ToArray();
 
@@ -98,12 +100,10 @@ namespace VersionedObject
         /**
         * Creates a new version string usable for this aspect object
         */
-        public static string GetNewVersion(this AspectObject @object)
+        public static byte[] GetHash(this AspectObject @object)
         {
-            var timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
             var graph = LoadGraph(@object.ToJsonldGraph().ToString());
-            var hash = graph.GetHash();
-            return $"{timestamp}-{hash}";
+            return graph.GetHash();
         }
 
         public static Uri GetJsonLdIRI(this JToken jsonld) =>
@@ -111,3 +111,4 @@ namespace VersionedObject
 
     }
 }
+

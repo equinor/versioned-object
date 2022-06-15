@@ -17,15 +17,29 @@ namespace VersionedObject
         public IRIReference PersistentIRI { get; }
         public IEnumerable<JProperty> Content { get; }
 
-        public string[] filter = { "@id", "http://www.w3.org/ns/prov#wasDerivedFrom", "asa:hasVersion" };
+        public string[] filter = { "@id", "http://www.w3.org/ns/prov#wasDerivedFrom", "asa:hasVersion", "@type" };
 
         public AspectObject(JObject jsonLdJObject) : this(jsonLdJObject.SelectToken("@id"), jsonLdJObject)
         { }
         public AspectObject(IRIReference persistentIRI, JObject content)
         {
             PersistentIRI = persistentIRI;
-            Content = content.Children<JProperty>().Where(
-                child => !filter.Contains(child.Name));
+            var tmp_content = content.Children<JProperty>()
+                    .Where(child => !filter.Contains(child.Name));
+            if (content.ContainsKey("@type") && content.SelectToken("@type") != null)
+            {
+                JArray types_array;
+
+                if (content.SelectToken("@type").Type == JTokenType.Array)
+                    types_array = content.SelectToken("@type").Value<JArray>();
+                else
+                    types_array = new JArray() { content.SelectToken("@type") };
+
+                Content = tmp_content.Append(new JProperty("@type", types_array.Append(new JValue("https://rdf.equinor.com/ontology/aspect-api#Object"))));
+            }
+            else
+                Content = tmp_content;
+
         }
 
         public AspectObject(JToken persistentIRI, JObject content) : this(new IRIReference(persistentIRI.ToString()), content)
@@ -48,7 +62,8 @@ namespace VersionedObject
         public JObject ToJsonldJObject() =>
             new()
             {
-                Content.Append(new JProperty("@id", PersistentIRI.ToJValue()))
+                Content
+                    .Append(new JProperty("@id", PersistentIRI.ToJValue()))
             };
 
 
@@ -73,27 +88,27 @@ namespace VersionedObject
 
     public class VersionedObject
     {
-        public string Version { get; }
+        public VersionedIRIReference VersionedIRI { get; }
         public AspectObject Object { get; }
         public IEnumerable<JProperty> GetContent() =>
-            Object.Content.Append(new JProperty("@id", GetVersionedIRI().ToJValue()));
+            Object.Content.Append(new JProperty("@id", VersionedIRI.ToJValue()));
 
         public VersionedObject(AspectObject persistent)
         {
-            this.Object = persistent;
-            this.Version = persistent.GetNewVersion();
+            Object = persistent;
+            var versionHash = persistent.GetHash();
+            VersionedIRI = new(persistent.PersistentIRI, versionHash);
         }
 
         public VersionedObject(VersionedIRIReference _VersionedIri, JObject content, IEnumerable<IRIReference> persistentIris)
         {
-            this.Object = new AspectObject(_VersionedIri.GetPersistentUri(), content.RemoveVersionFromUris(persistentIris));
-            this.Version = _VersionedIri.GetUriVersion();
+            this.Object = new AspectObject(_VersionedIri.PersistentIRI, content.RemoveVersionFromUris(persistentIris));
+            VersionedIRI = _VersionedIri;
         }
 
         public VersionedObject(JToken _VersionedIri, JObject content, IEnumerable<IRIReference> persistentIris) : this(new VersionedIRIReference(_VersionedIri.ToString()), content, persistentIris)
         { }
-        public VersionedIRIReference GetVersionedIRI() =>
-            new($"{this.Object.PersistentIRI}/{this.Version}");
+
 
         public IRIReference GetPersistentIRI() =>
             Object.PersistentIRI;
@@ -110,7 +125,7 @@ namespace VersionedObject
 
         public ProvenanceObject(AspectObject persistent, VersionedObject _WasDerivedFrom) : base(persistent)
         {
-            this.WasDerivedFrom = _WasDerivedFrom.GetVersionedIRI();
+            WasDerivedFrom = _WasDerivedFrom.VersionedIRI;
         }
 
         /// <summary>

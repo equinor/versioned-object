@@ -24,7 +24,8 @@ namespace VersionedObject
             var allEntities = existingList.Union(updateList);
 
             var deleteList = inputList.MakeDeleteList(existingList);
-            return CreateUpdateJObject(updateList, deleteList, x => x.AddVersionToUris(allEntities));
+            //return CreateUpdateJObject(updateList, deleteList, x => x.AddVersionToUris(allEntities));
+            return CreateUpdateJObject(updateList, deleteList, x => x);
         }
 
         /// <summary>
@@ -93,7 +94,7 @@ namespace VersionedObject
                 .Union(
                     existing
                         .GetAllEntityIds()?
-                        .Select(s => new VersionedIRIReference(s).GetPersistentUri())
+                        .Select(s => new VersionedIRIReference(s).PersistentIRI)
                 );
         public static IEnumerable<Uri>? GetAllEntityIds(this JObject input) =>
             input
@@ -146,6 +147,6 @@ namespace VersionedObject
             IEnumerable<VersionedObject> existing) =>
             existing
                 .Where(x => !input.Any(i => x.Object.SamePersistentIRI(i)))
-                .Select(x => x.GetVersionedIRI());
+                .Select(x => x.VersionedIRI);
     }
 }
