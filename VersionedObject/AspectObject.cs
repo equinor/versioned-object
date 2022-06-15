@@ -29,14 +29,15 @@ namespace VersionedObject
             if (content.ContainsKey("@type") && content.SelectToken("@type") != null)
             {
                 JArray types_array;
-                
+
                 if (content.SelectToken("@type").Type == JTokenType.Array)
                     types_array = content.SelectToken("@type").Value<JArray>();
                 else
-                    types_array = new JArray() {content.SelectToken("@type")};
-                
+                    types_array = new JArray() { content.SelectToken("@type") };
+
                 Content = tmp_content.Append(new JProperty("@type", types_array.Append(new JValue("https://rdf.equinor.com/ontology/aspect-api#Object"))));
-            } else 
+            }
+            else
                 Content = tmp_content;
 
         }

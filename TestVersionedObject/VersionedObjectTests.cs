@@ -173,9 +173,9 @@ namespace VersionedObject.Tests
         public void RdfHashTest()
         {
             var aspectFirst = aspect_jsonld
-                .GetExistingGraphAsEntities(new[] {new IRIReference("http://rdf.equinor.com/ontology/sor#Row1")})
+                .GetExistingGraphAsEntities(new[] { new IRIReference("http://rdf.equinor.com/ontology/sor#Row1") })
                 .First();
-            var aspectHashCode = string.Join("",aspectFirst.Object.GetHash());
+            var aspectHashCode = string.Join("", aspectFirst.Object.GetHash());
             Assert.Equal(aspectHashCode, aspectFirst.VersionedIRI.VersionHash);
         }
 
