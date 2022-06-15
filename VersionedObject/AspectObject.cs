@@ -17,7 +17,7 @@ namespace VersionedObject
         public IRIReference PersistentIRI { get; }
         public IEnumerable<JProperty> Content { get; }
 
-        public string[] filter = { "@id", "http://www.w3.org/ns/prov#wasDerivedFrom"};
+        public string[] filter = { "@id", "http://www.w3.org/ns/prov#wasDerivedFrom" };
 
         public AspectObject(JObject jsonLdJObject) : this(jsonLdJObject.SelectToken("@id"), jsonLdJObject)
         { }
