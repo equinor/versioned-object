@@ -124,7 +124,7 @@ namespace VersionedObject.Tests
                 {
                     new JObject()
                     {
-                        ["@id"] = "http://rdf.equinor.com/ontology/sor#Row1/version/123456789/2022-05-01",
+                        ["@id"] = "http://rdf.equinor.com/ontology/sor#Row1/version/21813615510499209214110/2022-05-01",
                         ["@type"] = new JArray(){ "http://rdf.equinor.com/ontology/mel#MelRow", "asa:Object" },
                         ["rdfs:label"] = "An empty MEL Row"
                     }
