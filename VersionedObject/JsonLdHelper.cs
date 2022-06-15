@@ -111,7 +111,7 @@ namespace VersionedObject
             props
                 .Where(p => p.Value.Type == JTokenType.Object)
                 .Select(p => (p, p.Value<JObject>().Properties().ReifyEdges(persistentIris)))
-                
+                .Append()
                 .Union(props.Where(p => p.Type != JTokenType.Object))
 
         //    props.Aggregate((new List<JProperty>(), new List<IRIReference>()), (acc, prop) => 
