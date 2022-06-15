@@ -84,7 +84,7 @@ namespace VersionedObject.Tests
                 {
                     new JObject()
                     {
-                        ["@id"] = "sor:Row1/version/123456789/2022-05-01",
+                        ["@id"] = "sor:Row1/version/21813615510499209214110/2022-05-01",
                         ["@type"] = new JArray(){ "http://rdf.equinor.com/ontology/mel#MelRow", "asa:Object" },
                         ["rdfs:label"] = "An empty MEL Row"
                     }
@@ -159,12 +159,26 @@ namespace VersionedObject.Tests
                 .GetExistingGraphAsEntities(new[] { new IRIReference("http://rdf.equinor.com/ontology/sor#Row1") })
                 .First().Object;
             var simpleFirst = simple_jsonld.GetInputGraphAsEntities().First();
+            var aspectHashCode = aspectFirst.GetHash();
+            var simpleHashCode = simpleFirst.GetHash();
+            Assert.Equal(aspectHashCode, simpleHashCode);
             Assert.True(aspectFirst.Equals(simpleFirst),
                 "Equality test on input and aspect jsonld failed");
             Assert.False(
                 aspect_jsonld.GetExistingGraphAsEntities(new[] { new IRIReference("http://rdf.equinor.com/ontology/sor#Row1") }).First().Object
                 .Equals(different_jsonld.GetInputGraphAsEntities().First()), "Equality test on input and aspect jsonld failed");
         }
+
+        [Fact()]
+        public void RdfHashTest()
+        {
+            var aspectFirst = aspect_jsonld
+                .GetExistingGraphAsEntities(new[] {new IRIReference("http://rdf.equinor.com/ontology/sor#Row1")})
+                .First();
+            var aspectHashCode = string.Join("",aspectFirst.Object.GetHash());
+            Assert.Equal(aspectHashCode, aspectFirst.VersionedIRI.VersionHash);
+        }
+
 
         [Fact()]
         public void LoadGraphTest()
