@@ -97,6 +97,11 @@ namespace VersionedObject
 
         public JObject ToJObject() =>
             new(GetContent());
+
+        internal List<VersionedObject> ReifyNodeEdges(IEnumerable<IRIReference> persistentIris)
+        {
+            Object.Content.Aggregate(new JObject(),);
+        }
     }
 
     public class ProvenanceObject : VersionedObject
