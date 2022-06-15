@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json.Linq;
+using System.Data.HashFunction.CRC;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -72,10 +73,11 @@ namespace VersionedObject
         {
             var writer = new NTriplesWriter();
             var graphString = VDS.RDF.Writing.StringWriter.Write(g, writer);
-            var hasher = MD5.Create();
+            var crcFactory = CRCFactory.Instance;
+            var hasher = crcFactory.Create(CRCConfig.CRC64);
             var triplesHash = graphString
                 .Split(new[] { '\r', '\n' }, System.StringSplitOptions.RemoveEmptyEntries)
-                .Select(x => (IEnumerable<byte>)hasher.ComputeHash(Encoding.UTF8.GetBytes(x)))
+                .Select(x => (IEnumerable<byte>)hasher.ComputeHash(Encoding.UTF8.GetBytes(x)).Hash)
                 .Aggregate((x, y) => x.Zip(y, (l1, l2) => (byte)(l1 ^ l2)));
             return triplesHash.ToArray();
 
@@ -119,3 +121,4 @@ namespace VersionedObject
 
     }
 }
+
