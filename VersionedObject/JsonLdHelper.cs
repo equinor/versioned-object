@@ -1,4 +1,4 @@
-﻿/*
+/*
 Copyright 2022 Equinor ASA
 
 This program is free software: you can redistribute it and/or modify it under the terms of version 3 of the GNU Lesser General Public License as published by the Free Software Foundation.
@@ -8,7 +8,7 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 using Newtonsoft.Json.Linq;
-using System.Security.Cryptography;
+using System.Data.HashFunction.CRC;
 using System.Text;
 using System.Text.RegularExpressions;
 using VDS.RDF;
@@ -81,10 +81,11 @@ namespace VersionedObject
         {
             var writer = new NTriplesWriter();
             var graphString = VDS.RDF.Writing.StringWriter.Write(g, writer);
-            var hasher = MD5.Create();
+            var crcFactory = CRCFactory.Instance;
+            var hasher = crcFactory.Create(CRCConfig.CRC64);
             var triplesHash = graphString
                 .Split(new[] { '\r', '\n' }, System.StringSplitOptions.RemoveEmptyEntries)
-                .Select(x => (IEnumerable<byte>)hasher.ComputeHash(Encoding.UTF8.GetBytes(x)))
+                .Select(x => (IEnumerable<byte>)hasher.ComputeHash(Encoding.UTF8.GetBytes(x)).Hash)
                 .Aggregate((x, y) => x.Zip(y, (l1, l2) => (byte)(l1 ^ l2)));
             return triplesHash.ToArray();
 
@@ -118,3 +119,4 @@ namespace VersionedObject
 
     }
 }
+
