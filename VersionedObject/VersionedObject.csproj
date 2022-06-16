@@ -3,7 +3,10 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
 	  <PackageId>VersionedObject</PackageId>
-	  <Description>A library for handling versioned IRIs and versioned objects for use with JSON-LD. IRIReference is a drop-in replacement for System.Uri, while AspectObject can be used to wrap JSON-LD objects and create correct versioned IRIs</Description>
+	  <Description>
+		  A library for handling versioned IRIs and versioned objects for use with JSON-LD. 
+		  IRIReference is a drop-in replacement for System.Uri, while AspectObject can be used to wrap JSON-LD objects and create correct versioned IRIs
+	  </Description>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 	  <GeneratePackageOnBuild>True</GeneratePackageOnBuild>

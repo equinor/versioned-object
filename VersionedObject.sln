@@ -8,9 +8,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestVersionedObject", "TestVersionedObject\TestVersionedObject.csproj", "{3CF5E328-F50F-4D8A-97C7-1C8C185018BA}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3E5A0A9D-B063-465A-B19F-4EE7490BC7B5}"
-	ProjectSection(SolutionItems) = preProject
-		aspect-azure-pipelines.yml = aspect-azure-pipelines.yml
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
