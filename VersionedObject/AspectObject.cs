@@ -17,29 +17,15 @@ namespace VersionedObject
         public IRIReference PersistentIRI { get; }
         public IEnumerable<JProperty> Content { get; }
 
-        public string[] filter = { "@id", "http://www.w3.org/ns/prov#wasDerivedFrom", "asa:hasVersion", "@type" };
+        public string[] filter = { "@id", "http://www.w3.org/ns/prov#wasDerivedFrom" };
 
         public AspectObject(JObject jsonLdJObject) : this(jsonLdJObject.SelectToken("@id"), jsonLdJObject)
         { }
         public AspectObject(IRIReference persistentIRI, JObject content)
         {
             PersistentIRI = persistentIRI;
-            var tmp_content = content.Children<JProperty>()
+            Content = content.Children<JProperty>()
                     .Where(child => !filter.Contains(child.Name));
-            if (content.ContainsKey("@type") && content.SelectToken("@type") != null)
-            {
-                JArray types_array;
-
-                if (content.SelectToken("@type").Type == JTokenType.Array)
-                    types_array = content.SelectToken("@type").Value<JArray>();
-                else
-                    types_array = new JArray() { content.SelectToken("@type") };
-
-                Content = tmp_content.Append(new JProperty("@type", types_array.Append(new JValue("https://rdf.equinor.com/ontology/aspect-api#Object"))));
-            }
-            else
-                Content = tmp_content;
-
         }
 
         public AspectObject(JToken persistentIRI, JObject content) : this(new IRIReference(persistentIRI.ToString()), content)

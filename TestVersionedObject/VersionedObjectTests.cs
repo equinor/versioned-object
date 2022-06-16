@@ -84,8 +84,8 @@ namespace VersionedObject.Tests
                 {
                     new JObject()
                     {
-                        ["@id"] = "sor:Row1/version/21813615510499209214110/2022-05-01",
-                        ["@type"] = new JArray(){ "http://rdf.equinor.com/ontology/mel#MelRow", "asa:Object" },
+                        ["@id"] = "sor:Row1/version/29110145432144214285/2022-05-01",
+                        ["@type"] = new JArray(){ "http://rdf.equinor.com/ontology/mel#MelRow" },
                         ["rdfs:label"] = "An empty MEL Row"
                     }
                 },
@@ -94,7 +94,6 @@ namespace VersionedObject.Tests
                     ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",
                     ["@vocab"] = "http://rdf.equinor.com/ontology/mel#",
                     ["sor"] = "http://rdf.equinor.com/ontology/sor#",
-                    ["asa"] = "https://rdf.equinor.com/ontology/aspect-api#",
                     ["@version"] = "1.1"
                 }
             };
@@ -105,7 +104,7 @@ namespace VersionedObject.Tests
                     new JObject()
                     {
                         ["@id"] = "sor:Row1",
-                        ["@type"] = new JArray(){ "http://rdf.equinor.com/ontology/mel#MelRow", "asa:Object" },
+                        ["@type"] = new JArray(){ "http://rdf.equinor.com/ontology/mel#MelRow" },
                         ["rdfs:label"] = "An empty MEL Row"
                     }
                 },
@@ -114,7 +113,6 @@ namespace VersionedObject.Tests
                     ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",
                     ["@vocab"] = "http://rdf.equinor.com/ontology/mel#",
                     ["sor"] = "http://rdf.equinor.com/ontology/sor#",
-                    ["asa"] = "https://rdf.equinor.com/ontology/aspect-api#",
                     ["@version"] = "1.1"
                 }
             };
@@ -124,8 +122,8 @@ namespace VersionedObject.Tests
                 {
                     new JObject()
                     {
-                        ["@id"] = "http://rdf.equinor.com/ontology/sor#Row1/version/21813615510499209214110/2022-05-01",
-                        ["@type"] = new JArray(){ "http://rdf.equinor.com/ontology/mel#MelRow", "asa:Object" },
+                        ["@id"] = "http://rdf.equinor.com/ontology/sor#Row1/version/29110145432144214285/2022-05-01",
+                        ["@type"] = new JArray(){ "http://rdf.equinor.com/ontology/mel#MelRow" },
                         ["rdfs:label"] = "An empty MEL Row"
                     }
                 },
@@ -134,7 +132,6 @@ namespace VersionedObject.Tests
                     ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",
                     ["@vocab"] = "http://rdf.equinor.com/ontology/mel#",
                     ["sor"] = "http://rdf.equinor.com/ontology/sor#",
-                    ["asa"] = "https://rdf.equinor.com/ontology/aspect-api#",
                     ["@version"] = "1.1"
                 }
             };
@@ -333,7 +330,7 @@ namespace VersionedObject.Tests
             Assert.NotNull(deletelist);
             Assert.True(deletelist.Any());
             Assert.Single(deletelist);
-            Assert.Equal(new IRIReference("http://rdf.equinor.com/ontology/sor#Row1/version/21813615510499209214110/2022-05-01").ToString(), deletelist.First().ToString());
+            Assert.Equal(new IRIReference("http://rdf.equinor.com/ontology/sor#Row1/version/29110145432144214285/2022-05-01").ToString(), deletelist.First().ToString());
         }
 
         [Fact()]
@@ -357,7 +354,7 @@ namespace VersionedObject.Tests
             persistentIris = expanded_jsonld.GetAllEntityIds();
             Assert.NotNull(persistentIris);
             Assert.Single(persistentIris);
-            Assert.Contains("http://rdf.equinor.com/ontology/sor#Row1/version/21813615510499209214110/2022-05-01", persistentIris.Select(x => x.ToString()));
+            Assert.Contains("http://rdf.equinor.com/ontology/sor#Row1/version/29110145432144214285/2022-05-01", persistentIris.Select(x => x.ToString()));
 
         }
 
