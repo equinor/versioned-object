@@ -107,7 +107,7 @@ namespace VersionedObject
         }
 
         public static Uri GetJsonLdIRI(this JToken jsonld) =>
-            jsonld.SelectToken("@id") == null ? new("") : new(jsonld.SelectToken("@id").ToString());
+            new(jsonld.SelectToken("@id")?.ToString() ?? throw new GraphEntityComparerException($"No @id field in object {jsonld}"));
 
     }
 }

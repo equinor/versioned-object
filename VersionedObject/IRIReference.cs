@@ -18,8 +18,8 @@ public class IRIReference : IEquatable<IRIReference>
 {
     public Uri uri { get; set; }
 
-    public static implicit operator IRIReference(Uri uri) => new(uri);
-    public static implicit operator IRIReference(string uri) => new(uri);
+    public static explicit operator IRIReference(Uri uri) => new(uri);
+    public static explicit operator IRIReference(string uri) => new(uri);
     public static implicit operator Uri(IRIReference r) => r.uri;
 
     public static implicit operator JValue(IRIReference r) => r.ToJValue();
@@ -54,8 +54,8 @@ public class IRIReference : IEquatable<IRIReference>
 /// </summary>
 public class VersionedIRIReference : IRIReference
 {
-    public static implicit operator VersionedIRIReference(Uri uri) => new(uri);
-    public static implicit operator VersionedIRIReference(string uriString) => new(uriString);
+    public static explicit operator VersionedIRIReference(Uri uri) => new(uri);
+    public static explicit operator VersionedIRIReference(string uriString) => new(uriString);
 
     public string VersionInfo { get; }
     public string VersionHash { get; }

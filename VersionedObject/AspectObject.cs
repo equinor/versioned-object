@@ -19,8 +19,6 @@ namespace VersionedObject
 
         public string[] filter = { "@id", "http://www.w3.org/ns/prov#wasDerivedFrom" };
 
-        public AspectObject(JObject jsonLdJObject) : this(jsonLdJObject.SelectToken("@id"), jsonLdJObject)
-        { }
         public AspectObject(IRIReference persistentIRI, JObject content)
         {
             PersistentIRI = persistentIRI;
@@ -55,8 +53,9 @@ namespace VersionedObject
 
 
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
+            if (obj == null) return false;
             if (obj is VersionedObject versioned)
                 obj = versioned.Object;
             if (obj is AspectObject other)
