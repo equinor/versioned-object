@@ -15,17 +15,21 @@ using VDS.RDF.JsonLd;
 
 namespace VersionedObject
 {
+    public class GraphEntityComparerException : Exception
+    {
+        public GraphEntityComparerException(string message) : base(message)
+        {
+        }
+    }
     public static class EntityGraphComparer
     {
-
-
-        public static JObject? MakeGraphUpdate(this JObject input, JObject existing) =>
+        public static JObject MakeGraphUpdate(this JObject input, JObject existing) =>
             input.MakeGraphUpdate(existing, x => x);
         /// <summary>
         /// Creates update object for use with the put method on the Aspect API graph endpoint
         /// Takes in full json-ld objects of input and existing snapshot
         /// </summary>
-        public static JObject? MakeGraphUpdate(this JObject input, JObject existing, Func<IEnumerable<AspectObject>?, IEnumerable<AspectObject>?> inputModifier)
+        public static JObject MakeGraphUpdate(this JObject input, JObject existing, Func<IEnumerable<AspectObject>, IEnumerable<AspectObject>> inputModifier)
         {
             var inputList = inputModifier(input.GetInputGraphAsEntities());
             var existingList = existing.GetExistingGraphAsEntities(GetAllPersistentIris(input, existing));
@@ -44,10 +48,11 @@ namespace VersionedObject
         /// </summary>
         /// <param name="jsonld"></param>
         /// <param name="persistentUris"></param>
-        public static IEnumerable<VersionedObject>? GetExistingGraphAsEntities(this JObject jsonld, IEnumerable<IRIReference> persistentUris) =>
+        public static IEnumerable<VersionedObject> GetExistingGraphAsEntities(this JObject jsonld, IEnumerable<IRIReference> persistentUris) =>
             jsonld.RemoveContext()
-                .GetJsonLdGraph()?
+                .GetJsonLdGraph()
                 .Values<JObject>()
+                .Select(s => s ?? throw new GraphEntityComparerException("Null value found when expected existing versioned graph entity"))
                 .Select(x =>
                     new VersionedObject(
                         x.GetJsonLdIRI(),
@@ -55,10 +60,11 @@ namespace VersionedObject
                         persistentUris)
                     );
 
-        public static IEnumerable<AspectObject>? GetInputGraphAsEntities(this JObject jsonld) =>
+        public static IEnumerable<AspectObject> GetInputGraphAsEntities(this JObject jsonld) =>
             jsonld.RemoveContext()
-                .GetJsonLdGraph()?
+                .GetJsonLdGraph()
                 .Values<JObject>()
+                .Select(s => s ?? throw new GraphEntityComparerException("Null value found when expected input graph entity"))
                 .Select(x =>
                     new AspectObject(
                         x.GetJsonLdIRI(),
@@ -69,9 +75,10 @@ namespace VersionedObject
         {
             if (jsonld.ContainsKey("@graph") && jsonld.SelectToken("@graph") != null)
             {
-                var graphArray = jsonld.SelectToken("@graph").Value<JArray>();
-                if (graphArray != null)
-                    return graphArray;
+                var graphArray = jsonld.SelectToken("@graph")?.Value<JArray>();
+                return graphArray ??
+                       throw new GraphEntityComparerException(
+                           "No value found in the @graph element of the JSON-LD graph");
             }
             return new JArray() { jsonld };
         }
@@ -96,20 +103,22 @@ namespace VersionedObject
                     compacterOptions
                 );
         }
-        public static IEnumerable<IRIReference>? GetAllPersistentIris(JObject input, JObject existing) =>
+        public static IEnumerable<IRIReference> GetAllPersistentIris(JObject input, JObject existing) =>
             input
-                .GetAllEntityIds()?
+                .GetAllEntityIds()
                 .Select(x => new IRIReference(x))
                 .Union(
                     existing
-                        .GetAllEntityIds()?
+                        .GetAllEntityIds()
                         .Select(s => new VersionedIRIReference(s).PersistentIRI)
                 );
-        public static IEnumerable<Uri>? GetAllEntityIds(this JObject input) =>
+        public static IEnumerable<Uri> GetAllEntityIds(this JObject input) =>
             input
                 .RemoveContext()
-                .GetJsonLdGraph()?.Values<JObject>()
-                .Select(s => new Uri(s.SelectToken("@id").Value<string>()));
+                .GetJsonLdGraph().Values<JObject>()
+                .Select(s => (obj: s, id: s?.SelectToken("@id")?.Value<string>()))
+                .Select(s => s.id ?? throw new GraphEntityComparerException($"No @id element found in JObject {s.obj}"))
+                .Select(s => new Uri(s));
 
         public static JObject CreateUpdateJObject(IEnumerable<VersionedObject> updateList,
             IEnumerable<IRIReference> deleteList, Func<JObject, JObject> outputModifier) =>
