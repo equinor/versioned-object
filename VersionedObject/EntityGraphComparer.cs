@@ -6,12 +6,6 @@ using VDS.RDF.JsonLd;
 
 namespace VersionedObject
 {
-    public class GraphEntityComparerException : Exception
-    {
-        public GraphEntityComparerException(string message) : base(message)
-        {
-        }
-    }
     public static class EntityGraphComparer
     {
         public static JObject MakeGraphUpdate(this JObject input, JObject existing) =>
@@ -20,7 +14,7 @@ namespace VersionedObject
         /// Creates update object for use with the put method on the Aspect API graph endpoint
         /// Takes in full json-ld objects of input and existing snapshot
         /// </summary>
-        public static JObject MakeGraphUpdate(this JObject input, JObject existing, Func<IEnumerable<AspectObject>, IEnumerable<AspectObject>> inputModifier)
+        public static JObject MakeGraphUpdate(this JObject input, JObject existing, Func<IEnumerable<PersistentObjectData>, IEnumerable<PersistentObjectData>> inputModifier)
         {
             var inputList = inputModifier(input.GetInputGraphAsEntities());
             var existingList = existing.GetExistingGraphAsEntities(GetAllPersistentIris(input, existing));
@@ -43,22 +37,22 @@ namespace VersionedObject
             jsonld.RemoveContext()
                 .GetJsonLdGraph()
                 .Values<JObject>()
-                .Select(s => s ?? throw new GraphEntityComparerException("Null value found when expected existing versioned graph entity"))
+                .Select(s => s ?? throw new InvalidJsonLdException("Null value found when expected existing versioned graph entity"))
                 .Select(x =>
                     new VersionedObject(
-                        x.GetJsonLdIRI(),
+                        x.GetVersionedIRIReference(),
                         x,
                         persistentUris)
                     );
 
-        public static IEnumerable<AspectObject> GetInputGraphAsEntities(this JObject jsonld) =>
+        public static IEnumerable<PersistentObjectData> GetInputGraphAsEntities(this JObject jsonld) =>
             jsonld.RemoveContext()
                 .GetJsonLdGraph()
                 .Values<JObject>()
-                .Select(s => s ?? throw new GraphEntityComparerException("Null value found when expected input graph entity"))
+                .Select(s => s ?? throw new InvalidJsonLdException("Null value found when expected input graph entity"))
                 .Select(x =>
-                    new AspectObject(
-                        x.GetJsonLdIRI(),
+                    new PersistentObjectData(
+                        x.GetIRIReference(),
                         x)
                     );
 
@@ -68,7 +62,7 @@ namespace VersionedObject
             {
                 var graphArray = jsonld.SelectToken("@graph")?.Value<JArray>();
                 return graphArray ??
-                       throw new GraphEntityComparerException(
+                       throw new InvalidJsonLdException(
                            "No value found in the @graph element of the JSON-LD graph");
             }
             return new JArray() { jsonld };
@@ -108,7 +102,7 @@ namespace VersionedObject
                 .RemoveContext()
                 .GetJsonLdGraph().Values<JObject>()
                 .Select(s => (obj: s, id: s?.SelectToken("@id")?.Value<string>()))
-                .Select(s => s.id ?? throw new GraphEntityComparerException($"No @id element found in JObject {s.obj}"))
+                .Select(s => s.id ?? throw new InvalidJsonLdException($"No @id element found in JObject {s.obj}"))
                 .Select(s => new Uri(s));
 
         public static JObject CreateUpdateJObject(IEnumerable<VersionedObject> updateList,
@@ -126,7 +120,7 @@ namespace VersionedObject
         public static JArray MakeUpdateGraph(this IEnumerable<VersionedObject> updateList, Func<JObject, JObject> outputModifier) =>
             new(updateList.Select(o => outputModifier(o.ToJObject())));
 
-        public static IEnumerable<VersionedObject> MakeUpdateList(this IEnumerable<AspectObject> inputList,
+        public static IEnumerable<VersionedObject> MakeUpdateList(this IEnumerable<PersistentObjectData> inputList,
             IEnumerable<VersionedObject> existingList)
         {
             var oldNewMap = inputList.Select(
@@ -142,7 +136,7 @@ namespace VersionedObject
                     oldNewMap
                         .Where(i => i.old.Any()
                                     && !i.input.Equals(i.old.First().Object))
-                        .Select(i => new ProvenanceObject(i.input, i.old.First()))
+                        .Select(i => new VersionedObject(i.input, i.old.First().VersionedIri))
                 );
         }
 
@@ -152,10 +146,10 @@ namespace VersionedObject
         /// <summary>
         /// Creates a list of objects that should  be deleted from the aspect api, based on an assumed complete list of "new objects"
         /// </summary>
-        public static IEnumerable<IRIReference> MakeDeleteList(this IEnumerable<AspectObject> input,
+        public static IEnumerable<IRIReference> MakeDeleteList(this IEnumerable<PersistentObjectData> input,
             IEnumerable<VersionedObject> existing) =>
             existing
                 .Where(x => !input.Any(i => x.Object.SamePersistentIRI(i)))
-                .Select(x => x.VersionedIRI);
+                .Select(x => x.VersionedIri);
     }
 }
