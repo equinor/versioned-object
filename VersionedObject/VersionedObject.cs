@@ -7,7 +7,7 @@ public class VersionedObject
     public VersionedIRIReference VersionedIri { get; }
     public PersistentObjectData Object { get; }
     public IRIReference WasDerivedFrom { get; }
-    
+
     public static IRIReference NoProvenance = new("http://www.w3.org/1999/02/22-rdf-syntax-ns#nil");
     public static string ProvWasDerivedFrom = "http://www.w3.org/ns/prov#wasDerivedFrom";
     public IEnumerable<JProperty> GetContent() =>
