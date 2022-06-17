@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using System.Data.HashFunction.CRC;
+using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -106,16 +107,16 @@ namespace VersionedObject
             return graph.GetHash();
         }
 
+        /// <summary>
+        /// Removes any references to the persistentIris in the props argument, and adds all these to the list of edges
+        /// </summary>
+        /// <param name="props"></param>
+        /// <param name="persistentIris"></param>
+        /// <returns></returns>
         public static (IEnumerable<IRIReference> edges, IEnumerable<JProperty> props) ReifyEdges(this IEnumerable<JProperty> props,
             IRIReference persistentIris) =>
-            props
-                .Where(p => p.Value.Type == JTokenType.Object)
-                .Select(p => (p, p.Value<JObject>().Properties().ReifyEdges(persistentIris)))
-                .Append()
-                .Union(props.Where(p => p.Type != JTokenType.Object))
-
-        //    props.Aggregate((new List<JProperty>(), new List<IRIReference>()), (acc, prop) => 
-         &&       (acc.Item1.Concat(new List<JProperty>(){prop}), acc.Item2));
+                props.Aggregate(((IEnumerable<JProperty>) List<JProperty>(), new List<IRIReference>()), (acc, prop) => 
+                   (acc.Item1.Append(prop), acc.Item2));
         public static Uri GetJsonLdIRI(this JToken jsonld) =>
             jsonld.SelectToken("@id") == null ? new("") : new(jsonld.SelectToken("@id").ToString());
 
