@@ -387,7 +387,7 @@ namespace VersionedObject.Tests
         [Fact()]
         public void MakeGraphUpdateTest()
         {
-            var diff_object = row2_jsonld.MakeGraphUpdate(expanded_jsonld);
+            var diff_object = row2_jsonld.HandleGraphCompleteUpdate(expanded_jsonld);
             Assert.NotNull(diff_object);
             var row2_iri = new IRIReference(row2_jsonld.RemoveContext().GetJsonLdGraph().Values<JObject>().First().SelectToken("@id").Value<string>());
             var diff_iri = diff_object

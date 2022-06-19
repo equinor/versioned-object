@@ -8,22 +8,34 @@ namespace VersionedObject
 {
     public static class EntityGraphComparer
     {
-        public static JObject MakeGraphUpdate(this JObject input, JObject existing) =>
-            input.MakeGraphUpdate(existing, x => x);
         /// <summary>
         /// Creates update object for use with the put method on the Aspect API graph endpoint
         /// Takes in full json-ld objects of input and existing snapshot
+        /// Assumes input is a complete version of the new graph, so lacking entries in input are assumed
+        /// not relevant anymore
         /// </summary>
-        public static JObject MakeGraphUpdate(this JObject input, JObject existing, Func<IEnumerable<PersistentObjectData>, IEnumerable<PersistentObjectData>> inputModifier)
+        public static JObject HandleGraphCompleteUpdate(this JObject input, JObject existing)
         {
-            var inputList = inputModifier(input.GetInputGraphAsEntities());
+            var inputList = input.GetInputGraphAsEntities();
             var existingList = existing.GetExistingGraphAsEntities(GetAllPersistentIris(input, existing));
             var updateList = inputList.MakeUpdateList(existingList);
-            var allEntities = existingList.Union(updateList);
-
             var deleteList = inputList.MakeDeleteList(existingList);
-            //return CreateUpdateJObject(updateList, deleteList, x => x.AddVersionToUris(allEntities));
-            return CreateUpdateJObject(updateList, deleteList, x => x);
+            return CreateUpdateJObject(updateList, deleteList);
+        }
+
+        /// <summary>
+        /// Used for handling new entries but not a complete version of the graph
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="existing"></param>
+        /// <returns></returns>
+        public static JObject HandleGraphEntries(this JObject input, JObject existing)
+        {
+            var inputList = input.GetInputGraphAsEntities();
+            var existingList = existing.GetExistingGraphAsEntities(GetAllPersistentIris(input, existing));
+            var updateList = inputList.MakeUpdateList(existingList);
+            return CreateUpdateJObject(updateList, new List<VersionedIRIReference>());
+
         }
 
         /// <summary>
@@ -106,19 +118,19 @@ namespace VersionedObject
                 .Select(s => new Uri(s));
 
         public static JObject CreateUpdateJObject(IEnumerable<VersionedObject> updateList,
-            IEnumerable<IRIReference> deleteList, Func<JObject, JObject> outputModifier) =>
+            IEnumerable<VersionedIRIReference> deleteList) =>
             new()
             {
                 ["update"] = new JObject()
                 {
-                    ["@graph"] = updateList.MakeUpdateGraph(outputModifier),
+                    ["@graph"] = updateList.MakeUpdateGraph(),
                     ["@context"] = new JObject() { ["@version"] = "1.1" }
                 },
                 ["delete"] = deleteList.MakeDeleteGraph(),
             };
 
-        public static JArray MakeUpdateGraph(this IEnumerable<VersionedObject> updateList, Func<JObject, JObject> outputModifier) =>
-            new(updateList.Select(o => outputModifier(o.ToJObject())));
+        public static JArray MakeUpdateGraph(this IEnumerable<VersionedObject> updateList) =>
+            new(updateList.Select(o => o.ToJObject()));
 
         public static IEnumerable<VersionedObject> MakeUpdateList(this IEnumerable<PersistentObjectData> inputList,
             IEnumerable<VersionedObject> existingList)
@@ -140,13 +152,13 @@ namespace VersionedObject
                 );
         }
 
-        public static JArray MakeDeleteGraph(this IEnumerable<IRIReference> deleteList) =>
+        public static JArray MakeDeleteGraph(this IEnumerable<VersionedIRIReference> deleteList) =>
             new(deleteList.Select(x => x.ToJValue()));
 
         /// <summary>
         /// Creates a list of objects that should  be deleted from the aspect api, based on an assumed complete list of "new objects"
         /// </summary>
-        public static IEnumerable<IRIReference> MakeDeleteList(this IEnumerable<PersistentObjectData> input,
+        public static IEnumerable<VersionedIRIReference> MakeDeleteList(this IEnumerable<PersistentObjectData> input,
             IEnumerable<VersionedObject> existing) =>
             existing
                 .Where(x => !input.Any(i => x.Object.SamePersistentIRI(i)))
