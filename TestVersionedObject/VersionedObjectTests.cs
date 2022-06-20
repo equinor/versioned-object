@@ -86,7 +86,8 @@ namespace VersionedObject.Tests
                     {
                         ["@id"] = "sor:Row1/version/29110145432144214285/2022-05-01",
                         ["@type"] = new JArray(){ "http://rdf.equinor.com/ontology/mel#MelRow" },
-                        ["rdfs:label"] = "An empty MEL Row"
+                        ["rdfs:label"] = "An empty MEL Row",
+                        [VersionedObject.ProvWasDerivedFrom] = VersionedObject.NoProvenance.ToString()
                     }
                 },
                 ["@context"] = new JObject()
@@ -124,7 +125,8 @@ namespace VersionedObject.Tests
                     {
                         ["@id"] = "http://rdf.equinor.com/ontology/sor#Row1/version/29110145432144214285/2022-05-01",
                         ["@type"] = new JArray(){ "http://rdf.equinor.com/ontology/mel#MelRow" },
-                        ["rdfs:label"] = "An empty MEL Row"
+                        ["rdfs:label"] = "An empty MEL Row",
+                        ["http://www.w3.org/ns/prov#wasDerivedFrom"] = VersionedObject.NoProvenance.ToString()
                     }
                 },
                 ["@context"] = new JObject()
@@ -173,14 +175,14 @@ namespace VersionedObject.Tests
                 .GetExistingGraphAsEntities(new[] { new IRIReference("http://rdf.equinor.com/ontology/sor#Row1") })
                 .First();
             var aspectHashCode = string.Join("", aspectFirst.Object.GetHash());
-            Assert.Equal(aspectHashCode, aspectFirst.VersionedIRI.VersionHash);
+            Assert.Equal(aspectHashCode, aspectFirst.VersionedIri.VersionHash);
         }
 
 
         [Fact()]
         public void LoadGraphTest()
         {
-            var graph = LoadGraph(simple_jsonld.ToString());
+            var graph = ParseJsonLdString(simple_jsonld.ToString());
             Assert.NotNull(graph);
             Assert.False(graph.IsEmpty);
         }
@@ -188,7 +190,7 @@ namespace VersionedObject.Tests
         [Fact()]
         public void LoadStringGraphTest()
         {
-            var graph = LoadGraph(@"{
+            var graph = ParseJsonLdString(@"{
                 ""@graph"": [
                     {
                         ""@id"": ""sor:Row1"",
@@ -210,7 +212,7 @@ namespace VersionedObject.Tests
         [Fact()]
         public void LoadMarkusGraphTest()
         {
-            var graph = LoadGraph(@"{
+            var graph = ParseJsonLdString(@"{
                 ""@graph"":[
                     {
                         ""@id"": ""https://example.com/yo"",
@@ -238,20 +240,20 @@ namespace VersionedObject.Tests
         [Fact()]
         public void TestHashTriples()
         {
-            var simple_graph = LoadGraph(simple_jsonld.ToString());
-            var aspect_persistent_graph = LoadGraph(aspect_persistent_jsonld.ToString());
-            var simple_aspect_graph = LoadGraph(simple_jsonld.ToString()).AddAspectApiTriples(aspect_persistent_graph);
-            var aspect_graph = LoadGraph(aspect_jsonld.ToString());
+            var simple_graph = ParseJsonLdString(simple_jsonld.ToString());
+            var aspect_persistent_graph = ParseJsonLdString(aspect_persistent_jsonld.ToString());
+            var simple_aspect_graph = ParseJsonLdString(simple_jsonld.ToString()).AddAspectApiTriples(aspect_persistent_graph);
+            var aspect_graph = ParseJsonLdString(aspect_jsonld.ToString());
             var simple_expanded = simple_jsonld.RemoveContext();
             var aspet_persistent_expanded = aspect_persistent_jsonld.RemoveContext();
             Assert.True(simple_expanded.AspectEquals(aspet_persistent_expanded, RdfEqualsHash));
 
             var simple_hash = simple_graph.GetHash();
             var simple_aspect_hash = simple_aspect_graph.GetHash();
-            var different_hash = LoadGraph(different_jsonld.ToString()).GetHash();
+            var different_hash = ParseJsonLdString(different_jsonld.ToString()).GetHash();
             var aspect_hash = aspect_graph.GetHash();
             var aspect_persistent_hash = aspect_persistent_graph.GetHash();
-            var row2_hash = LoadGraph(row2_jsonld.ToString()).GetHash();
+            var row2_hash = ParseJsonLdString(row2_jsonld.ToString()).GetHash();
             Assert.NotEqual(simple_hash, different_hash);
             Assert.NotEqual(aspect_hash, different_hash);
             Assert.NotEqual(row2_hash, different_hash);
@@ -339,7 +341,7 @@ namespace VersionedObject.Tests
             var expanded = row2_jsonld.RemoveContext();
             Assert.NotNull(expanded);
             var second = expanded.RemoveContext();
-            Assert.Equal(new IRIReference("http://rdf.equinor.com/ontology/sor#Row2"), new IRIReference(second.GetJsonLdGraph().Values<JObject>().First().GetJsonLdIRI()));
+            Assert.Equal(new IRIReference("http://rdf.equinor.com/ontology/sor#Row2"), new IRIReference(second.GetJsonLdGraph().Values<JObject>().First().GetIRIReference()));
         }
 
 
@@ -385,16 +387,16 @@ namespace VersionedObject.Tests
         [Fact()]
         public void MakeGraphUpdateTest()
         {
-            var diff_object = row2_jsonld.MakeGraphUpdate(expanded_jsonld);
+            var diff_object = row2_jsonld.HandleGraphCompleteUpdate(expanded_jsonld);
             Assert.NotNull(diff_object);
             var row2_iri = new IRIReference(row2_jsonld.RemoveContext().GetJsonLdGraph().Values<JObject>().First().SelectToken("@id").Value<string>());
-            var diff_iri = (VersionedIRIReference)diff_object
+            var diff_iri = diff_object
                 .SelectToken("update")
                 .Value<JObject>()
                 .GetJsonLdGraph()
                 .Values<JObject>()
                 .First()
-                .GetJsonLdIRI();
+                .GetVersionedIRIReference();
 
             var persistent_diff_iri = diff_iri.PersistentIRI;
             Assert.Equal(row2_iri, persistent_diff_iri);
