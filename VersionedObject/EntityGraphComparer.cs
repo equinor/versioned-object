@@ -20,7 +20,7 @@ namespace VersionedObject
         {
             var inputList = inputModifier(input.GetInputGraphAsEntities());
             var persistentEntities = GetAllPersistentIris(input, existing);
-            var reifiedInput = inputList.reifyAllEdges();
+            var reifiedInput = inputList.ReifyAllEdges(persistentEntities);
             var existingList = existing.GetExistingGraphAsEntities(persistentEntities);
             var updateList = inputList.MakeUpdateList(existingList);
             var allEntities = existingList.Union(updateList.Values);
@@ -35,8 +35,8 @@ namespace VersionedObject
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
-        public static IEnumerable<VersionedObject> ReifyAllEdges(this IDictionary<IRIReference, VersionedObject> updateList, IEnumerable<IRIReference> persistentIris)
-        => updateList.Values.SelectMany(obj => obj.ReifyNodeEdges(persistentIris));
+        public static IEnumerable<VersionedObject> ReifyAllEdges(this IEnumerable<AspectObject> updateList, IEnumerable<IRIReference> persistentIris)
+        => updateList.SelectMany(obj => obj.ReifyNodeEdges(persistentIris));
 
         /// <summary>
         /// Translates JSON-LD coming from Aspect-API (so using versioned IRIs)

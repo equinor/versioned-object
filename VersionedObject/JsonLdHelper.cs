@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json.Linq;
 using System.Data.HashFunction.CRC;
 using System.Diagnostics;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -107,16 +108,62 @@ namespace VersionedObject
             return graph.GetHash();
         }
 
+
         /// <summary>
         /// Removes any references to the persistentIris in the props argument, and adds all these to the list of edges
         /// </summary>
         /// <param name="props"></param>
         /// <param name="persistentIris"></param>
         /// <returns></returns>
-        public static (IEnumerable<IRIReference> edges, IEnumerable<JProperty> props) ReifyEdges(this IEnumerable<JProperty> props,
-            IRIReference persistentIris) =>
-                props.Aggregate(((IEnumerable<JProperty>) List<JProperty>(), new List<IRIReference>()), (acc, prop) => 
-                   (acc.Item1.Append(prop), acc.Item2));
+        public static (IEnumerable<JProperty> props, IEnumerable<IRIReference> edges) ReifyEdges(this IEnumerable<JProperty> props,
+            IEnumerable<IRIReference> persistentIris) =>
+                props.Aggregate(
+                    (new List<JProperty>(), new List<IRIReference>()),
+                    ((IEnumerable<JProperty> props, IEnumerable<IRIReference> edges) acc, JProperty prop) =>
+                        @prop.Value switch
+                       {
+                           JObject obj =>
+                               ReifyObjectChild(acc, prop, obj.Properties().ReifyEdges(persistentIris)),
+                           JValue val =>
+                               ReifyPropertyChild(acc, prop, val, persistentIris),
+                           JArray vals =>
+                               ReifyPropertyArray(acc, prop, vals, persistentIris),
+                            _  => throw new Exception("Expected JObject, JValue or JArray")                  
+                       },
+                       
+                    acc => (acc.Item1, acc.Item2)
+                );
+
+        private static (IEnumerable<JProperty> props, IEnumerable<IRIReference> edges) ReifyPropertyArray((IEnumerable<JProperty> props, IEnumerable<IRIReference> edges) acc, JProperty prop, JArray vals, IEnumerable<IRIReference> persistentIris)
+        {
+            var externalEdges = vals
+                .Select(v => v.Value<string>())
+                .Where(v => v != null)
+                .Cast<string>()
+                .Where(v => persistentIris.Any(p => p.ToString().Equals(v)))
+                .Select(v => new IRIReference(v));
+            if (externalEdges.Any())
+            {
+                var internalEdges = vals
+                    .Select(v => v.Value<string>())
+                    .Where(v => v != null)
+                    .Cast<string>()
+                    .Where(v => !persistentIris.Any(p => p.ToString().Equals(v)))
+                    .Select(v => new JValue(v));
+                return (acc.props.Append(new JProperty(prop.Name, new JArray(internalEdges))), acc.edges.Union(externalEdges));
+            }
+            else
+                return (acc.props.Append(prop), acc.edges);
+        }
+
+        private static (IEnumerable<JProperty> props, IEnumerable<IRIReference> edges) ReifyPropertyChild((IEnumerable<JProperty> props, IEnumerable<IRIReference> edges) acc, JProperty prop, JValue val, IEnumerable<IRIReference> persistentIris)
+        {
+            throw new NotImplementedException();
+        }
+
+        static (IEnumerable<JProperty> props, IEnumerable<IRIReference> edges) ReifyObjectChild((IEnumerable<JProperty> props, IEnumerable<IRIReference> edges) acc, JProperty prop, (IEnumerable<JProperty> props, IEnumerable<IRIReference> edges) children) =>
+            (acc.props.Append(new JProperty(prop.Name, new JObject(children.props))),acc.edges.Union(children.edges));
+        
         public static Uri GetJsonLdIRI(this JToken jsonld) =>
             jsonld.SelectToken("@id") == null ? new("") : new(jsonld.SelectToken("@id").ToString());
 

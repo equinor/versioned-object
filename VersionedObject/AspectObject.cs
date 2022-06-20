@@ -77,9 +77,9 @@ namespace VersionedObject
             return false;
         }
 
-        internal List<VersionedObject> ReifyNodeEdges(IEnumerable<IRIReference> persistentIris)
+        internal IEnumerable<VersionedObject> ReifyNodeEdges(IEnumerable<IRIReference> persistentIris)
         {
-            ReifyAllEdges(Content, persistentIris);
+            Content.ReifyEdges(persistentIris);
         }
         public override int GetHashCode()
         {
