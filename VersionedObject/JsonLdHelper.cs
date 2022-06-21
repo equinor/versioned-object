@@ -157,9 +157,18 @@ namespace VersionedObject
 
         private static (IEnumerable<JProperty> props, IEnumerable<IRIReference> edges) ReifyPropertyChild((IEnumerable<JProperty> props, IEnumerable<IRIReference> edges) acc, JProperty prop, JValue val, IEnumerable<IRIReference> persistentIris)
         {
-            throw new NotImplementedException();
+            if (persistentIris.Any(i => i.ToString().Equals(val.ToString())))
+                return (acc.props, acc.edges.Append(new IRIReference(val.ToString())));
+            return (acc.props.Append(prop), acc.edges);
         }
-
+        /// <summary>
+        /// Any child objects are always just treated, even if the IRI is a persistent object.
+        /// I am not sure how to handle this situation
+        /// </summary>
+        /// <param name="acc"></param>
+        /// <param name="prop"></param>
+        /// <param name="children"></param>
+        /// <returns></returns>
         static (IEnumerable<JProperty> props, IEnumerable<IRIReference> edges) ReifyObjectChild((IEnumerable<JProperty> props, IEnumerable<IRIReference> edges) acc, JProperty prop, (IEnumerable<JProperty> props, IEnumerable<IRIReference> edges) children) =>
             (acc.props.Append(new JProperty(prop.Name, new JObject(children.props))),acc.edges.Union(children.edges));
         
