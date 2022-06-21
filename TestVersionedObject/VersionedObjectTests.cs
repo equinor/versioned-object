@@ -464,11 +464,15 @@ namespace VersionedObject.Tests
         public void TestGetExternalIRIs()
         {
             var simple_list = simple_jsonld.GetInputGraphAsEntities();
-            //var refs = simple_list.First().ReifyAllEdges(new List<IRIReference>());
-            //Assert.Empty(refs);
-            var edged_list = simple_jsonld.GetInputGraphAsEntities();
-            //refs = edged_list.First().GetExternalIriReferences();
-            //Assert.NotEmpty(refs);
+            var refs = simple_list.First().ReifyNodeEdges(new List<IRIReference>());
+            Assert.Single(refs);
+            var edged_list = edge_jsonld.GetInputGraphAsEntities();
+            Assert.Equal(2, edged_list.Count());
+            var persistentEntities = GetAllPersistentIris(edge_jsonld, aspect_jsonld);
+            var refs2 = edged_list.First().ReifyNodeEdges(persistentEntities);
+            Assert.Equal(3, refs2.Count());
+            var refs3 = edged_list.Skip(1).First().ReifyNodeEdges(persistentEntities);
+            Assert.Equal(3, refs2.Count());
 
         }
     }

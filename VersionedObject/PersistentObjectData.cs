@@ -61,7 +61,7 @@ namespace VersionedObject
             return false;
         }
 
-        internal IEnumerable<PersistentObjectData> ReifyNodeEdges(IEnumerable<IRIReference> persistentIris)
+        public IEnumerable<PersistentObjectData> ReifyNodeEdges(IEnumerable<IRIReference> persistentIris)
         {
             var (props, edges) = Content.ReifyEdges(persistentIris);
             return edges.Select(i => new PersistentObjectData(i, new JObject(i)))
