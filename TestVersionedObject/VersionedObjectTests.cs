@@ -10,17 +10,8 @@ namespace VersionedObject.Tests
 {
     public class VersionedObjectTests
     {
-        JObject simple_jsonld;
-        JObject different_jsonld;
-        JObject row2_jsonld;
-        JObject aspect_jsonld;
-        JObject edge_jsonld;
-        private JObject aspect_persistent_jsonld;
-        JObject expanded_jsonld;
 
-        public VersionedObjectTests()
-        {
-            different_jsonld = new JObject()
+            public static readonly JObject different_jsonld = new JObject()
             {
                 ["@graph"] = new JArray()
                 {
@@ -40,7 +31,7 @@ namespace VersionedObject.Tests
                 }
             };
 
-            row2_jsonld = new JObject()
+            public static readonly JObject row2_jsonld = new JObject()
             {
                 ["@graph"] = new JArray()
                 {
@@ -60,7 +51,7 @@ namespace VersionedObject.Tests
                 }
             };
 
-            simple_jsonld = new JObject()
+            public static readonly JObject simple_jsonld = new JObject()
             {
                 ["@graph"] = new JArray()
                 {
@@ -80,7 +71,7 @@ namespace VersionedObject.Tests
                 }
             };
 
-            edge_jsonld = new JObject()
+            public static readonly JObject edge_jsonld = new JObject()
             {
                 ["@graph"] = new JArray()
                 {
@@ -108,7 +99,7 @@ namespace VersionedObject.Tests
                 }
             };
 
-            aspect_jsonld = new JObject()
+            public static readonly JObject aspect_jsonld = new JObject()
             {
                 ["@graph"] = new JArray()
                 {
@@ -128,7 +119,7 @@ namespace VersionedObject.Tests
                     ["@version"] = "1.1"
                 }
             };
-            aspect_persistent_jsonld = new JObject()
+            public static readonly JObject aspect_persistent_jsonld = new JObject()
             {
                 ["@graph"] = new JArray()
                 {
@@ -147,7 +138,7 @@ namespace VersionedObject.Tests
                     ["@version"] = "1.1"
                 }
             };
-            expanded_jsonld = new JObject()
+            public static readonly JObject expanded_jsonld = new JObject()
             {
                 ["@graph"] = new JArray()
                 {
@@ -167,8 +158,7 @@ namespace VersionedObject.Tests
                     ["@version"] = "1.1"
                 }
             };
-        }
-
+        
         [Fact()]
         public void RdfEqualsHashTest()
         {
@@ -460,16 +450,39 @@ namespace VersionedObject.Tests
             Assert.Equal("http://rdf.equinor.com/ontology/sor#Row1", removed_versions["@id"]);
         }
 
+      
+        [Fact]
+        public void TestRemoveContext()
+        {
+            var edged_graph = edge_jsonld.RemoveContext();
+            Assert.Equal(2, edged_graph.SelectToken("@graph").Value<JArray>().Count());
+
+            var simple_graph = simple_jsonld.RemoveContext();
+            Assert.Equal(1, new JArray(simple_graph).Count());
+        }
+
+        [Fact]
+        public void TestGetGraph()
+        {
+            var edged_graph = edge_jsonld.RemoveContext().GetJsonLdGraph();
+            Assert.Equal(2, edged_graph.Count());
+
+            var simple_graph = simple_jsonld.RemoveContext().GetJsonLdGraph();
+            Assert.Equal(1, simple_graph.Count());
+        }
+
         [Fact]
         public void TestGetExternalIRIs()
         {
             var simple_list = simple_jsonld.GetInputGraphAsEntities();
             var refs = simple_list.First().ReifyNodeEdges(new List<IRIReference>());
             Assert.Single(refs);
+            var single_refs = simple_list.ReifyAllEdges(new List<IRIReference>());
+            Assert.Single(single_refs);
             var edged_list = edge_jsonld.GetInputGraphAsEntities();
             Assert.Equal(2, edged_list.Count());
             var persistentEntities = GetAllPersistentIris(edge_jsonld, aspect_jsonld);
-            var refs2 = edged_list.First().ReifyNodeEdges(persistentEntities);
+            var refs2 = edged_list.ReifyAllEdges(persistentEntities);
             Assert.Equal(3, refs2.Count());
             var refs3 = edged_list.Skip(1).First().ReifyNodeEdges(persistentEntities);
             Assert.Equal(3, refs2.Count());

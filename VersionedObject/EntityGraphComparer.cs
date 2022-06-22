@@ -103,8 +103,9 @@ namespace VersionedObject
 
             var compacterContext = new JObject();
             var compacterOptions = new JsonLdProcessorOptions();
+            var expanded = JsonLdProcessor.Expand(jsonld, expanderOptions);
             return JsonLdProcessor.Compact(
-                    JsonLdProcessor.Expand(jsonld, expanderOptions).First,
+                    expanded,
                     compacterContext,
                     compacterOptions
                 );
