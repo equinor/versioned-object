@@ -114,7 +114,7 @@ namespace VersionedObject
         /// <param name="props"></param>
         /// <param name="persistentIris"></param>
         /// <returns></returns>
-        public static (IEnumerable<JProperty> props, IEnumerable<IRIReference> edges) ReifyEdges(this IEnumerable<JProperty> props,
+        public static (IEnumerable<JProperty> props, IEnumerable<PersistentEdge> edges) ReifyEdges(this IEnumerable<JProperty> props,
             IEnumerable<IRIReference> persistentIris) =>
                 props.Aggregate(
                     (new List<JProperty>(), new List<IRIReference>()),
@@ -133,14 +133,14 @@ namespace VersionedObject
                     acc => (acc.Item1, acc.Item2)
                 );
 
-        private static (IEnumerable<JProperty> props, IEnumerable<IRIReference> edges) ReifyPropertyArray((IEnumerable<JProperty> props, IEnumerable<IRIReference> edges) acc, JProperty prop, JArray vals, IEnumerable<IRIReference> persistentIris)
+        private static (IEnumerable<JProperty> props, IEnumerable<PersistendEdge> edges) ReifyPropertyArray((IEnumerable<JProperty> props, IEnumerable<IRIReference> edges) acc, JProperty prop, JArray vals, IEnumerable<IRIReference> persistentIris)
         {
             var externalEdges = vals
                 .Select(v => v.Value<string>())
                 .Where(v => v != null)
                 .Cast<string>()
                 .Where(v => persistentIris.Any(p => p.ToString().Equals(v)))
-                .Select(v => new IRIReference(v));
+                .Select(v => new PersistentEdge(prop.Name, v));
             if (externalEdges.Any())
             {
                 var internalEdges = vals
