@@ -71,7 +71,7 @@ namespace VersionedObject.Tests
             var versionedIri = new VersionedIRIReference(persistentIri, hashFake, dateNow);
             (var persComponent, var versionHash, var versionDate) = versionedIri;
             Assert.Equal(persistentIri, persComponent);
-            Assert.Equal(string.Join("", hashFake),versionHash);
+            Assert.Equal(string.Join("", hashFake), versionHash);
             Assert.Equal(versionDate, dateNow.ToString());
         }
     }
