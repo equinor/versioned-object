@@ -41,8 +41,8 @@ namespace VersionedObject
         /// </summary>
         public static bool AspectEquals(this JObject old, JObject input, System.Func<IGraph, IGraph, bool> RdfComparer)
         {
-            var oldGraph = LoadGraph(old.ToString());
-            var inputGraph = LoadGraph(input.ToString());
+            var oldGraph = ParseJsonLdString(old.ToString());
+            var inputGraph = ParseJsonLdString(input.ToString());
             return RdfComparer(oldGraph.AddAspectApiTriples(inputGraph), inputGraph.AddAspectApiTriples(oldGraph));
         }
 
@@ -66,7 +66,7 @@ namespace VersionedObject
                 .Aggregate(persistentEntity.ToString(),
                     (ent, versioned) =>
                         new Regex($"{versioned.GetPersistentIRI().ToString().Replace(".", "\\.")}/\\w+")
-                            .Replace(ent, versioned.VersionedIRI.ToString())
+                            .Replace(ent, versioned.VersionedIri.ToString())
                         )
                 );
 
@@ -91,12 +91,12 @@ namespace VersionedObject
 
         }
 
-        public static IGraph LoadGraph(string valueAsString)
+        public static IGraph ParseJsonLdString(string jsonLdString)
         {
             var parser = new VDS.RDF.Parsing.JsonLdParser();
             using var store = new TripleStore();
 
-            using (TextReader reader = new StringReader(valueAsString))
+            using (TextReader reader = new StringReader(jsonLdString))
                 parser.Load(store, reader);
 
             if (store.Graphs.Count != 1)
@@ -108,14 +108,17 @@ namespace VersionedObject
         /**
         * Creates a new version string usable for this aspect object
         */
-        public static byte[] GetHash(this AspectObject @object)
+        public static byte[] GetHash(this PersistentObjectData @object)
         {
-            var graph = LoadGraph(@object.ToJsonldGraph().ToString());
+            var graph = ParseJsonLdString(@object.ToJsonldGraph().ToString());
             return graph.GetHash();
         }
 
-        public static Uri GetJsonLdIRI(this JToken jsonld) =>
-            new(jsonld.SelectToken("@id")?.ToString() ?? throw new GraphEntityComparerException($"No @id field in object {jsonld}"));
+        public static IRIReference GetIRIReference(this JToken jsonld) =>
+            new(jsonld.SelectToken("@id")?.ToString() ?? throw new InvalidJsonLdException($"No @id field in object {jsonld}"));
+
+        public static VersionedIRIReference GetVersionedIRIReference(this JToken jsonld) =>
+            new(jsonld.SelectToken("@id")?.ToString() ?? throw new InvalidJsonLdException($"No @id field in object {jsonld}"));
 
     }
 }
