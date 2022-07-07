@@ -61,5 +61,18 @@ namespace VersionedObject.Tests
             var generatedUri = JsonConvert.DeserializeObject<IRIReference>(uriJson);
             Assert.Equal(uri, generatedUri);
         }
+
+        [Fact]
+        public void TestDeconstructor()
+        {
+            var persistentIri = new IRIReference("http://rdf.equinor.com/data/objectx");
+            var dateNow = DateTimeOffset.Now.ToUnixTimeSeconds();
+            var hashFake = Encoding.UTF8.GetBytes("12345");
+            var versionedIri = new VersionedIRIReference(persistentIri, hashFake, dateNow);
+            (var persComponent, var versionHash, var versionDate) = versionedIri;
+            Assert.Equal(persistentIri, persComponent);
+            Assert.Equal(string.Join("", hashFake),versionHash);
+            Assert.Equal(versionDate, dateNow.ToString());
+        }
     }
 }
