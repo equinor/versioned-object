@@ -433,7 +433,7 @@ namespace VersionedObject.Tests
             Assert.Equal("http://rdf.equinor.com/ontology/sor#Row1", removed_versions["@id"]);
         }
         [Fact]
-        public void TestFullMelTranslation()
+        public void TestFullTranslation()
         {
             using var reader = new StreamReader("Data/data.ttl");
             var mel_text = reader.ReadToEnd();
