@@ -1,0 +1,32 @@
+﻿@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix ont:   <http://example.com/ontology#> .
+
+<http://data.example.com/project/Example/1234>
+        ont:systemNumber                "12" ;
+        rdf:type                        ont:ontRow ;
+        ont:disciplineCode              "K" ;
+        ont:functionArea                "Somewhere" ;
+        ont:topTag                      "YES" .
+
+<http://data.example.com/project/Example/12345>
+        ont:equipmentTypeDescription    "Thing" ;
+        ont:functionArea                "Somwhere Else" ;
+        rdf:type                        ont:ontRow ;
+        ont:lengthOrTanTan_in_millimetre  "314" ;
+        ont:tagNumber                   "B-1234" .
+
+<http://data.example.com/project/Example/123456>
+        ont:netDryWeight_in_kilogram    "100" ;
+        ont:functionArea                "In Space" ;
+        ont:subAreaCode                 "XXYYZZ" ;
+        ont:lengthOrTanTan_in_millimetre  "1" ;
+        rdf:type                        ont:ontRow .
+
+<http://data.aibel.com/project/Example2/EQ_5690>
+        ont:functionArea                "Nowhere" ;
+        ont:lengthOrTanTan_in_millimetre  "2" ;
+        rdf:type                        ont:ontRow ;
+        ont:footprint_in_square_metre   "2" .

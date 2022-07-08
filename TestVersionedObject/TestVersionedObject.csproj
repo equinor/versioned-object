@@ -23,4 +23,10 @@
 	<ItemGroup>
 		<ProjectReference Include="..\VersionedObject\VersionedObject.csproj" />
 	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="Data\data.ttl">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
 </Project>
