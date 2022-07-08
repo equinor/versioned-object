@@ -43,4 +43,11 @@ public class VersionedIRIReference : IRIReference
     public VersionedIRIReference(IRIReference uri, byte[] versionHash) : this(uri, versionHash,
         DateTimeOffset.Now.ToUnixTimeSeconds())
     { }
+
+    public void Deconstruct(out IRIReference persistentIri, out string versionHash, out string versionInfo)
+    {
+        persistentIri = PersistentIRI;
+        versionInfo = VersionInfo;
+        versionHash = VersionHash;
+    }
 }
