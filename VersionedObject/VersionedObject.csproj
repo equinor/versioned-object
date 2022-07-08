@@ -1,14 +1,40 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
+	  <PackageId>VersionedObject</PackageId>
+	  <Description>
+		  A library for handling versioned IRIs and versioned objects for use with JSON-LD. 
+		  IRIReference is a drop-in replacement for System.Uri, while AspectObject can be used to wrap JSON-LD objects and create correct versioned IRIs
+	  </Description>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+	  <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	  <Version>$(VersionPrefix)0.0.2</Version>
+	  <Description>A c# library for handling versioned objects and IRIs.</Description>
+	  <Authors>Dag Hovland</Authors>
+	  <Company>Equinor</Company>
+	  <Copyright>Equinor</Copyright>
+	  <PackageReadmeFile>README.md</PackageReadmeFile>
+	  <RepositoryUrl>https://github.com/equinor/versioned-object</RepositoryUrl>
+	  <RepositoryType>git</RepositoryType>
+	  <PackageTags>semantic technology;rdf</PackageTags>
+	  <PackageReleaseNotes>Initial release without edge reification</PackageReleaseNotes>
+	  <PackageLicenseExpression>LGPL-3.0-only</PackageLicenseExpression>
+	  <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="dotNetRDF" Version="2.7.4" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="System.Data.HashFunction.CRC" Version="2.0.0" />
   </ItemGroup>
 
 </Project>

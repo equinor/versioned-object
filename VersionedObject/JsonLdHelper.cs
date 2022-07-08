@@ -1,5 +1,14 @@
-﻿using Newtonsoft.Json.Linq;
-using System.Security.Cryptography;
+/*
+Copyright 2022 Equinor ASA
+
+This program is free software: you can redistribute it and/or modify it under the terms of version 3 of the GNU Lesser General Public License as published by the Free Software Foundation.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
+using Newtonsoft.Json.Linq;
+using System.Data.HashFunction.CRC;
 using System.Text;
 using System.Text.RegularExpressions;
 using VDS.RDF;
@@ -32,8 +41,8 @@ namespace VersionedObject
         /// </summary>
         public static bool AspectEquals(this JObject old, JObject input, System.Func<IGraph, IGraph, bool> RdfComparer)
         {
-            var oldGraph = LoadGraph(old.ToString());
-            var inputGraph = LoadGraph(input.ToString());
+            var oldGraph = ParseJsonLdString(old.ToString());
+            var inputGraph = ParseJsonLdString(input.ToString());
             return RdfComparer(oldGraph.AddAspectApiTriples(inputGraph), inputGraph.AddAspectApiTriples(oldGraph));
         }
 
@@ -52,12 +61,12 @@ namespace VersionedObject
         /// <summary>
         /// Adds the version suffix to all persistent URIs in the JObject
         /// </summary>
-        public static JObject AddVersionToUris(this JObject persistentEntity, IEnumerable<VersionedEntity> entities) =>
+        public static JObject AddVersionToUris(this JObject persistentEntity, IEnumerable<VersionedObject> entities) =>
             JObject.Parse(entities
                 .Aggregate(persistentEntity.ToString(),
                     (ent, versioned) =>
                         new Regex($"{versioned.GetPersistentIRI().ToString().Replace(".", "\\.")}/\\w+")
-                            .Replace(ent, versioned.GetVersionedIRI().ToString())
+                            .Replace(ent, versioned.VersionedIri.ToString())
                         )
                 );
 
@@ -72,21 +81,22 @@ namespace VersionedObject
         {
             var writer = new NTriplesWriter();
             var graphString = VDS.RDF.Writing.StringWriter.Write(g, writer);
-            var hasher = MD5.Create();
+            var crcFactory = CRCFactory.Instance;
+            var hasher = crcFactory.Create(CRCConfig.CRC64);
             var triplesHash = graphString
                 .Split(new[] { '\r', '\n' }, System.StringSplitOptions.RemoveEmptyEntries)
-                .Select(x => (IEnumerable<byte>)hasher.ComputeHash(Encoding.UTF8.GetBytes(x)))
+                .Select(x => (IEnumerable<byte>)hasher.ComputeHash(Encoding.UTF8.GetBytes(x)).Hash)
                 .Aggregate((x, y) => x.Zip(y, (l1, l2) => (byte)(l1 ^ l2)));
             return triplesHash.ToArray();
 
         }
 
-        public static IGraph LoadGraph(string valueAsString)
+        public static IGraph ParseJsonLdString(string jsonLdString)
         {
             var parser = new VDS.RDF.Parsing.JsonLdParser();
             using var store = new TripleStore();
 
-            using (TextReader reader = new StringReader(valueAsString))
+            using (TextReader reader = new StringReader(jsonLdString))
                 parser.Load(store, reader);
 
             if (store.Graphs.Count != 1)
@@ -98,16 +108,18 @@ namespace VersionedObject
         /**
         * Creates a new version string usable for this aspect object
         */
-        public static string GetNewVersion(this AspectEntity entity)
+        public static byte[] GetHash(this PersistentObjectData @object)
         {
-            var timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
-            var graph = LoadGraph(entity.ToJsonldGraph().ToString());
-            var hash = graph.GetHash();
-            return $"{timestamp}-{hash}";
+            var graph = ParseJsonLdString(@object.ToJsonldGraph().ToString());
+            return graph.GetHash();
         }
 
-        public static IRIReference GetJsonLdIRI(this JToken jsonld) =>
-            new(jsonld.SelectToken("@id").ToString());
+        public static IRIReference GetIRIReference(this JToken jsonld) =>
+            new(jsonld.SelectToken("@id")?.ToString() ?? throw new InvalidJsonLdException($"No @id field in object {jsonld}"));
+
+        public static VersionedIRIReference GetVersionedIRIReference(this JToken jsonld) =>
+            new(jsonld.SelectToken("@id")?.ToString() ?? throw new InvalidJsonLdException($"No @id field in object {jsonld}"));
 
     }
 }
+

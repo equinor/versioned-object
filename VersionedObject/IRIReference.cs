@@ -1,4 +1,15 @@
-﻿using System.Runtime.Serialization;
+﻿/*
+Copyright 2022 Equinor ASA
+
+This program is free software: you can redistribute it and/or modify it under the terms of version 3 of the GNU Lesser General Public License as published by the Free Software Foundation.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
+using System.Runtime.CompilerServices;
+using System.Runtime.Serialization;
+using System.Text;
 using Newtonsoft.Json.Linq;
 
 namespace VersionedObject;
@@ -24,28 +35,12 @@ public class IRIReference : IEquatable<IRIReference>
 
     bool IEquatable<IRIReference>.Equals(IRIReference? other) =>
         (other != null) && ToString().Equals(other.ToString());
-    
+
     public override string ToString() => uri.ToString();
 
-    public JValue ToJValue() => new (uri);
+    public JValue ToJValue() => new(uri);
     public JValue ToJToken() => ToJValue();
-    /// <summary>
-    /// Adds version suffix to IRI to create an identifier for an immutable version object
-    /// The inverse operation is GetPersistentUri below
-    /// </summary>
-    public IRIReference AddVersionToUri(string version) =>
-        new($"{this}/{version}");
 
-    /// <summary>
-    /// Gets the version part of the versioned URI (See also AddVersionToUri above)
-    /// </summary>
-    public string GetUriVersion() => ToString().Split("/").Last();
-
-    /// <summary>
-    /// Gets the persistent URI part of the versioned URI. This is the inverse of AddVersionToUri above
-    /// </summary>
-    public IRIReference GetPersistentUri() =>
-        new(ToString().Split("/").SkipLast(1).Aggregate((x, y) => $"{x}/{y}"));
 
     /// <summary>
     /// Cannot use Uri.getHashCode since that ignores the fragment
