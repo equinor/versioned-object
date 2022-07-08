@@ -86,7 +86,14 @@ namespace VersionedObject
                        throw new InvalidJsonLdException(
                            "No value found in the @graph element of the JSON-LD graph");
             }
-            return new JArray() { jsonld };
+            else if (jsonld.HasValues)
+            {
+                return new JArray() { jsonld };
+            }
+            else
+            {
+                return new JArray();
+            }
         }
 
         public static JObject RemoveContext(this JObject jsonld)
@@ -103,11 +110,12 @@ namespace VersionedObject
 
             var compacterContext = new JObject();
             var compacterOptions = new JsonLdProcessorOptions();
+            var expandedList = JsonLdProcessor.Expand(jsonld, expanderOptions);
             return JsonLdProcessor.Compact(
-                    JsonLdProcessor.Expand(jsonld, expanderOptions).First,
-                    compacterContext,
-                    compacterOptions
-                );
+                expandedList,
+                compacterContext,
+                compacterOptions
+            );
         }
         public static IEnumerable<IRIReference> GetAllPersistentIris(JObject input, JObject existing) =>
             input
