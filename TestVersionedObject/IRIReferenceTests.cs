@@ -69,7 +69,7 @@ namespace VersionedObject.Tests
             var dateNow = DateTimeOffset.Now.ToUnixTimeSeconds();
             var hashFake = Encoding.UTF8.GetBytes("12345");
             var versionedIri = new VersionedIRIReference(persistentIri, hashFake, dateNow);
-            (var persComponent, var versionHash, var versionDate) = versionedIri;
+            var (persComponent, versionHash, versionDate) = versionedIri;
             Assert.Equal(persistentIri, persComponent);
             Assert.Equal(string.Join("", hashFake), versionHash);
             Assert.Equal(versionDate, dateNow.ToString());
