@@ -25,4 +25,4 @@ jobs:
     - name: Build
       run: dotnet build -c release --no-restore
     - name: Publish
-      run: dotnet nuget push .\VersionedObject\bin\Release\VersionedObject*.nupkg --apikey $NUGETAPIKEY  --source https://api.nuget.org/v3/index.json
+      run: dotnet nuget push .\VersionedObject\bin\Release\VersionedObject*.nupkg --api-key $NUGETAPIKEY  --source https://api.nuget.org/v3/index.json
