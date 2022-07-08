@@ -19,3 +19,21 @@ The method for calculating the hash is in JsonLdHelper.GetHash. This hashing mus
 #EntityGraphComparer
 Library for comparing unversioned (persistent) input graph with versioned (existing) graph and creates update command for the aspect api.
 The versioned objects that are created have only persistent IRIs inside them.
+
+The methods MakeGraphUpdate can be called on the new/incoming data (in JSON-LD representation) with the single parameter being the existing data (in JSON-LD representation)
+
+The assumption is that the existing data will usually be taken from some local storage or API, while the new data will be coming in from a different, not local storage.
+
+Example usage:
+
+using var reader = new StreamReader("TestData/mel-rdf.ttl");
+var mel_text = reader.ReadToEnd();
+var mel = ReadMEL(mel_text);
+var jsonLd = WriteJsonLd(mel);
+
+var existingGraph = new JObject()
+{
+    ["@graph"] = new JArray()
+};
+var scopeList = new List<Context>() {new(){ Type = "project", Value = "test"}};
+var updateBody = jsonLd.MakeGraphUpdate(existingGraph);
