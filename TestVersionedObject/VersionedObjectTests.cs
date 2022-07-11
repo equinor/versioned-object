@@ -9,11 +9,13 @@ using Xunit;
 using static VersionedObject.EntityGraphComparer;
 using static VersionedObject.JsonLdHelper;
 
+#pragma warning disable CS8604 // Possible null reference argument.
+#pragma warning disable CS8602
+
 namespace VersionedObject.Tests
 {
     public class VersionedObjectTests
     {
-
         public static readonly JObject different_jsonld = new JObject()
         {
             ["@graph"] = new JArray()
@@ -83,7 +85,7 @@ namespace VersionedObject.Tests
                         ["@id"] = "sor:Row1",
                         ["@type"] = "MelRow",
                         ["rdfs:label"] = "An empty MEL Row",
-                        ["imf:hasChild"] = "sor:Row2"
+                        ["imf:hasChild"] = "http://rdf.equinor.com/ontology/sor#Row2"
                     },
                     new JObject()
                     {
@@ -98,6 +100,11 @@ namespace VersionedObject.Tests
                 ["@vocab"] = "http://rdf.equinor.com/ontology/mel#",
                 ["sor"] = "http://rdf.equinor.com/ontology/sor#",
                 ["imf"] = "http://imf.imfid.org/ontology/imf#",
+                //["imf:hasChild"] =
+                //{
+                //    ["@type"] = "@vocab",
+                //    ["@id"] = "imf:hasChild"
+                //},
                 ["@version"] = "1.1"
             }
         };
@@ -412,6 +419,7 @@ namespace VersionedObject.Tests
         {
             var diff_object = row2_jsonld.HandleGraphCompleteUpdate(expanded_jsonld);
             Assert.NotNull(diff_object);
+#pragma warning disable CS8604
             var row2_iri = new IRIReference(row2_jsonld.RemoveContext().GetJsonLdGraph().Values<JObject>().First().SelectToken("@id").Value<string>());
             var diff_iri = diff_object
                 .SelectToken("update")
@@ -432,9 +440,7 @@ namespace VersionedObject.Tests
         {
             var simple_list = simple_jsonld.GetInputGraphAsEntities();
             Assert.True(simple_list.Any());
-#pragma warning disable CS8604 // Possible null reference argument.
             var num_items = simple_jsonld.SelectToken("@graph").Count();
-#pragma warning restore CS8604 // Possible null reference argument.
             Assert.Equal(num_items, simple_list.Count());
         }
 
@@ -469,7 +475,7 @@ namespace VersionedObject.Tests
                 {
                     ["@vocab"] = "http://example.com/ontology#",
                     ["sor"] = "http://rdf.equinor.com/ontology/sor#",
-                    ["@version"] = "1.1",
+                    ["@version"] = "1.1"
                 },
                 ["@type"] = new JArray() { "ontRow", "sor:File" }
             };
@@ -505,10 +511,16 @@ namespace VersionedObject.Tests
             var simple_graph = simple_jsonld.RemoveContext();
             Assert.Single(new JArray(simple_graph));
 
-            var edged_expanded = edge_jsonld.RemoveContext();
-            var row2 = edged_expanded.GetJsonLdGraph().First().SelectToken("http://imf.imfid.org/ontology/imf#hasChild");
-            Assert.NotNull(row2);
-            Assert.Equal("http://rdf.equinor.com/ontology/sor#Row2", row2);
+            var edged_expanded = edge_jsonld.GetInputGraphAsEntities();
+
+            var childList = from edge in (from node in edged_expanded
+                                          where node.PersistentIRI.ToString().Equals("http://rdf.equinor.com/ontology/sor#Row1")
+                                          select node.Content).First()
+                            where edge.Name.ToString().Equals("http://imf.imfid.org/ontology/imf#hasChild")
+                            select edge.Value;
+            var child = childList.First();
+            Assert.NotNull(child);
+            Assert.Equal("http://rdf.equinor.com/ontology/sor#Row2", child.ToString());
         }
 
         [Fact]
@@ -539,4 +551,6 @@ namespace VersionedObject.Tests
         }
 
     }
+#pragma warning restore CS8604 // Possible null reference argument.
+#pragma warning restore CS8602
 }

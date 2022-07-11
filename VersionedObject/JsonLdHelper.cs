@@ -171,14 +171,14 @@ namespace VersionedObject
                 )
                 select (Value: v, External:
                         from p in persistentIris
-                        where p.ToString().Equals(v.Value<string>().ToString())
+                        where p.ToString().Equals(v.ToString())
                         select p
                     );
 
             var externalEdges =
                 from edge in edges
                 where edge.External.Any()
-                select MakeEdgeFromObject(edge.Value.Value<string>().ToString());
+                select MakeEdgeFromObject(edge.Value.ToString());
 
             var internalEdges =
                 from edge in edges
