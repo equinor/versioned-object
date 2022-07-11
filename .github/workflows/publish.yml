@@ -1,0 +1,36 @@
+name: Publish
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+
+  workflow_call:
+    secrets:  
+        NUGETAPIKEY:
+            required: true
+            description: "Key for publishing to nuget.org"
+   
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  publish:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 6.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build -c release --no-restore
+    - name: Publish
+      run: dotnet nuget push ./VersionedObject/bin/Release/VersionedObject*.nupkg --api-key ${{ secrets.NUGETAPIKEY }}  --source https://api.nuget.org/v3/index.json

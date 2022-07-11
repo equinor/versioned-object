@@ -1,4 +1,13 @@
-﻿using System;
+﻿/*
+Copyright 2022 Equinor ASA
+
+This program is free software: you can redistribute it and/or modify it under the terms of version 3 of the GNU Lesser General Public License as published by the Free Software Foundation.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
+using System;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Linq;
@@ -86,7 +95,14 @@ namespace VersionedObject
                        throw new InvalidJsonLdException(
                            "No value found in the @graph element of the JSON-LD graph");
             }
-            return new JArray() { jsonld };
+            else if (jsonld.HasValues)
+            {
+                return new JArray() { jsonld };
+            }
+            else
+            {
+                return new JArray();
+            }
         }
 
         public static JObject RemoveContext(this JObject jsonld)
@@ -103,12 +119,13 @@ namespace VersionedObject
 
             var compacterContext = new JObject();
             var compacterOptions = new JsonLdProcessorOptions();
-            var expanded = JsonLdProcessor.Expand(jsonld, expanderOptions);
+
+            var expandedList = JsonLdProcessor.Expand(jsonld, expanderOptions);
             return JsonLdProcessor.Compact(
-                    expanded,
-                    compacterContext,
-                    compacterOptions
-                );
+                expandedList,
+                compacterContext,
+                compacterOptions
+            );
         }
         public static IEnumerable<IRIReference> GetAllPersistentIris(JObject input, JObject existing) =>
             input
