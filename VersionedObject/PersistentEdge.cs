@@ -12,8 +12,12 @@ namespace VersionedObject
     /// </summary>
     public class PersistentEdge : PersistentObjectData
     {
-        public PersistentEdge(IRIReference s, IRIReference p, IRIReference o) : base(CreateEdgeIRI(s,p, o), CreateEdgeObject(s,p,o))
+        public PersistentEdge(IRIReference s, IRIReference p, IRIReference o) : base(CreateEdgeIRI(s, p, o), CreateEdgeObject(s, p, o))
         { }
+
+        // Enables currying of the constructor
+        public static Func<IRIReference, Func<IRIReference, Func<IRIReference, PersistentEdge>>> MakePersistentEdge =
+            s => p => o => new PersistentEdge(s, p, o);
 
         private static IRIReference CreateEdgeIRI(IRIReference s, IRIReference p, IRIReference o)
             => new($"{s.ToString()}/{p.GetHashCode()}/{o.GetHashCode()}");
@@ -25,6 +29,5 @@ namespace VersionedObject
                 ["rdf:predicate"] = p,
                 ["rdf:object"] = o
             };
-    }
     }
 }

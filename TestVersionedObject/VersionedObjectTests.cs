@@ -11,9 +11,9 @@ namespace VersionedObject.Tests
     public class VersionedObjectTests
     {
 
-            public static readonly JObject different_jsonld = new JObject()
-            {
-                ["@graph"] = new JArray()
+        public static readonly JObject different_jsonld = new JObject()
+        {
+            ["@graph"] = new JArray()
                 {
                     new JObject()
                     {
@@ -22,18 +22,18 @@ namespace VersionedObject.Tests
                         ["rdfs:label"] = "A different MEL Row"
                     }
                 },
-                ["@context"] = new JObject()
-                {
-                    ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",
-                    ["@vocab"] = "http://rdf.equinor.com/ontology/mel#",
-                    ["sor"] = "http://rdf.equinor.com/ontology/sor#",
-                    ["@version"] = "1.1"
-                }
-            };
-
-            public static readonly JObject row2_jsonld = new JObject()
+            ["@context"] = new JObject()
             {
-                ["@graph"] = new JArray()
+                ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",
+                ["@vocab"] = "http://rdf.equinor.com/ontology/mel#",
+                ["sor"] = "http://rdf.equinor.com/ontology/sor#",
+                ["@version"] = "1.1"
+            }
+        };
+
+        public static readonly JObject row2_jsonld = new JObject()
+        {
+            ["@graph"] = new JArray()
                 {
                     new JObject()
                     {
@@ -42,18 +42,18 @@ namespace VersionedObject.Tests
                         ["rdfs:label"] = "The second MEL Row"
                     }
                 },
-                ["@context"] = new JObject()
-                {
-                    ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",
-                    ["@vocab"] = "http://rdf.equinor.com/ontology/mel#",
-                    ["sor"] = "http://rdf.equinor.com/ontology/sor#",
-                    ["@version"] = "1.1"
-                }
-            };
-
-            public static readonly JObject simple_jsonld = new JObject()
+            ["@context"] = new JObject()
             {
-                ["@graph"] = new JArray()
+                ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",
+                ["@vocab"] = "http://rdf.equinor.com/ontology/mel#",
+                ["sor"] = "http://rdf.equinor.com/ontology/sor#",
+                ["@version"] = "1.1"
+            }
+        };
+
+        public static readonly JObject simple_jsonld = new JObject()
+        {
+            ["@graph"] = new JArray()
                 {
                     new JObject()
                     {
@@ -62,18 +62,18 @@ namespace VersionedObject.Tests
                         ["rdfs:label"] = "An empty MEL Row"
                     }
                 },
-                ["@context"] = new JObject()
-                {
-                    ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",
-                    ["@vocab"] = "http://rdf.equinor.com/ontology/mel#",
-                    ["sor"] = "http://rdf.equinor.com/ontology/sor#",
-                    ["@version"] = "1.1"
-                }
-            };
-
-            public static readonly JObject edge_jsonld = new JObject()
+            ["@context"] = new JObject()
             {
-                ["@graph"] = new JArray()
+                ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",
+                ["@vocab"] = "http://rdf.equinor.com/ontology/mel#",
+                ["sor"] = "http://rdf.equinor.com/ontology/sor#",
+                ["@version"] = "1.1"
+            }
+        };
+
+        public static readonly JObject edge_jsonld = new JObject()
+        {
+            ["@graph"] = new JArray()
                 {
                     new JObject()
                     {
@@ -89,19 +89,19 @@ namespace VersionedObject.Tests
                         ["rdfs:label"] = "The second MEL Row"
                     }
                 },
-                ["@context"] = new JObject()
-                {
-                    ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",
-                    ["@vocab"] = "http://rdf.equinor.com/ontology/mel#",
-                    ["sor"] = "http://rdf.equinor.com/ontology/sor#",
-                    ["imf"] = "http://imf.imfid.org/ontology/imf#",
-                    ["@version"] = "1.1"
-                }
-            };
-
-            public static readonly JObject aspect_jsonld = new JObject()
+            ["@context"] = new JObject()
             {
-                ["@graph"] = new JArray()
+                ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",
+                ["@vocab"] = "http://rdf.equinor.com/ontology/mel#",
+                ["sor"] = "http://rdf.equinor.com/ontology/sor#",
+                ["imf"] = "http://imf.imfid.org/ontology/imf#",
+                ["@version"] = "1.1"
+            }
+        };
+
+        public static readonly JObject aspect_jsonld = new JObject()
+        {
+            ["@graph"] = new JArray()
                 {
                     new JObject()
                     {
@@ -111,17 +111,17 @@ namespace VersionedObject.Tests
                         [VersionedObject.ProvWasDerivedFrom] = VersionedObject.NoProvenance.ToString()
                     }
                 },
-                ["@context"] = new JObject()
-                {
-                    ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",
-                    ["@vocab"] = "http://rdf.equinor.com/ontology/mel#",
-                    ["sor"] = "http://rdf.equinor.com/ontology/sor#",
-                    ["@version"] = "1.1"
-                }
-            };
-            public static readonly JObject aspect_persistent_jsonld = new JObject()
+            ["@context"] = new JObject()
             {
-                ["@graph"] = new JArray()
+                ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",
+                ["@vocab"] = "http://rdf.equinor.com/ontology/mel#",
+                ["sor"] = "http://rdf.equinor.com/ontology/sor#",
+                ["@version"] = "1.1"
+            }
+        };
+        public static readonly JObject aspect_persistent_jsonld = new JObject()
+        {
+            ["@graph"] = new JArray()
                 {
                     new JObject()
                     {
@@ -130,17 +130,17 @@ namespace VersionedObject.Tests
                         ["rdfs:label"] = "An empty MEL Row"
                     }
                 },
-                ["@context"] = new JObject()
-                {
-                    ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",
-                    ["@vocab"] = "http://rdf.equinor.com/ontology/mel#",
-                    ["sor"] = "http://rdf.equinor.com/ontology/sor#",
-                    ["@version"] = "1.1"
-                }
-            };
-            public static readonly JObject expanded_jsonld = new JObject()
+            ["@context"] = new JObject()
             {
-                ["@graph"] = new JArray()
+                ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",
+                ["@vocab"] = "http://rdf.equinor.com/ontology/mel#",
+                ["sor"] = "http://rdf.equinor.com/ontology/sor#",
+                ["@version"] = "1.1"
+            }
+        };
+        public static readonly JObject expanded_jsonld = new JObject()
+        {
+            ["@graph"] = new JArray()
                 {
                     new JObject()
                     {
@@ -150,15 +150,15 @@ namespace VersionedObject.Tests
                         ["http://www.w3.org/ns/prov#wasDerivedFrom"] = VersionedObject.NoProvenance.ToString()
                     }
                 },
-                ["@context"] = new JObject()
-                {
-                    ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",
-                    ["@vocab"] = "http://rdf.equinor.com/ontology/mel#",
-                    ["sor"] = "http://rdf.equinor.com/ontology/sor#",
-                    ["@version"] = "1.1"
-                }
-            };
-        
+            ["@context"] = new JObject()
+            {
+                ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",
+                ["@vocab"] = "http://rdf.equinor.com/ontology/mel#",
+                ["sor"] = "http://rdf.equinor.com/ontology/sor#",
+                ["@version"] = "1.1"
+            }
+        };
+
         [Fact()]
         public void RdfEqualsHashTest()
         {
@@ -450,7 +450,7 @@ namespace VersionedObject.Tests
             Assert.Equal("http://rdf.equinor.com/ontology/sor#Row1", removed_versions["@id"]);
         }
 
-      
+
         [Fact]
         public void TestRemoveContext()
         {
@@ -458,7 +458,7 @@ namespace VersionedObject.Tests
             Assert.Equal(2, edged_graph.SelectToken("@graph").Value<JArray>().Count());
 
             var simple_graph = simple_jsonld.RemoveContext();
-            Assert.Equal(1, new JArray(simple_graph).Count());
+            Assert.Single(new JArray(simple_graph));
         }
 
         [Fact]
@@ -468,7 +468,7 @@ namespace VersionedObject.Tests
             Assert.Equal(2, edged_graph.Count());
 
             var simple_graph = simple_jsonld.RemoveContext().GetJsonLdGraph();
-            Assert.Equal(1, simple_graph.Count());
+            Assert.Single(simple_graph);
         }
 
         [Fact]

@@ -26,7 +26,7 @@ namespace VersionedObject
         /// </summary>
         public static bool RdfEqualsTriples(IGraph old, IGraph input) =>
             old.Triples.Count() != input.Triples.Count() ||
-                !old.Triples.Any(triple => !input.ContainsTriple(triple));
+            !old.Triples.Any(triple => !input.ContainsTriple(triple));
 
         /// <summary>
         /// Checks equality of two JSON-LD objects 
@@ -43,7 +43,8 @@ namespace VersionedObject
         /// <summary>
         /// Removes the version suffix from all persistent URIs in the JObject
         /// </summary>
-        public static JObject RemoveVersionFromUris(this JObject versionedEntity, IEnumerable<IRIReference> persistentUris) =>
+        public static JObject RemoveVersionFromUris(this JObject versionedEntity,
+            IEnumerable<IRIReference> persistentUris) =>
             JObject.Parse(persistentUris
                 .Aggregate(versionedEntity.ToString(),
                     (ent, persistent) =>
@@ -61,16 +62,18 @@ namespace VersionedObject
                     (ent, versioned) =>
                         new Regex($"{versioned.GetPersistentIRI().ToString().Replace(".", "\\.")}/\\w+")
                             .Replace(ent, versioned.VersionedIri.ToString())
-                        )
-                );
+                )
+            );
 
         public static IGraph AddAspectApiTriples(this IGraph inputGraph, IGraph oldGraph)
         {
             //oldGraph.NamespaceMap.AddNamespace("rdf", new IRIReference("http://www.w3.org/1999/02/22-rdf-syntax-ns#"));
             //oldGraph.NamespaceMap.AddNamespace("asa", new IRIReference("https://rdf.equinor.com/ontology/aspect-api#"));
-            inputGraph.Assert(oldGraph.GetTriplesWithObject(oldGraph.CreateUriNode(new Uri("https://rdf.equinor.com/ontology/aspect-api#Object"))));
+            inputGraph.Assert(oldGraph.GetTriplesWithObject(
+                oldGraph.CreateUriNode(new Uri("https://rdf.equinor.com/ontology/aspect-api#Object"))));
             return inputGraph;
         }
+
         public static byte[] GetHash(this IGraph g)
         {
             var writer = new NTriplesWriter();
@@ -108,6 +111,34 @@ namespace VersionedObject
             return graph.GetHash();
         }
 
+        private static readonly Func<IEnumerable<IRIReference>, Func<IRIReference, Func<IRIReference, PersistentEdge>>,
+                Func<(IEnumerable<JProperty>, IEnumerable<PersistentEdge>), JProperty,
+                    (IEnumerable<JProperty>, IEnumerable<PersistentEdge>)>>
+            reifyJToken =
+                (persistentIris, MakeEdge) => (acc, prop) =>
+                    prop.Name switch
+                    {
+                        "@id" or "@type" => (acc.Item1.Append(prop), acc.Item2),
+                        _ => @prop.Value switch
+                        {
+                            JObject obj =>
+                                @obj.SelectToken("@id") switch
+                                {
+                                    JValue id => persistentIris.Any(i => i.ToString().Equals(id.ToString())) switch
+                                    {
+                                        true => (acc.Item1, acc.Item2.Append(MakeEdge(prop.Name)(id.ToString()))),
+                                        false => ReifyObjectChild(acc, prop, obj.Properties().ReifyEdges(MakeEdge, persistentIris))
+                                    },
+                                    _ => ReifyObjectChild(acc, prop, obj.Properties().ReifyEdges(MakeEdge, persistentIris))
+                                },
+                            JValue val =>
+                                ReifyPropertyChild(acc, MakeEdge(prop.Name), prop, val, persistentIris),
+                            JArray vals =>
+                                ReifyPropertyArray(acc, MakeEdge(prop.Name), MakeEdge, prop, vals, persistentIris),
+                            _ => throw new Exception("Expected JObject, JValue or JArray")
+                        }
+                    };
+
         /// <summary>
         /// Removes any references to the persistentIris in the props argument, and adds all these to the list of edges
         /// </summary>
@@ -115,63 +146,52 @@ namespace VersionedObject
         /// <param name="persistentIris"></param>
         /// <returns></returns>
         public static (IEnumerable<JProperty> props, IEnumerable<PersistentEdge> edges) ReifyEdges(this IEnumerable<JProperty> props,
-            IEnumerable<IRIReference> persistentIris) =>
-                props.Aggregate(
-                    (new List<JProperty>(), new List<IRIReference>()),
-                    ((IEnumerable<JProperty> props, IEnumerable<IRIReference> edges) acc, JProperty prop) =>
-                        @prop.Value switch
-                       {
-                           JObject obj =>
-                               ReifyObjectChild(acc, prop, obj.Properties().ReifyEdges(persistentIris)),
-                           JValue val =>
-                               ReifyPropertyChild(acc, prop, val, persistentIris),
-                           JArray vals =>
-                               ReifyPropertyArray(acc, prop, vals, persistentIris),
-                            _  => throw new Exception("Expected JObject, JValue or JArray")                  
-                       },
-                       
-                    acc => (acc.Item1, acc.Item2)
-                );
+                Func<IRIReference, Func<IRIReference, PersistentEdge>> MakeEdge,
+                IEnumerable<IRIReference> persistentIris) =>
+                    props.Aggregate(
+                        (new List<JProperty>(), new List<PersistentEdge>()),
+                        reifyJToken(persistentIris, MakeEdge),
+                        acc => (acc.Item1, acc.Item2)
+                    );
 
-        private static (IEnumerable<JProperty> props, IEnumerable<PersistendEdge> edges) ReifyPropertyArray((IEnumerable<JProperty> props, IEnumerable<IRIReference> edges) acc, JProperty prop, JArray vals, IEnumerable<IRIReference> persistentIris)
+
+        private static (IEnumerable<JProperty> props, IEnumerable<PersistentEdge> edges) ReifyPropertyArray((IEnumerable<JProperty> props, IEnumerable<PersistentEdge> edges) acc, Func<IRIReference, PersistentEdge> MakeEdgeFromObject, Func<IRIReference, Func<IRIReference, PersistentEdge>> MakeEdge, JProperty prop, JArray vals, IEnumerable<IRIReference> persistentIris)
         {
-            var externalEdges = vals
-                .Select(v => v.Value<string>())
-                .Where(v => v != null)
-                .Cast<string>()
-                .Where(v => persistentIris.Any(p => p.ToString().Equals(v)))
-                .Select(v => new PersistentEdge(prop.Name, v));
-            if (externalEdges.Any())
-            {
-                var internalEdges = vals
-                    .Select(v => v.Value<string>())
-                    .Where(v => v != null)
-                    .Cast<string>()
-                    .Where(v => !persistentIris.Any(p => p.ToString().Equals(v)))
-                    .Select(v => new JValue(v));
-                return (acc.props.Append(new JProperty(prop.Name, new JArray(internalEdges))), acc.edges.Union(externalEdges));
-            }
-            else
-                return (acc.props.Append(prop), acc.edges);
+            var edges =
+                from v in (
+                    from v in vals
+                    where v != null
+                    select v
+                )
+                select (Value: v, External:
+                        from p in persistentIris
+                        where p.ToString().Equals(v.Value<string>().ToString())
+                        select p
+                    );
+
+            var externalEdges =
+                from edge in edges
+                where edge.External.Any()
+                select MakeEdgeFromObject(edge.Value.Value<string>().ToString());
+
+            var internalEdges =
+                from edge in edges
+                where !edge.External.Any()
+                select reifyJToken(persistentIris, MakeEdge)(acc, prop);
+
+            return (acc.props.Append(new JProperty(prop.Name, new JArray(internalEdges))), acc.edges.Union(externalEdges));
         }
 
-        private static (IEnumerable<JProperty> props, IEnumerable<IRIReference> edges) ReifyPropertyChild((IEnumerable<JProperty> props, IEnumerable<IRIReference> edges) acc, JProperty prop, JValue val, IEnumerable<IRIReference> persistentIris)
+        private static (IEnumerable<JProperty> props, IEnumerable<PersistentEdge> edges) ReifyPropertyChild((IEnumerable<JProperty> props, IEnumerable<PersistentEdge> edges) acc, Func<IRIReference, PersistentEdge> MakeEdge, JProperty prop, JValue val, IEnumerable<IRIReference> persistentIris)
         {
             if (persistentIris.Any(i => i.ToString().Equals(val.ToString())))
-                return (acc.props, acc.edges.Append(new IRIReference(val.ToString())));
+                return (acc.props, acc.edges.Append(MakeEdge(val.ToString())));
             return (acc.props.Append(prop), acc.edges);
         }
-        /// <summary>
-        /// Any child objects are always just treated, even if the IRI is a persistent object.
-        /// I am not sure how to handle this situation
-        /// </summary>
-        /// <param name="acc"></param>
-        /// <param name="prop"></param>
-        /// <param name="children"></param>
-        /// <returns></returns>
-        static (IEnumerable<JProperty> props, IEnumerable<IRIReference> edges) ReifyObjectChild((IEnumerable<JProperty> props, IEnumerable<IRIReference> edges) acc, JProperty prop, (IEnumerable<JProperty> props, IEnumerable<IRIReference> edges) children) =>
-            (acc.props.Append(new JProperty(prop.Name, new JObject(children.props))),acc.edges.Union(children.edges));
-        
+
+        static (IEnumerable<JProperty> props, IEnumerable<PersistentEdge> edges) ReifyObjectChild((IEnumerable<JProperty> props, IEnumerable<PersistentEdge> edges) acc, JProperty prop, (IEnumerable<JProperty> props, IEnumerable<PersistentEdge> edges) children) =>
+            (acc.props.Append(new JProperty(prop.Name, new JObject(children.props))), acc.edges.Union(children.edges));
+
         public static IRIReference GetIRIReference(this JToken jsonld) =>
             new(jsonld.SelectToken("@id")?.ToString() ?? throw new InvalidJsonLdException($"No @id field in object {jsonld}"));
 
