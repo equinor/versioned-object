@@ -504,6 +504,11 @@ namespace VersionedObject.Tests
 
             var simple_graph = simple_jsonld.RemoveContext();
             Assert.Single(new JArray(simple_graph));
+
+            var edged_expanded = edge_jsonld.RemoveContext();
+            var row2 = edged_expanded.GetJsonLdGraph().First().SelectToken("http://imf.imfid.org/ontology/imf#hasChild");
+            Assert.NotNull(row2);
+            Assert.Equal("http://rdf.equinor.com/ontology/sor#Row2", row2);
         }
 
         [Fact]

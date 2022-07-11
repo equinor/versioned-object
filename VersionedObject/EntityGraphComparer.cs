@@ -29,8 +29,8 @@ namespace VersionedObject
             var persistentEntities = GetAllPersistentIris(input, existing);
             var reifiedInput = inputList.ReifyAllEdges(persistentEntities);
             var existingList = existing.GetExistingGraphAsEntities(GetAllPersistentIris(input, existing));
-            var updateList = inputList.MakeUpdateList(existingList);
-            var deleteList = inputList.MakeDeleteList(existingList);
+            var updateList = reifiedInput.MakeUpdateList(existingList);
+            var deleteList = reifiedInput.MakeDeleteList(existingList);
             return CreateUpdateJObject(updateList, deleteList);
         }
 
@@ -43,8 +43,10 @@ namespace VersionedObject
         public static JObject HandleGraphEntries(this JObject input, JObject existing)
         {
             var inputList = input.GetInputGraphAsEntities();
+            var persistentEntities = GetAllPersistentIris(input, existing);
+            var reifiedInput = inputList.ReifyAllEdges(persistentEntities);
             var existingList = existing.GetExistingGraphAsEntities(GetAllPersistentIris(input, existing));
-            var updateList = inputList.MakeUpdateList(existingList);
+            var updateList = reifiedInput.MakeUpdateList(existingList);
             return CreateUpdateJObject(updateList, new List<VersionedIRIReference>());
         }
 
