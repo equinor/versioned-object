@@ -1,12 +1,12 @@
-# versioned-object
+# <p align="center">versioned-object</p>
 Library for handling and creating versioned objects and IRIs for use with the Aspect API
 
 The library consists of three parts that can to some extent be used separately:
 
-# IRIReference
+## IRIReference
 Drop-in replacement for System.Uri for use with RDF. This is needed because URIs per definition and implementation do not take into account the fragment, especially for equality comparison
 
-#VersionedIRIReference
+## VersionedIRIReference
 This is used for IRIs that refer to immutable versioned objects. It is useful to separate this in a subclass of IRIReference since parsing of the IRI itself is not always enough. 
 These IRIs are of the following form: 
 {persistent base IRI}/version/{bytes of hash of object}/{arbitrary version numbering system}
@@ -18,7 +18,7 @@ The method for calculating the hash is in JsonLdHelper.GetHash. This hashing mus
 - Put all elements in the array after each other as string (String.Join in C#)
 
 
-#EntityGraphComparer
+## EntityGraphComparer
 Library for comparing unversioned (persistent) input graph with versioned (existing) graph and creates update command for the aspect api.
 The versioned objects that are created have only persistent IRIs inside them.
 
@@ -28,7 +28,7 @@ The assumption is that the existing data will usually be taken from some local s
 
 Example usage is in TestVersionedObject/VersionedObjectTests/TestFullTranslation
 
-#EdgeReifier
+## EdgeReifier
 Edge reification: Any reference to a different object is removed and replaced with an object that represents that relation. The relation-object gets the persistent IRI : <property-IRI>/subject-hash/object-hash
 The class PersistentEdge represents such reified edges, while the class EdgeReifier contains the methods for reifying edges. The easiest way to use edge reification is to call the method PersistentObjectData.ReifyNodeEdges
 
