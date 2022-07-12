@@ -43,7 +43,7 @@ namespace VersionedObject
         {
             var oldGraph = ParseJsonLdString(old.ToString());
             var inputGraph = ParseJsonLdString(input.ToString());
-            return RdfComparer(oldGraph.AddAspectApiTriples(inputGraph), inputGraph.AddAspectApiTriples(oldGraph));
+            return RdfComparer(oldGraph, inputGraph);
         }
 
         /// <summary>
@@ -70,15 +70,6 @@ namespace VersionedObject
                             .Replace(ent, versioned.VersionedIri.ToString())
                 )
             );
-
-        public static IGraph AddAspectApiTriples(this IGraph inputGraph, IGraph oldGraph)
-        {
-            //oldGraph.NamespaceMap.AddNamespace("rdf", new IRIReference("http://www.w3.org/1999/02/22-rdf-syntax-ns#"));
-            //oldGraph.NamespaceMap.AddNamespace("asa", new IRIReference("https://rdf.equinor.com/ontology/aspect-api#"));
-            inputGraph.Assert(oldGraph.GetTriplesWithObject(
-                oldGraph.CreateUriNode(new Uri("https://rdf.equinor.com/ontology/aspect-api#Object"))));
-            return inputGraph;
-        }
 
         public static byte[] GetHash(this IGraph g)
         {

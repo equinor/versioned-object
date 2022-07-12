@@ -165,17 +165,17 @@ namespace VersionedObject
             var oldNewMap = inputList.Select(
                 i => (
                     input: i,
-                    old: existingList.Where(x => i.SamePersistentIRI(x.Object))
+                    existing: existingList.Where(x => i.SamePersistentIRI(x.Object))
                 )
             );
             return oldNewMap
-                .Where(i => !i.old.Any())
+                .Where(i => !i.existing.Any())
                 .Select(i => new VersionedObject(i.input))
                 .Union(
                     oldNewMap
-                        .Where(i => i.old.Any()
-                                    && !i.input.Equals(i.old.First().Object))
-                        .Select(i => new VersionedObject(i.input, i.old.First().VersionedIri))
+                        .Where(i => i.existing.Any()
+                                    && !i.input.Equals(i.existing.First().Object))
+                        .Select(i => new VersionedObject(i.input, i.existing.First().VersionedIri))
                 );
         }
 
