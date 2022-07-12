@@ -21,7 +21,8 @@ public class VersionedIRIReference : IRIReference
     public IRIReference PersistentIRI { get; }
 
     public VersionedIRIReference(Uri uri) : this(uri.ToString())
-    { }
+    {
+    }
 
     public VersionedIRIReference(string uriString) : base(uriString)
     {
@@ -33,7 +34,8 @@ public class VersionedIRIReference : IRIReference
         PersistentIRI = new(ToString().Split("/").SkipLast(3).Aggregate((x, y) => $"{x}/{y}"));
     }
 
-    public VersionedIRIReference(IRIReference uri, byte[] versionHash, long versionInfo) : base($"{uri}/version/{string.Join("", versionHash)}/{versionInfo}")
+    public VersionedIRIReference(IRIReference uri, byte[] versionHash, long versionInfo) : base(
+        $"{uri}/version/{string.Join("", versionHash)}/{versionInfo}")
     {
         VersionHash = string.Join("", versionHash);
         VersionInfo = versionInfo.ToString();
@@ -42,12 +44,34 @@ public class VersionedIRIReference : IRIReference
 
     public VersionedIRIReference(IRIReference uri, byte[] versionHash) : this(uri, versionHash,
         DateTimeOffset.Now.ToUnixTimeSeconds())
-    { }
+    {
+    }
 
     public void Deconstruct(out IRIReference persistentIri, out string versionHash, out string versionInfo)
     {
         persistentIri = PersistentIRI;
         versionInfo = VersionInfo;
         versionHash = VersionHash;
+    }
+}
+
+public static class IRIReferenceHelper {
+
+    /// <summary>
+    /// Helper method for making versioned IRI reference if possible
+    /// Use of this method should be avoided whenever possible
+    /// </summary>
+    /// <param name="uri"></param>
+    /// <returns></returns>
+    public static IRIReference TryGetVersionedIriReference(string uri)
+    {
+        try
+        {
+            return new VersionedIRIReference(uri);
+        }
+        catch (ArgumentException _)
+        {
+            return new IRIReference(uri);
+        }
     }
 }
