@@ -67,6 +67,12 @@ namespace VersionedObject
             return false;
         }
 
+        public IEnumerable<PersistentObjectData> ReifyNodeEdges(IEnumerable<IRIReference> persistentIris)
+        {
+            var (props, edges) = Content.ReifyEdges(PersistentEdge.MakePersistentEdge(PersistentIRI), persistentIris);
+            return edges
+                .Append(new PersistentObjectData(PersistentIRI, new JObject(props)));
+        }
         public override int GetHashCode()
         {
             throw new NotImplementedException();

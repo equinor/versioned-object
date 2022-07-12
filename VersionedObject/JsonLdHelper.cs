@@ -32,7 +32,7 @@ namespace VersionedObject
         /// </summary>
         public static bool RdfEqualsTriples(IGraph old, IGraph input) =>
             old.Triples.Count() != input.Triples.Count() ||
-                !old.Triples.Any(triple => !input.ContainsTriple(triple));
+            !old.Triples.Any(triple => !input.ContainsTriple(triple));
 
         /// <summary>
         /// Checks equality of two JSON-LD objects 
@@ -43,13 +43,14 @@ namespace VersionedObject
         {
             var oldGraph = ParseJsonLdString(old.ToString());
             var inputGraph = ParseJsonLdString(input.ToString());
-            return RdfComparer(oldGraph.AddAspectApiTriples(inputGraph), inputGraph.AddAspectApiTriples(oldGraph));
+            return RdfComparer(oldGraph, inputGraph);
         }
 
         /// <summary>
         /// Removes the version suffix from all persistent URIs in the JObject
         /// </summary>
-        public static JObject RemoveVersionFromUris(this JObject versionedEntity, IEnumerable<IRIReference> persistentUris) =>
+        public static JObject RemoveVersionFromUris(this JObject versionedEntity,
+            IEnumerable<IRIReference> persistentUris) =>
             JObject.Parse(persistentUris
                 .Aggregate(versionedEntity.ToString(),
                     (ent, persistent) =>
@@ -67,16 +68,9 @@ namespace VersionedObject
                     (ent, versioned) =>
                         new Regex($"{versioned.GetPersistentIRI().ToString().Replace(".", "\\.")}/\\w+")
                             .Replace(ent, versioned.VersionedIri.ToString())
-                        )
-                );
+                )
+            );
 
-        public static IGraph AddAspectApiTriples(this IGraph inputGraph, IGraph oldGraph)
-        {
-            //oldGraph.NamespaceMap.AddNamespace("rdf", new IRIReference("http://www.w3.org/1999/02/22-rdf-syntax-ns#"));
-            //oldGraph.NamespaceMap.AddNamespace("asa", new IRIReference("https://rdf.equinor.com/ontology/aspect-api#"));
-            inputGraph.Assert(oldGraph.GetTriplesWithObject(oldGraph.CreateUriNode(new Uri("https://rdf.equinor.com/ontology/aspect-api#Object"))));
-            return inputGraph;
-        }
         public static byte[] GetHash(this IGraph g)
         {
             var writer = new NTriplesWriter();
@@ -114,12 +108,12 @@ namespace VersionedObject
             return graph.GetHash();
         }
 
+       
         public static IRIReference GetIRIReference(this JToken jsonld) =>
             new(jsonld.SelectToken("@id")?.ToString() ?? throw new InvalidJsonLdException($"No @id field in object {jsonld}"));
 
         public static VersionedIRIReference GetVersionedIRIReference(this JToken jsonld) =>
             new(jsonld.SelectToken("@id")?.ToString() ?? throw new InvalidJsonLdException($"No @id field in object {jsonld}"));
-
     }
 }
 

@@ -11,6 +11,7 @@ using System;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using VDS.RDF.JsonLd;
 
 namespace VersionedObject
@@ -23,14 +24,9 @@ namespace VersionedObject
         /// Assumes input is a complete version of the new graph, so lacking entries in input are assumed
         /// not relevant anymore
         /// </summary>
-        public static JObject HandleGraphCompleteUpdate(this JObject input, JObject existing)
-        {
-            var inputList = input.GetInputGraphAsEntities();
-            var existingList = existing.GetExistingGraphAsEntities(GetAllPersistentIris(input, existing));
-            var updateList = inputList.MakeUpdateList(existingList);
-            var deleteList = inputList.MakeDeleteList(existingList);
-            return CreateUpdateJObject(updateList, deleteList);
-        }
+        public static JObject HandleGraphCompleteUpdate(this JObject input, JObject existing) =>
+            HandleGraphUpdate(input, existing, MakeDeleteList);
+
 
         /// <summary>
         /// Used for handling new entries but not a complete version of the graph
@@ -38,14 +34,27 @@ namespace VersionedObject
         /// <param name="input"></param>
         /// <param name="existing"></param>
         /// <returns></returns>
-        public static JObject HandleGraphEntries(this JObject input, JObject existing)
+        public static JObject HandleGraphEntries(this JObject input, JObject existing) =>
+            HandleGraphUpdate(input, existing, (_, _) => new List<VersionedIRIReference>());
+
+
+        private static JObject HandleGraphUpdate(this JObject input, JObject existing, Func<IEnumerable<PersistentObjectData>, IEnumerable<VersionedObject>, IEnumerable<VersionedIRIReference>> MakeDeleteList)
         {
             var inputList = input.GetInputGraphAsEntities();
-            var existingList = existing.GetExistingGraphAsEntities(GetAllPersistentIris(input, existing));
-            var updateList = inputList.MakeUpdateList(existingList);
-            return CreateUpdateJObject(updateList, new List<VersionedIRIReference>());
-
+            var persistentEntities = GetAllPersistentIris(input, existing);
+            var reifiedInput = inputList.ReifyAllEdges(persistentEntities);
+            var existingList = existing.GetExistingGraphAsEntities(persistentEntities);
+            var updateList = reifiedInput.MakeUpdateList(existingList);
+            var deleteList = MakeDeleteList(reifiedInput, existingList);
+            return CreateUpdateJObject(updateList, deleteList);
         }
+        /// <summary>
+        /// Returns all IRIs to objects not inside this entity. These should be reified edges
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public static IEnumerable<PersistentObjectData> ReifyAllEdges(this IEnumerable<PersistentObjectData> updateList, IEnumerable<IRIReference> persistentIris)
+        => updateList.SelectMany(obj => obj.ReifyNodeEdges(persistentIris));
 
         /// <summary>
         /// Translates JSON-LD coming from Aspect-API (so using versioned IRIs)
@@ -110,6 +119,7 @@ namespace VersionedObject
 
             var compacterContext = new JObject();
             var compacterOptions = new JsonLdProcessorOptions();
+
             var expandedList = JsonLdProcessor.Expand(jsonld, expanderOptions);
             return JsonLdProcessor.Compact(
                 expandedList,
@@ -155,17 +165,17 @@ namespace VersionedObject
             var oldNewMap = inputList.Select(
                 i => (
                     input: i,
-                    old: existingList.Where(x => i.SamePersistentIRI(x.Object))
+                    existing: existingList.Where(x => i.SamePersistentIRI(x.Object))
                 )
             );
             return oldNewMap
-                .Where(i => !i.old.Any())
+                .Where(i => !i.existing.Any())
                 .Select(i => new VersionedObject(i.input))
                 .Union(
                     oldNewMap
-                        .Where(i => i.old.Any()
-                                    && !i.input.Equals(i.old.First().Object))
-                        .Select(i => new VersionedObject(i.input, i.old.First().VersionedIri))
+                        .Where(i => i.existing.Any()
+                                    && !i.input.Equals(i.existing.First().Object))
+                        .Select(i => new VersionedObject(i.input, i.existing.First().VersionedIri))
                 );
         }
 
