@@ -8,7 +8,7 @@ The methods HandleGraphCompleteUpdate and HandleGraphUpdate in [EntityGraphCompa
 
 The assumption is that the existing data will usually be taken from some local storage or API, while the new data will be coming in from a different, not local storage.
 
-Example usage is in [TestVersionedObject/VersionedObjectTests/TestFullTranslation](https://github.com/equinor/versioned-object/blob/54ccb2c14174123055cda7658954411458b934f8/TestVersionedObject/VersionedObjectTests.cs#L457), example data shown below:
+Example usage is in [TestVersionedObject/VersionedObjectTests/FullTranslationTests.cs](TestVersionedObject/VersionedObjectTests/FullTranslationTests.cs), example data shown below:
 
 This input json
 
