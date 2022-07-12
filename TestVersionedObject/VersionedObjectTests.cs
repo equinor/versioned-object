@@ -529,7 +529,7 @@ namespace VersionedObject.Tests
         }
 
         [Fact]
-        public void TestGetExternalIRIs()
+        public void TestEdgeReifier()
         {
             var simple_list = SimpleJsonLd.GetInputGraphAsEntities();
             var refs = simple_list.First().ReifyNodeEdges(new List<IRIReference>());
@@ -540,6 +540,7 @@ namespace VersionedObject.Tests
             Assert.Equal(2, edged_list.Count());
             var persistentEntities = GetAllPersistentIris(EdgeJsonLd, aspect_jsonld);
             var refs2 = edged_list.ReifyAllEdges(persistentEntities);
+            var reified_json = from j in refs2 select j.ToJsonldJObject();
             Assert.Equal(3, refs2.Count());
             var refs3 = edged_list.Skip(1).First().ReifyNodeEdges(persistentEntities);
             Assert.Equal(3, refs2.Count());
