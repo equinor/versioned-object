@@ -55,7 +55,8 @@ public class VersionedIRIReference : IRIReference
     }
 }
 
-public static class IRIReferenceHelper {
+public static class IRIReferenceHelper
+{
 
     /// <summary>
     /// Helper method for making versioned IRI reference if possible
@@ -63,13 +64,13 @@ public static class IRIReferenceHelper {
     /// </summary>
     /// <param name="uri"></param>
     /// <returns></returns>
-    public static IRIReference TryGetVersionedIriReference(string uri)
+    public static IRIReference TryGetVersionedIRIReference(string uri)
     {
         try
         {
             return new VersionedIRIReference(uri);
         }
-        catch (ArgumentException _)
+        catch (ArgumentException)
         {
             return new IRIReference(uri);
         }
