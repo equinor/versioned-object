@@ -1,10 +1,6 @@
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
-using VDS.RDF;
-using VDS.RDF.JsonLd;
 using Xunit;
 using static VersionedObject.EntityGraphComparer;
 using static VersionedObject.JsonLdHelper;
@@ -72,34 +68,6 @@ namespace VersionedObject.Tests
                 ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",
                 ["@vocab"] = "http://rdf.equinor.com/ontology/mel#",
                 ["sor"] = "http://rdf.equinor.com/ontology/sor#",
-                ["@version"] = "1.1"
-            }
-        };
-
-        public static readonly JObject EdgeJsonLd = new()
-        {
-            ["@graph"] = new JArray()
-                {
-                    new JObject()
-                    {
-                        ["@id"] = "sor:Row1",
-                        ["@type"] = "MelRow",
-                        ["rdfs:label"] = "An empty MEL Row",
-                        ["imf:hasChild"] = "http://rdf.equinor.com/ontology/sor#Row2"
-                    },
-                    new JObject()
-                    {
-                        ["@id"] = "sor:Row2",
-                        ["@type"] = "MelRow",
-                        ["rdfs:label"] = "The second MEL Row"
-                    }
-                },
-            ["@context"] = new JObject()
-            {
-                ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",
-                ["@vocab"] = "http://rdf.equinor.com/ontology/mel#",
-                ["sor"] = "http://rdf.equinor.com/ontology/sor#",
-                ["imf"] = "http://imf.imfid.org/ontology/imf#",
                 ["@version"] = "1.1"
             }
         };
@@ -453,60 +421,18 @@ namespace VersionedObject.Tests
             var removed_versions = aspect_persistent_jsonld.RemoveContext().RemoveVersionFromUris(urilist);
             Assert.Equal("http://rdf.equinor.com/ontology/sor#Row1", removed_versions["@id"]);
         }
-        [Fact]
-        public void TestFullTranslation()
-        {
-            using var reader = new StreamReader("Data/data.ttl");
-            var mel_text = reader.ReadToEnd();
-            var mel = new Graph();
 
-            mel.LoadFromString(mel_text);
-            var opts = new JsonLdProcessorOptions();
-            opts.OmitDefault = true;
-            opts.ProcessingMode = VDS.RDF.JsonLd.Syntax.JsonLdProcessingMode.JsonLd11;
-            var MelFrame = new JObject()
-            {
-                ["@context"] = new JObject()
-                {
-                    ["@vocab"] = "http://example.com/ontology#",
-                    ["sor"] = "http://rdf.equinor.com/ontology/sor#",
-                    ["@version"] = "1.1"
-                },
-                ["@type"] = new JArray() { "ontRow", "sor:File" }
-            };
-
-            var config = (Frame: MelFrame, Opts: opts);
-            var store = new TripleStore();
-            store.Add(mel);
-            JArray aasjson = (new VDS.RDF.Writing.JsonLdWriter()).SerializeStore(store);
-
-            var jsonLd = JsonLdProcessor.Frame(aasjson, config.Frame, config.Opts);
-
-            var existingGraph = new JObject()
-            {
-                ["@graph"] = new JArray()
-            };
-            var updateBody = jsonLd.HandleGraphCompleteUpdate(existingGraph);
-            Assert.Contains("update", updateBody);
-            Assert.True(updateBody["update"].Value<JObject>().ContainsKey("@graph"));
-            Assert.NotNull(updateBody["update"]["@graph"]);
-
-            Assert.True(updateBody.ContainsKey("delete"));
-            Assert.Empty(updateBody["delete"]);
-            var updateGraph = updateBody["update"]["@graph"].Value<JArray>();
-            Assert.Equal(4, updateGraph.Count());
-        }
 
         [Fact]
         public void TestRemoveContext()
         {
-            var edged_graph = EdgeJsonLd.RemoveContext();
+            var edged_graph = EdgeReificationTests.EdgeJsonLd.RemoveContext();
             Assert.Equal(2, edged_graph.SelectToken("@graph").Value<JArray>().Count());
 
             var simple_graph = SimpleJsonLd.RemoveContext();
             Assert.Single(new JArray(simple_graph));
 
-            var edged_expanded = EdgeJsonLd.GetInputGraphAsEntities();
+            var edged_expanded = EdgeReificationTests.EdgeJsonLd.GetInputGraphAsEntities();
 
             var childList = from edge in (from node in edged_expanded
                                           where node.PersistentIRI.ToString().Equals("http://rdf.equinor.com/ontology/sor#Row1")
@@ -521,30 +447,12 @@ namespace VersionedObject.Tests
         [Fact]
         public void TestGetGraph()
         {
-            var edged_graph = EdgeJsonLd.RemoveContext().GetJsonLdGraph();
+            var edged_graph = EdgeReificationTests.EdgeJsonLd.RemoveContext().GetJsonLdGraph();
             Assert.Equal(2, edged_graph.Count());
 
             var simple_graph = SimpleJsonLd.RemoveContext().GetJsonLdGraph();
             Assert.Single(simple_graph);
         }
-
-        [Fact]
-        public void TestGetExternalIRIs()
-        {
-            var simple_list = SimpleJsonLd.GetInputGraphAsEntities();
-            var refs = simple_list.First().ReifyNodeEdges(new List<IRIReference>());
-            Assert.Single(refs);
-            var single_refs = simple_list.ReifyAllEdges(new List<IRIReference>());
-            Assert.Single(single_refs);
-            var edged_list = EdgeJsonLd.GetInputGraphAsEntities();
-            Assert.Equal(2, edged_list.Count());
-            var persistentEntities = GetAllPersistentIris(EdgeJsonLd, aspect_jsonld);
-            var refs2 = edged_list.ReifyAllEdges(persistentEntities);
-            Assert.Equal(3, refs2.Count());
-            var refs3 = edged_list.Skip(1).First().ReifyNodeEdges(persistentEntities);
-            Assert.Equal(3, refs2.Count());
-        }
-
     }
 #pragma warning restore CS8604 // Possible null reference argument.
 #pragma warning restore CS8602
