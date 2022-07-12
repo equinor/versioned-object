@@ -43,7 +43,7 @@ namespace VersionedObject
             var inputList = input.GetInputGraphAsEntities();
             var persistentEntities = GetAllPersistentIris(input, existing);
             var reifiedInput = inputList.ReifyAllEdges(persistentEntities);
-            var existingList = existing.GetExistingGraphAsEntities(GetAllPersistentIris(input, existing));
+            var existingList = existing.GetExistingGraphAsEntities(persistentEntities);
             var updateList = reifiedInput.MakeUpdateList(existingList);
             var deleteList = MakeDeleteList(reifiedInput, existingList);
             return CreateUpdateJObject(updateList, deleteList);
