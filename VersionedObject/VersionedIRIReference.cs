@@ -53,10 +53,6 @@ public class VersionedIRIReference : IRIReference
         versionInfo = VersionInfo;
         versionHash = VersionHash;
     }
-}
-
-public static class IRIReferenceHelper
-{
 
     /// <summary>
     /// Helper method for making versioned IRI reference if possible
