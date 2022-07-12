@@ -1,6 +1,13 @@
 ﻿[To index](/README.md)
-## IRIReference
-Drop-in replacement for System.Uri for use with RDF. This is needed because URIs per definition and implementation do not take into account the fragment, especially for equality comparison
+# IRIReference
+Drop-in replacement for System.Uri for use with RDF. This is needed because URIs per definition and implementation do not take into account the fragment, especially for equality comparison, while in RDF the fragment is important.
+* Code in [/VersionedObject/IRIReference.cs]
+* Tests in [/TestVersionedObject/IRIReferenceTests.cs]
+
+## Background
+In the specifications for URIs, the "anchor", is any part after an #. This is not considered part of the Uri, and is specifically not considered when comparing Uris, f.ex. in C#s library. 
+However, when using IRIs in semantic technology, the # is often used and the part after # must be included in equality comparisons. 
+Therefore any correct built-in Uri implementation, like System.Uri in C# cannot be used indiscriminately for handling IRIs in semantic technology.
 
 ## VersionedIRIReference
 This is used for IRIs that refer to immutable versioned objects. It is useful to separate this in a subclass of IRIReference since parsing of the IRI itself is not always enough. 

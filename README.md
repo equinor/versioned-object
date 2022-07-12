@@ -1,4 +1,4 @@
-# <p align="center">versioned-object</p>
+# versioned-object
 Library for handling and creating versioned objects and IRIs for use with the Aspect API
 
 The library consists of three parts that can to some extent be used separately:

@@ -1,5 +1,5 @@
 ﻿[To index](/README.md)
-## EdgeReifier
+# EdgeReifier
 Edge reification: Any reference to a different object is removed and replaced with an object that represents that relation. The relation-object gets the persistent IRI : <property-IRI>/subject-hash/object-hash
 The class PersistentEdge represents such reified edges, while the class EdgeReifier contains the methods for reifying edges. The easiest way to use edge reification is to call the method PersistentObjectData.ReifyNodeEdges
 
@@ -9,7 +9,7 @@ It is technically no problemto use the versioning of objects without edge reific
 Depending on the graph structure this might lead to changes in objects propagating along the edges in the graph, such that large parts of a graph must be updated whenever some or any objects are changed.
 
 ## Example
-VersionedObjectTests.TestEdgeReifier includes examples of using the edge reifier.
+[/TestVersionedObject/VersionedObjectTests.cs] VersionedObjectTests.TestEdgeReifier includes examples of using the edge reifier.
 
 This json as input:
 ```json

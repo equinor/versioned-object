@@ -1,6 +1,6 @@
 ﻿[To index](/README.md)
 
-## GraphComparer
+# GraphComparer
 Library for comparing unversioned (persistent) input graph with versioned (existing) graph and creates update command for the aspect api.
 The versioned objects that are created have only persistent IRIs inside them.
 
