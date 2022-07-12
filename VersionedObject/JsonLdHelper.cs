@@ -108,7 +108,7 @@ namespace VersionedObject
             return graph.GetHash();
         }
 
-       
+
         public static IRIReference GetIRIReference(this JToken jsonld) =>
             new(jsonld.SelectToken("@id")?.ToString() ?? throw new InvalidJsonLdException($"No @id field in object {jsonld}"));
 
