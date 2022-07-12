@@ -51,7 +51,7 @@ namespace VersionedObject.Tests
             Assert.Single(single_refs);
             var edged_list = EdgeJsonLd.GetInputGraphAsEntities();
             Assert.Equal(2, edged_list.Count());
-            var persistentEntities = GetAllPersistentIris(EdgeJsonLd,  VersionedObjectTests.aspect_jsonld);
+            var persistentEntities = GetAllPersistentIris(EdgeJsonLd, VersionedObjectTests.aspect_jsonld);
             var refs2 = edged_list.ReifyAllEdges(persistentEntities);
             var reified_json = from j in refs2 select j.ToJsonldJObject();
             Assert.Equal(3, refs2.Count());

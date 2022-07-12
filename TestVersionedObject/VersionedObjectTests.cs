@@ -71,7 +71,7 @@ namespace VersionedObject.Tests
                 ["@version"] = "1.1"
             }
         };
-        
+
         public static readonly JObject aspect_jsonld = new()
         {
             ["@graph"] = new JArray()
@@ -421,7 +421,7 @@ namespace VersionedObject.Tests
             var removed_versions = aspect_persistent_jsonld.RemoveContext().RemoveVersionFromUris(urilist);
             Assert.Equal("http://rdf.equinor.com/ontology/sor#Row1", removed_versions["@id"]);
         }
-      
+
 
         [Fact]
         public void TestRemoveContext()
