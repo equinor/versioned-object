@@ -267,7 +267,7 @@ namespace VersionedObject.Tests
         {
             var simple_graph = ParseJsonLdString(SimpleJsonLd.ToString());
             var aspect_persistent_graph = ParseJsonLdString(aspect_persistent_jsonld.ToString());
-            var simple_aspect_graph = ParseJsonLdString(SimpleJsonLd.ToString()).AddAspectApiTriples(aspect_persistent_graph);
+            var simple_aspect_graph = ParseJsonLdString(SimpleJsonLd.ToString());
             var aspect_graph = ParseJsonLdString(aspect_jsonld.ToString());
             var simple_expanded = SimpleJsonLd.RemoveContext();
             var aspet_persistent_expanded = aspect_persistent_jsonld.RemoveContext();
