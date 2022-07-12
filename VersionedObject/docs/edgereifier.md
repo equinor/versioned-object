@@ -9,7 +9,7 @@ It is technically no problemto use the versioning of objects without edge reific
 Depending on the graph structure this might lead to changes in objects propagating along the edges in the graph, such that large parts of a graph must be updated whenever some or any objects are changed.
 
 ## Example
-[VersionedObjectTests.TestEdgeReifier](/TestVersionedObject/VersionedObjectTests.cs)  includes examples of using the edge reifier.
+The method TestEdgeReifier in [VersionedObjectTests](/TestVersionedObject/VersionedObjectTests.cs) includes examples of using the edge reifier:
 
 This json as input:
 ```json
