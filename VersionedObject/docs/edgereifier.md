@@ -37,17 +37,17 @@ This json as input:
 }
 ```
 
-Is processed by: 
+Is processed by parsing it into the JObject EdgeJsonLd and then:
 
 ```c#
 var edged_list = EdgeJsonLd.GetInputGraphAsEntities();
-var persistentEntities = GetAllPersistentIris(EdgeJsonLd, aspect_jsonld);
+var persistentEntities = GetAllPersistentIris(EdgeJsonLd, ExistingJsonLd);
 var refs2 = edged_list.ReifyAllEdges(persistentEntities);
 ```
 
-GetInputGraphAsEntities extracts a list of all top-level objects in the input json-ld
-GetAllPersistentIris extracts all the persistent IRIs in the two graphs (one exising, one input)
-ReifyAllEdges actually reifies the edges ,and results in these three objects:
+* GetInputGraphAsEntities extracts a list of all top-level objects in the input json-ld
+* GetAllPersistentIris extracts all the persistent IRIs in the two graphs (EdgeJsonLd + an existing ExistingJsonLd assumed extracated from some local storage)
+* ReifyAllEdges actually reifies the edges ,and results in these three objects:
 
 ```json
 {
