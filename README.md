@@ -3,6 +3,6 @@ Library for handling and creating versioned objects and IRIs for use with the As
 
 The library consists of three parts that can to some extent be used separately:
 
-* [IRIReference /docs/irireference.md](docs/irireference.md).
-* [Edge Reifier /docs/edgereifier.md](docs/edgereifier.md).
-* [Graph Comparer /docs/graphcomparer.md](docs/graphcomparer.md).
+* [IRIReference /docs/irireference.md](/docs/irireference.md).
+* [Edge Reifier /docs/edgereifier.md](/docs/edgereifier.md).
+* [Graph Comparer /docs/graphcomparer.md](/docs/graphcomparer.md).
