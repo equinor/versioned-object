@@ -74,5 +74,15 @@ namespace VersionedObject.Tests
             Assert.Equal(string.Join("", hashFake), versionHash);
             Assert.Equal(versionDate, dateNow.ToString());
         }
+
+        [Fact]
+        public void TestTryGetVersionedIRIReference()
+        {
+            var uri = VersionedIRIReference.TryGetVersionedIRIReference("http://rdf.equinor.com/data/objectx/version/12345/2022-06-08");
+            Assert.IsType<VersionedIRIReference>(uri);
+            var uri2 = VersionedIRIReference.TryGetVersionedIRIReference("http://rdf.equinor.com/data/objectx");
+            Assert.IsNotType<VersionedIRIReference>(uri2);
+            Assert.IsType<IRIReference>(uri2);
+        }
     }
 }
