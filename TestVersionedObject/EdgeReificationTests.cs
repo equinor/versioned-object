@@ -66,13 +66,17 @@ namespace VersionedObject.Tests
             var edged_list = InputEdgeJsonLd.GetInputGraphAsEntities();
             
             var persistentEntities = GetAllPersistentIris(InputEdgeJsonLd, VersionedObjectTests.aspect_jsonld);
+            var existingJObject = VersionedObjectTests.aspect_jsonld.ToString();
             var existing_list = VersionedObjectTests.aspect_jsonld.GetExistingGraphAsEntities(persistentEntities);
             var refs2 = edged_list.ReifyAllEdges(persistentEntities);
             var reified_json = from j in refs2 select j.ToJsonldJObject();
             var existingList = VersionedObjectTests.aspect_jsonld.GetExistingGraphAsEntities(persistentEntities);
             var updateList = refs2.MakeUpdateList(existingList);
             var reified_update = from j in updateList select j.ToJObject();
-            Assert.Equal(3, updateList.Count());
+            Assert.Equal(2, updateList.Count());
+            var map = updateList.Union(existingList).MakePersistentIriMap();
+            var versionedUpdate = updateList.UpdateEdgeIris(map);
+            var versioned_update_json = from j in versionedUpdate select j.ToJObject();
             var deleteList = EntityGraphComparer.MakeDeleteList(refs2, existingList);
             Assert.Empty(deleteList);
         }
