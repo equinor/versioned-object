@@ -64,7 +64,7 @@ namespace VersionedObject.Tests
         public void TestVersionedEdgeReifier()
         {
             var edged_list = InputEdgeJsonLd.GetInputGraphAsEntities();
-            
+
             var persistentEntities = GetAllPersistentIris(InputEdgeJsonLd, VersionedObjectTests.aspect_jsonld);
             var existingJObject = VersionedObjectTests.aspect_jsonld.ToString();
             var existing_list = VersionedObjectTests.aspect_jsonld.GetExistingGraphAsEntities(persistentEntities);

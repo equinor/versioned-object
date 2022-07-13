@@ -139,11 +139,11 @@ namespace VersionedObject
         /// <returns></returns>
         public static IEnumerable<IRIReference> GetAllPersistentIris(JObject input, JObject existing) =>
             (from x in input.GetAllEntityIds()
-            select new IRIReference(x))
+             select new IRIReference(x))
                 .Union(
                     from s in existing
                         .GetAllEntityIds()
-                        select new VersionedIRIReference(s).PersistentIRI
+                    select new VersionedIRIReference(s).PersistentIRI
                 );
 
         /// <summary>
@@ -192,7 +192,7 @@ namespace VersionedObject
                     )
                 );
         public static VersionedObject CreateVersionedIRIs(this VersionedObject orig, ImmutableDictionary<IRIReference, VersionedIRIReference> map) =>
-            new (orig.Object.CreateVersionedIRIs(map), orig.WasDerivedFrom);
+            new(orig.Object.CreateVersionedIRIs(map), orig.WasDerivedFrom);
 
         public static IEnumerable<VersionedObject> UpdateEdgeIris(this IEnumerable<VersionedObject> updateList,
             ImmutableDictionary<IRIReference, VersionedIRIReference> map) =>
@@ -224,7 +224,7 @@ namespace VersionedObject
                     existing: existingList.Where(x => i.SamePersistentIRI(x.Object))
                 )
             );
-            var newObjects = 
+            var newObjects =
                 from i in oldNewMap
                 where !i.existing.Any()
                 select new VersionedObject(i.input);
