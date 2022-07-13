@@ -15,11 +15,7 @@ using Newtonsoft.Json.Linq;
 namespace VersionedObject;
 
 /// <summary>
-/// Handles "versioned IRIs". These identify immutable sets of data about an object.
-/// The versioned IRIs have a slash followd by a unique version ID suffixed to the persistent IRI of the object
-/// If for example: "http://rdf.equinor.com/data/objectx" is an object, then "http://rdf.equinor.com/data/objectx/12345" is a versioned IRI for version "12345"
-///
-/// Also useful for other IRIs because a fragment is not part of a URI, and URI.Equals ignores the fragment.
+/// Useful for other IRIs because a fragment is not part of a URI, and URI.Equals ignores the fragment.
 /// A URI Reference includes the fragment
 /// </summary>
 [Serializable]
@@ -35,6 +31,9 @@ public class IRIReference : IEquatable<IRIReference>
 
     bool IEquatable<IRIReference>.Equals(IRIReference? other) =>
         (other != null) && ToString().Equals(other.ToString());
+
+    public new bool Equals(object? other) =>
+        other != null && other is IRIReference iri && Equals(iri);
 
     public override string ToString() => uri.ToString();
 

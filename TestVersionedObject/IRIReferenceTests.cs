@@ -63,6 +63,18 @@ namespace VersionedObject.Tests
         }
 
         [Fact]
+        public void TestVersionedIRIEquality()
+        {
+            var uri1 = new IRIReference("https://example.com/testA/version/12345/2");
+            var uri2 = new IRIReference("https://example.com/testA/version/12345/2");
+            Assert.Equal(uri1, uri2);
+
+            var uri3 = new VersionedIRIReference("https://example.com/testA/version/12345/2");
+            var uri4 = new VersionedIRIReference("https://example.com/testA/version/12345/2");
+            Assert.Equal(uri3, uri4);
+        }
+
+        [Fact]
         public void TestDeconstructor()
         {
             var persistentIri = new IRIReference("http://rdf.equinor.com/data/objectx");
