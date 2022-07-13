@@ -30,10 +30,10 @@ public class IRIReference : IEquatable<IRIReference>
     public static implicit operator JValue(IRIReference r) => r.ToJValue();
 
     bool IEquatable<IRIReference>.Equals(IRIReference? other) =>
-        (other != null) && ToString().Equals(other.ToString());
+        other != null && (ReferenceEquals(this, other) || ToString().Equals(other.ToString()));
 
     public new bool Equals(object? other) =>
-        other != null && other is IRIReference iri && Equals(iri);
+        other != null && (ReferenceEquals(this, other) || (other is IRIReference iri && Equals(iri)));
 
     public override string ToString() => uri.ToString();
 
