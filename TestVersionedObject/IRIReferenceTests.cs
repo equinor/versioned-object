@@ -72,6 +72,11 @@ namespace VersionedObject.Tests
             var uri3 = new VersionedIRIReference("https://example.com/testA/version/12345/2");
             var uri4 = new VersionedIRIReference("https://example.com/testA/version/12345/2");
             Assert.Equal(uri3, uri4);
+
+            var uri5 = new VersionedIRIReference("https://example.com/testA/version/12345/2");
+            var uri6 = new IRIReference("https://example.com/testA/version/12345/2");
+            Assert.Equal(uri5, uri6);
+            Assert.Equal(uri6, uri5);
         }
 
         [Fact]
