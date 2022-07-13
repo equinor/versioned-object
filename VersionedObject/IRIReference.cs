@@ -32,7 +32,7 @@ public class IRIReference : IEquatable<IRIReference>
     bool IEquatable<IRIReference>.Equals(IRIReference? other) =>
         other != null && (ReferenceEquals(this, other) || ToString().Equals(other.ToString()));
 
-    public new bool Equals(object? other) =>
+    public override bool Equals(object? other) =>
         other != null && (ReferenceEquals(this, other) || (other is IRIReference iri && Equals(iri)));
 
     public override string ToString() => uri.ToString();

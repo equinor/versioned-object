@@ -56,9 +56,6 @@ public class VersionedIRIReference : IRIReference, IEquatable<VersionedIRIRefere
         versionHash = VersionHash;
     }
 
-    public new bool Equals(object? other) =>
-        other != null && (ReferenceEquals(this, other) || (other is VersionedIRIReference iri && Equals(iri)));
-
     bool IEquatable<VersionedIRIReference>.Equals(VersionedIRIReference? other) =>
         (other != null) && (ReferenceEquals(this, other) || ToString().Equals(other.ToString()));
 }
