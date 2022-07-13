@@ -10,8 +10,10 @@ You should have received a copy of the GNU General Public License along with thi
 using System;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
+using AngleSharp.Common;
 using VDS.RDF.JsonLd;
 
 namespace VersionedObject
@@ -45,6 +47,7 @@ namespace VersionedObject
             var reifiedInput = inputList.ReifyAllEdges(persistentEntities);
             var existingList = existing.GetExistingGraphAsEntities(persistentEntities);
             var updateList = reifiedInput.MakeUpdateList(existingList);
+            var versionedIriMap = updateList.Union(existingList).MakePersistentIriMap();
             var deleteList = MakeDeleteList(reifiedInput, existingList);
             return CreateUpdateJObject(updateList, deleteList);
         }
@@ -127,15 +130,28 @@ namespace VersionedObject
                 compacterOptions
             );
         }
+        /// <summary>
+        /// Called on input (and existing) data before comparison to get all persistent IRIs
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="existing"></param>
+        /// <returns></returns>
         public static IEnumerable<IRIReference> GetAllPersistentIris(JObject input, JObject existing) =>
-            input
-                .GetAllEntityIds()
-                .Select(x => new IRIReference(x))
+            (from x in input.GetAllEntityIds()
+            select new IRIReference(x))
                 .Union(
-                    existing
+                    from s in existing
                         .GetAllEntityIds()
-                        .Select(s => new VersionedIRIReference(s).PersistentIRI)
+                        select new VersionedIRIReference(s).PersistentIRI
                 );
+
+        /// <summary>
+        /// Helper function for getting persistent IRIs from all objects
+        /// It needs to use Uri because we dont know if its a versioned IRI
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidJsonLdException"></exception>
         public static IEnumerable<Uri> GetAllEntityIds(this JObject input) =>
             input
                 .RemoveContext()
@@ -143,6 +159,22 @@ namespace VersionedObject
                 .Select(s => (obj: s, id: s?.SelectToken("@id")?.Value<string>()))
                 .Select(s => s.id ?? throw new InvalidJsonLdException($"No @id element found in JObject {s.obj}"))
                 .Select(s => new Uri(s));
+
+        /// <summary>
+        /// Called on list of versioned objects to get a mapping from persistent to versioned IRIs
+        /// Similar to a HEAD mapping in aspect api
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="existing"></param>
+        /// <returns></returns>
+        public static ImmutableDictionary<IRIReference, VersionedIRIReference> MakePersistentIriMap(
+            this IEnumerable<VersionedObject> objectList) =>
+            ImmutableDictionary.CreateRange(
+                from obj in objectList
+                select new KeyValuePair<IRIReference, VersionedIRIReference>(obj.GetPersistentIRI(), obj.VersionedIri)
+                );
+
+
 
         public static JObject CreateUpdateJObject(IEnumerable<VersionedObject> updateList,
             IEnumerable<VersionedIRIReference> deleteList) =>
