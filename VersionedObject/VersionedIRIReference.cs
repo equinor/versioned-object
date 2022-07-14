@@ -60,7 +60,7 @@ public class VersionedIRIReference : IRIReference
     /// </summary>
     /// <param name="uri"></param>
     /// <returns></returns>
-    public static IRIReference TryGetVersionedIRIReference(string uri)
+    public static IRIReference CreateIriReference(string uri)
     {
         try
         {

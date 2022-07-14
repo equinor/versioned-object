@@ -78,9 +78,9 @@ namespace VersionedObject.Tests
         [Fact]
         public void TestTryGetVersionedIRIReference()
         {
-            var uri = VersionedIRIReference.TryGetVersionedIRIReference("http://rdf.equinor.com/data/objectx/version/12345/2022-06-08");
+            var uri = VersionedIRIReference.CreateIriReference("http://rdf.equinor.com/data/objectx/version/12345/2022-06-08");
             Assert.IsType<VersionedIRIReference>(uri);
-            var uri2 = VersionedIRIReference.TryGetVersionedIRIReference("http://rdf.equinor.com/data/objectx");
+            var uri2 = VersionedIRIReference.CreateIriReference("http://rdf.equinor.com/data/objectx");
             Assert.IsNotType<VersionedIRIReference>(uri2);
             Assert.IsType<IRIReference>(uri2);
         }
