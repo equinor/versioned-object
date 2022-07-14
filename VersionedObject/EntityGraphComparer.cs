@@ -10,8 +10,10 @@ You should have received a copy of the GNU General Public License along with thi
 using System;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
+using AngleSharp.Common;
 using VDS.RDF.JsonLd;
 
 namespace VersionedObject
@@ -45,8 +47,10 @@ namespace VersionedObject
             var reifiedInput = inputList.ReifyAllEdges(persistentEntities);
             var existingList = existing.GetExistingGraphAsEntities(persistentEntities);
             var updateList = reifiedInput.MakeUpdateList(existingList);
+            var versionedIriMap = updateList.Union(existingList).MakePersistentIriMap();
+            var versionedUpdateList = updateList.UpdateEdgeIris(versionedIriMap);
             var deleteList = MakeDeleteList(reifiedInput, existingList);
-            return CreateUpdateJObject(updateList, deleteList);
+            return CreateUpdateJObject(versionedUpdateList, deleteList);
         }
         /// <summary>
         /// Returns all IRIs to objects not inside this entity. These should be reified edges
@@ -127,15 +131,28 @@ namespace VersionedObject
                 compacterOptions
             );
         }
+        /// <summary>
+        /// Called on input (and existing) data before comparison to get all persistent IRIs
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="existing"></param>
+        /// <returns></returns>
         public static IEnumerable<IRIReference> GetAllPersistentIris(JObject input, JObject existing) =>
-            input
-                .GetAllEntityIds()
-                .Select(x => new IRIReference(x))
+            (from x in input.GetAllEntityIds()
+             select new IRIReference(x))
                 .Union(
-                    existing
+                    from s in existing
                         .GetAllEntityIds()
-                        .Select(s => new VersionedIRIReference(s).PersistentIRI)
+                    select new VersionedIRIReference(s).PersistentIRI
                 );
+
+        /// <summary>
+        /// Helper function for getting persistent IRIs from all objects
+        /// It needs to use Uri because we dont know if its a versioned IRI
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidJsonLdException"></exception>
         public static IEnumerable<Uri> GetAllEntityIds(this JObject input) =>
             input
                 .RemoveContext()
@@ -143,6 +160,45 @@ namespace VersionedObject
                 .Select(s => (obj: s, id: s?.SelectToken("@id")?.Value<string>()))
                 .Select(s => s.id ?? throw new InvalidJsonLdException($"No @id element found in JObject {s.obj}"))
                 .Select(s => new Uri(s));
+
+        /// <summary>
+        /// Called on list of versioned objects to get a mapping from persistent to versioned IRIs
+        /// Similar to a HEAD mapping in aspect api
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="existing"></param>
+        /// <returns></returns>
+        public static ImmutableDictionary<IRIReference, VersionedIRIReference> MakePersistentIriMap(
+            this IEnumerable<VersionedObject> objectList) =>
+            ImmutableDictionary.CreateRange(
+                from obj in objectList
+                select new KeyValuePair<IRIReference, VersionedIRIReference>(obj.GetPersistentIRI(), obj.VersionedIri)
+                );
+
+        /// <summary>
+        /// Adds versions to all references to persistent IRIs in the map argument
+        /// </summary>
+        /// <param name="orig"></param>
+        /// <param name="map"></param>
+        /// <returns></returns>
+        public static PersistentObjectData CreateVersionedIRIs(this PersistentObjectData orig,
+            ImmutableDictionary<IRIReference, VersionedIRIReference> map) =>
+            new(orig.PersistentIRI,
+                JObject.Parse(
+                    map.Keys
+                        .Aggregate(orig.ToJsonldJObject().ToString(),
+                            (json, uri) => json.Replace(uri.ToString(), map[uri].ToString())
+                            )
+                    )
+                );
+        public static VersionedObject CreateVersionedIRIs(this VersionedObject orig, ImmutableDictionary<IRIReference, VersionedIRIReference> map) =>
+            new(orig.Object.CreateVersionedIRIs(map), orig.WasDerivedFrom);
+
+        public static IEnumerable<VersionedObject> UpdateEdgeIris(this IEnumerable<VersionedObject> updateList,
+            ImmutableDictionary<IRIReference, VersionedIRIReference> map) =>
+            from obj in updateList
+            select obj.CreateVersionedIRIs(map);
+
 
         public static JObject CreateUpdateJObject(IEnumerable<VersionedObject> updateList,
             IEnumerable<VersionedIRIReference> deleteList) =>
@@ -168,15 +224,17 @@ namespace VersionedObject
                     existing: existingList.Where(x => i.SamePersistentIRI(x.Object))
                 )
             );
-            return oldNewMap
-                .Where(i => !i.existing.Any())
-                .Select(i => new VersionedObject(i.input))
-                .Union(
-                    oldNewMap
-                        .Where(i => i.existing.Any()
-                                    && !i.input.Equals(i.existing.First().Object))
-                        .Select(i => new VersionedObject(i.input, i.existing.First().VersionedIri))
-                );
+            var newObjects =
+                from i in oldNewMap
+                where !i.existing.Any()
+                select new VersionedObject(i.input);
+
+            var updatedObjects =
+                from i in oldNewMap
+                where i.existing.Any() && !i.input.Equals(i.existing.First().Object)
+                select new VersionedObject(i.input, i.existing.First().VersionedIri);
+
+            return newObjects.Union(updatedObjects);
         }
 
         public static JArray MakeDeleteGraph(this IEnumerable<VersionedIRIReference> deleteList) =>

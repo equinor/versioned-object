@@ -13,7 +13,7 @@ namespace VersionedObject.Tests
     public class EdgeReificationTests
     {
 
-        public static readonly JObject EdgeJsonLd = new()
+        public static readonly JObject InputEdgeJsonLd = new()
         {
             ["@graph"] = new JArray()
                 {
@@ -41,6 +41,7 @@ namespace VersionedObject.Tests
             }
         };
 
+
         [Fact]
         public void TestEdgeReifier()
         {
@@ -49,14 +50,35 @@ namespace VersionedObject.Tests
             Assert.Single(refs);
             var single_refs = simple_list.ReifyAllEdges(new List<IRIReference>());
             Assert.Single(single_refs);
-            var edged_list = EdgeJsonLd.GetInputGraphAsEntities();
+            var edged_list = InputEdgeJsonLd.GetInputGraphAsEntities();
             Assert.Equal(2, edged_list.Count());
-            var persistentEntities = GetAllPersistentIris(EdgeJsonLd, VersionedObjectTests.aspect_jsonld);
+            var persistentEntities = GetAllPersistentIris(InputEdgeJsonLd, VersionedObjectTests.aspect_jsonld);
             var refs2 = edged_list.ReifyAllEdges(persistentEntities);
             var reified_json = from j in refs2 select j.ToJsonldJObject();
             Assert.Equal(3, refs2.Count());
             var refs3 = edged_list.Skip(1).First().ReifyNodeEdges(persistentEntities);
             Assert.Equal(3, refs2.Count());
+        }
+
+        [Fact]
+        public void TestVersionedEdgeReifier()
+        {
+            var edged_list = InputEdgeJsonLd.GetInputGraphAsEntities();
+
+            var persistentEntities = GetAllPersistentIris(InputEdgeJsonLd, VersionedObjectTests.aspect_jsonld);
+            var existingJObject = VersionedObjectTests.aspect_jsonld.ToString();
+            var existing_list = VersionedObjectTests.aspect_jsonld.GetExistingGraphAsEntities(persistentEntities);
+            var refs2 = edged_list.ReifyAllEdges(persistentEntities);
+            var reified_json = from j in refs2 select j.ToJsonldJObject();
+            var existingList = VersionedObjectTests.aspect_jsonld.GetExistingGraphAsEntities(persistentEntities);
+            var updateList = refs2.MakeUpdateList(existingList);
+            var reified_update = from j in updateList select j.ToJObject();
+            Assert.Equal(2, updateList.Count());
+            var map = updateList.Union(existingList).MakePersistentIriMap();
+            var versionedUpdate = updateList.UpdateEdgeIris(map);
+            var versioned_update_json = from j in versionedUpdate select j.ToJObject();
+            var deleteList = EntityGraphComparer.MakeDeleteList(refs2, existingList);
+            Assert.Empty(deleteList);
         }
 
     }
