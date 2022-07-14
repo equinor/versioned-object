@@ -26,7 +26,8 @@ public class VersionedIRIReference : IRIReference, IEquatable<VersionedIRIRefere
     public IRIReference PersistentIRI { get; }
 
     public VersionedIRIReference(Uri uri) : this(uri.ToString())
-    { }
+    {
+    }
 
     public VersionedIRIReference(string uriString) : base(uriString)
     {
@@ -38,7 +39,8 @@ public class VersionedIRIReference : IRIReference, IEquatable<VersionedIRIRefere
         PersistentIRI = new(ToString().Split("/").SkipLast(3).Aggregate((x, y) => $"{x}/{y}"));
     }
 
-    public VersionedIRIReference(IRIReference uri, byte[] versionHash, long versionInfo) : base($"{uri}/version/{string.Join("", versionHash)}/{versionInfo}")
+    public VersionedIRIReference(IRIReference uri, byte[] versionHash, long versionInfo) : base(
+        $"{uri}/version/{string.Join("", versionHash)}/{versionInfo}")
     {
         VersionHash = string.Join("", versionHash);
         VersionInfo = versionInfo.ToString();
@@ -47,7 +49,8 @@ public class VersionedIRIReference : IRIReference, IEquatable<VersionedIRIRefere
 
     public VersionedIRIReference(IRIReference uri, byte[] versionHash) : this(uri, versionHash,
         DateTimeOffset.Now.ToUnixTimeSeconds())
-    { }
+    {
+    }
 
     public void Deconstruct(out IRIReference persistentIri, out string versionHash, out string versionInfo)
     {
@@ -56,6 +59,25 @@ public class VersionedIRIReference : IRIReference, IEquatable<VersionedIRIRefere
         versionHash = VersionHash;
     }
 
+
+    /// <summary>
+    /// Helper method for making versioned IRI reference if possible
+    /// Use of this method should be avoided whenever possible
+    /// </summary>
+    /// <param name="uri"></param>
+    /// <returns></returns>
+    public static IRIReference CreateIriReference(string uri)
+    {
+        try
+        {
+            return new VersionedIRIReference(uri);
+        }
+        catch (ArgumentException)
+        {
+            return new IRIReference(uri);
+        }
+    }
     bool IEquatable<VersionedIRIReference>.Equals(VersionedIRIReference? other) =>
         (other != null) && (ReferenceEquals(this, other) || ToString().Equals(other.ToString()));
+
 }

@@ -426,13 +426,13 @@ namespace VersionedObject.Tests
         [Fact]
         public void TestRemoveContext()
         {
-            var edged_graph = EdgeReificationTests.EdgeJsonLd.RemoveContext();
+            var edged_graph = EdgeReificationTests.InputEdgeJsonLd.RemoveContext();
             Assert.Equal(2, edged_graph.SelectToken("@graph").Value<JArray>().Count());
 
             var simple_graph = SimpleJsonLd.RemoveContext();
             Assert.Single(new JArray(simple_graph));
 
-            var edged_expanded = EdgeReificationTests.EdgeJsonLd.GetInputGraphAsEntities();
+            var edged_expanded = EdgeReificationTests.InputEdgeJsonLd.GetInputGraphAsEntities();
 
             var childList = from edge in (from node in edged_expanded
                                           where node.PersistentIRI.ToString().Equals("http://rdf.equinor.com/ontology/sor#Row1")
@@ -447,7 +447,7 @@ namespace VersionedObject.Tests
         [Fact]
         public void TestGetGraph()
         {
-            var edged_graph = EdgeReificationTests.EdgeJsonLd.RemoveContext().GetJsonLdGraph();
+            var edged_graph = EdgeReificationTests.InputEdgeJsonLd.RemoveContext().GetJsonLdGraph();
             Assert.Equal(2, edged_graph.Count());
 
             var simple_graph = SimpleJsonLd.RemoveContext().GetJsonLdGraph();

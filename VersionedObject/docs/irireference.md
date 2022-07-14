@@ -13,9 +13,14 @@ Therefore any correct built-in Uri implementation, like System.Uri in C# cannot 
 This is used for IRIs that refer to immutable versioned objects. It is useful to separate this in a subclass of IRIReference since parsing of the IRI itself is not always enough. 
 These IRIs are of the following form: 
 {persistent base IRI}/version/{bytes of hash of object}/{arbitrary version numbering system}
+
 The method for calculating the hash is in JsonLdHelper.GetHash. This hashing must be done in the same way everyhwere. The algorithm is this:
 - Translate to n-triples (if ambiguous, in the same way as the default in dotnetrdf)
 - Split the non-empty lines of n-triples into an array of lines. Each entry is a triple
 - Run CRC64 on each such line, resulting in a byte array for each line
 - Run xor of all these byte arrays
 - Put all elements in the array after each other as string (String.Join in C#)
+
+The constructors for VersionedIRIReference check for the pattern using the string "version" above and throw ArgumentException if invalid. 
+
+THe helper method VersionedIRIReference.TryGetVersionedIRIReference will only instantiate VersionedIRIReference if syntax is valid, but it is usually safer to keep these types of object separate.
