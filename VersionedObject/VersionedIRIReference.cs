@@ -10,8 +10,13 @@ namespace VersionedObject;
 /// <summary>
 /// Represents IRIs that reference versioned, immutable objects
 /// Theses IRIs consist of a first part, that is a normal IRIReference, followed by "/version/" then a hash of the object and finally "/" and an arbitrary version string (f.ex. a date)
+///
+/// Handles "versioned IRIs". These identify immutable sets of data about an object.
+/// The versioned IRIs have a slash followd by a unique version ID suffixed to the persistent IRI of the object
+/// If for example: "http://rdf.equinor.com/data/objectx" is an object, then "http://rdf.equinor.com/data/objectx/12345" is a versioned IRI for version "12345"
+///
 /// </summary>
-public class VersionedIRIReference : IRIReference
+public class VersionedIRIReference : IRIReference, IEquatable<VersionedIRIReference>
 {
     public static explicit operator VersionedIRIReference(Uri uri) => new(uri);
     public static explicit operator VersionedIRIReference(string uriString) => new(uriString);
@@ -54,6 +59,7 @@ public class VersionedIRIReference : IRIReference
         versionHash = VersionHash;
     }
 
+
     /// <summary>
     /// Helper method for making versioned IRI reference if possible
     /// Use of this method should be avoided whenever possible
@@ -71,4 +77,7 @@ public class VersionedIRIReference : IRIReference
             return new IRIReference(uri);
         }
     }
+    bool IEquatable<VersionedIRIReference>.Equals(VersionedIRIReference? other) =>
+        (other != null) && (ReferenceEquals(this, other) || ToString().Equals(other.ToString()));
+
 }
