@@ -42,12 +42,13 @@ namespace VersionedObject
 
         private static JObject HandleGraphUpdate(this JObject input, JObject existing, Func<IEnumerable<PersistentObjectData>, IEnumerable<VersionedObject>, IEnumerable<VersionedIRIReference>> MakeDeleteList)
         {
-            var inputList = input.GetInputGraphAsEntities();
-            var persistentEntities = GetAllPersistentIris(input, existing);
-            var reifiedInput = inputList.ReifyAllEdges(persistentEntities);
-            var existingList = existing.GetExistingGraphAsEntities(persistentEntities);
-            var updateList = reifiedInput.MakeUpdateList(existingList);
-            var versionedIriMap = updateList.Union(existingList).MakePersistentIriMap();
+            var inputList = input.GetInputGraphAsEntities().ToList();
+            var persistentEntities = GetAllPersistentIris(input, existing).ToList();
+            var reifiedInput = inputList.ReifyAllEdges(persistentEntities).ToList();
+            var existingList = existing.GetExistingGraphAsEntities(persistentEntities).ToList();
+            var updateList = reifiedInput.MakeUpdateList(existingList).ToList();
+            var union = updateList.Union(existingList).ToList();
+            var versionedIriMap = union.MakePersistentIriMap();
             var versionedUpdateList = updateList.UpdateEdgeIris(versionedIriMap);
             var deleteList = MakeDeleteList(reifiedInput, existingList);
             return CreateUpdateJObject(versionedUpdateList, deleteList);
