@@ -63,6 +63,23 @@ namespace VersionedObject.Tests
         }
 
         [Fact]
+        public void TestVersionedIRIEquality()
+        {
+            var uri1 = new IRIReference("https://example.com/testA/version/12345/2");
+            var uri2 = new IRIReference("https://example.com/testA/version/12345/2");
+            Assert.Equal(uri1, uri2);
+
+            var uri3 = new VersionedIRIReference("https://example.com/testA/version/12345/2");
+            var uri4 = new VersionedIRIReference("https://example.com/testA/version/12345/2");
+            Assert.Equal(uri3, uri4);
+
+            var uri5 = new VersionedIRIReference("https://example.com/testA/version/12345/2");
+            var uri6 = new IRIReference("https://example.com/testA/version/12345/2");
+            Assert.Equal(uri5, uri6);
+            Assert.Equal(uri6, uri5);
+        }
+
+        [Fact]
         public void TestDeconstructor()
         {
             var persistentIri = new IRIReference("http://rdf.equinor.com/data/objectx");
@@ -73,6 +90,16 @@ namespace VersionedObject.Tests
             Assert.Equal(persistentIri, persComponent);
             Assert.Equal(string.Join("", hashFake), versionHash);
             Assert.Equal(versionDate, dateNow.ToString());
+        }
+
+        [Fact]
+        public void TestTryGetVersionedIRIReference()
+        {
+            var uri = VersionedIRIReference.CreateIriReference("http://rdf.equinor.com/data/objectx/version/12345/2022-06-08");
+            Assert.IsType<VersionedIRIReference>(uri);
+            var uri2 = VersionedIRIReference.CreateIriReference("http://rdf.equinor.com/data/objectx");
+            Assert.IsNotType<VersionedIRIReference>(uri2);
+            Assert.IsType<IRIReference>(uri2);
         }
     }
 }

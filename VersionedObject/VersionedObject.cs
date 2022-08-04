@@ -15,8 +15,8 @@ public class VersionedObject
     public PersistentObjectData Object { get; }
     public IRIReference WasDerivedFrom { get; }
 
-    public static IRIReference NoProvenance = new("http://www.w3.org/1999/02/22-rdf-syntax-ns#nil");
-    public static string ProvWasDerivedFrom = "http://www.w3.org/ns/prov#wasDerivedFrom";
+    public static readonly IRIReference NoProvenance = new("http://www.w3.org/1999/02/22-rdf-syntax-ns#nil");
+    public const string ProvWasDerivedFrom = "http://www.w3.org/ns/prov#wasDerivedFrom";
     public IEnumerable<JProperty> GetContent() =>
         Object.Content.Append(new JProperty("@id", VersionedIri.ToJValue()))
             .Append(new JProperty(ProvWasDerivedFrom, WasDerivedFrom.ToJValue()));

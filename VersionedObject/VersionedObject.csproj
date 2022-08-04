@@ -10,7 +10,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 	  <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-	  <Version>$(VersionPrefix)0.0.2</Version>
+	  <Version>$(VersionPrefix)0.0.3</Version>
 	  <Description>A c# library for handling versioned objects and IRIs.</Description>
 	  <Authors>Dag Hovland</Authors>
 	  <Company>Equinor</Company>
