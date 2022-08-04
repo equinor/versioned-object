@@ -335,8 +335,29 @@ namespace VersionedObject.Tests
             Assert.NotNull(expanded);
             var second = expanded.RemoveContext();
             Assert.Equal(new IRIReference("http://rdf.equinor.com/ontology/sor#Row2"), new IRIReference(second.GetJsonLdGraph().Values<JObject>().First().GetIRIReference()));
-        }
+            
+            var vobject = JObject.Parse(@"{
+                ""@graph"": [
+                {
+                    ""@type"": [
+                    ""http://rdf.equinor.com/ontology/mel#MelRow""
+                        ],
+                    ""rdfs:label"": ""An empty MEL Row"",
+                    ""@id"": ""http://rdf.equinor.com/ontology/sor#Row1/version/22310441759822761165/1659612640"",
+                    ""http://www.w3.org/ns/prov#wasDerivedFrom"": ""http://www.w3.org/1999/02/22-rdf-syntax-ns#nil""
+                }
+                ],
+                ""@context"": {
+                    ""rdfs"": ""http://www.w3.org/2000/01/rdf-schema#"",
+                    ""sor"": ""http://rdf.equinor.com/ontology/sor#"",
+                    ""imf"": ""http://imf.imfid.org/ontology/imf#"",
+                    ""@version"": ""1.1""
+                }
+            }");
+            var flat = vobject.RemoveContext();
+            Assert.NotNull(flat);
 
+        }
 
         [Fact()]
         public void GetAllIdsTest()
