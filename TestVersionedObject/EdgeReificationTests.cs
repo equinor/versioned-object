@@ -44,7 +44,7 @@ namespace VersionedObject.Tests
             }
         };
 
-        public static readonly int test_size = 1;
+        public static readonly int test_size = 10;
 
         public static readonly JObject LargeInputJsonLd = new()
         {
@@ -137,47 +137,11 @@ namespace VersionedObject.Tests
         }
 
         [Fact]
-        public void TestFullEdgeReifierPerformance()
-        {
-            LargeInputJsonLd.HandleGraphCompleteUpdate(LargeAspectJsonLd);
-        }
-
-        [Fact]
         public void TestGetPersistentIrirs()
         {
             var persistent = GetAllPersistentIris(LargeInputJsonLd, LargeAspectJsonLd);
             Assert.NotNull(persistent);
             Assert.Equal(test_size, persistent.Count());
-        }
-
-        [Fact]
-        public void TestEdgeReifierPerformance()
-        {
-            var edged_list = LargeInputJsonLd.GetInputGraphAsEntities().ToImmutableList();
-
-            var persistentEntities = LargeAspectGraph.Select(o => o.PersistentIRI).ToImmutableList();
-            var existing_list = LargeAspectVersionedGraph.ToImmutableList();
-            var refs2 = edged_list.ReifyAllEdges(persistentEntities).ToImmutableList();
-            var reified_json = from j in refs2 select j.ToJsonldJObject();
-            var updateList = refs2.MakeUpdateList(existing_list).ToImmutableList();
-            var reified_update = from j in updateList select j.ToJObject();
-            Assert.Equal(test_size, updateList.Count());
-            //var map = updateList.Union(existing_list).MakePersistentIriMap();
-            var map = ImmutableDictionary.CreateRange(
-                    from obj in existing_list
-                    select new KeyValuePair<IRIReference, VersionedIRIReference>(obj.GetPersistentIRI(),
-                        obj.VersionedIri)
-                )
-                .RemoveRange(updateList.Select(o => o.GetPersistentIRI()))
-                .AddRange(
-                    from obj in updateList
-                    select new KeyValuePair<IRIReference, VersionedIRIReference>(obj.GetPersistentIRI(),
-                        obj.VersionedIri)
-                );
-            var versionedUpdate = updateList.UpdateEdgeIris(map).ToImmutableList();
-            var versioned_update_json = from j in versionedUpdate select j.ToJObject();
-            var deleteList = EntityGraphComparer.MakeDeleteList(refs2, existing_list).ToImmutableList();
-            Assert.Empty(deleteList);
         }
 
     }
