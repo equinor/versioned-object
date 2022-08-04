@@ -76,7 +76,7 @@ namespace VersionedObject.Tests
                         new IRIReference(new string($"http://rdf.equinor.com/ontology/sor#Row{i}")),
                         new JObject()
                         {
-                            ["@type"] = new JArray() {"http://rdf.equinor.com/ontology/mel#MelRow"},
+                            ["@type"] = new JArray() { "http://rdf.equinor.com/ontology/mel#MelRow" },
                             ["rdfs:label"] = "An empty MEL Row",
                         }
                     )
@@ -88,7 +88,7 @@ namespace VersionedObject.Tests
         public static readonly JObject LargeAspectJsonLd = new()
         {
             ["@graph"] = new JArray(LargeAspectVersionedGraph.Select(o => o.ToJObject())),
-            
+
             ["@context"] = new JObject()
             {
                 ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",

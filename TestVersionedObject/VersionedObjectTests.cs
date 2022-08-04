@@ -335,7 +335,7 @@ namespace VersionedObject.Tests
             Assert.NotNull(expanded);
             var second = expanded.RemoveContext();
             Assert.Equal(new IRIReference("http://rdf.equinor.com/ontology/sor#Row2"), new IRIReference(second.GetJsonLdGraph().Values<JObject>().First().GetIRIReference()));
-            
+
             var vobject = JObject.Parse(@"{
                 ""@graph"": [
                 {
