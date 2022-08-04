@@ -53,7 +53,7 @@ namespace VersionedObject.Tests
                 Enumerable.Range(1, test_size)
                     .Select(i => new JObject()
                         {
-                            ["@id"] = $"sor:Row{i}",
+                            ["@id"] = new JValue($"sor:Row{i}"),
                             ["@type"] = "MelRow",
                             ["rdfs:label"] = $"Empty MEL Row {i}"
                         }
@@ -73,7 +73,7 @@ namespace VersionedObject.Tests
             Enumerable.Range(1, test_size)
                 .Select(i =>
                     new PersistentObjectData(
-                        new IRIReference($"http://rdf.equinor.com/ontology/sor#Row{i}"),
+                        new IRIReference(new string($"http://rdf.equinor.com/ontology/sor#Row{i}")),
                         new JObject()
                         {
                             ["@type"] = new JArray() {"http://rdf.equinor.com/ontology/mel#MelRow"},
@@ -87,10 +87,8 @@ namespace VersionedObject.Tests
 
         public static readonly JObject LargeAspectJsonLd = new()
         {
-            ["@graph"] = new JArray()
-            {
-                LargeAspectVersionedGraph.Select(o => o.ToJObject())
-            },
+            ["@graph"] = new JArray(LargeAspectVersionedGraph.Select(o => o.ToJObject())),
+            
             ["@context"] = new JObject()
             {
                 ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",
