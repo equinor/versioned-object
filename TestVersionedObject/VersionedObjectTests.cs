@@ -158,7 +158,7 @@ namespace VersionedObject.Tests
             Assert.True(aspectFirst.Equals(simpleFirst),
                 "Equality test on input and aspect jsonld failed");
             Assert.False(
-                aspect_jsonld.GetExistingGraphAsEntities(ImmutableHashSet<IRIReference>.Empty.Add(new IRIReference("http://rdf.equinor.com/ontology/sor#Row1") )).First().Object
+                aspect_jsonld.GetExistingGraphAsEntities(ImmutableHashSet<IRIReference>.Empty.Add(new IRIReference("http://rdf.equinor.com/ontology/sor#Row1"))).First().Object
                 .Equals(DifferentJsonLd.GetInputGraphAsEntities().First()), "Equality test on input and aspect jsonld failed");
         }
 
@@ -166,7 +166,7 @@ namespace VersionedObject.Tests
         public void RdfHashTest()
         {
             var aspectFirst = aspect_jsonld
-                .GetExistingGraphAsEntities(ImmutableHashSet<IRIReference>.Empty.Add(new IRIReference("http://rdf.equinor.com/ontology/sor#Row1") ))
+                .GetExistingGraphAsEntities(ImmutableHashSet<IRIReference>.Empty.Add(new IRIReference("http://rdf.equinor.com/ontology/sor#Row1")))
                 .First();
             var aspectHashCode = string.Join("", aspectFirst.Object.GetHash());
             Assert.Equal(aspectHashCode, aspectFirst.VersionedIri.VersionHash);
@@ -225,7 +225,7 @@ namespace VersionedObject.Tests
         [Fact()]
         public void MakeUpdateListTest()
         {
-            var updatelist = DifferentJsonLd.GetInputGraphAsEntities().MakeUpdateList(aspect_jsonld.GetExistingGraphAsEntities(ImmutableHashSet<IRIReference>.Empty.Add(new IRIReference("http://rdf.equinor.com/ontology/sor#Row1") )));
+            var updatelist = DifferentJsonLd.GetInputGraphAsEntities().MakeUpdateList(aspect_jsonld.GetExistingGraphAsEntities(ImmutableHashSet<IRIReference>.Empty.Add(new IRIReference("http://rdf.equinor.com/ontology/sor#Row1"))));
             Assert.True(updatelist.Any());
             Assert.Single(updatelist);
             Assert.Equal(DifferentJsonLd.GetInputGraphAsEntities().First().PersistentIRI, updatelist.First().GetPersistentIRI());
@@ -289,7 +289,7 @@ namespace VersionedObject.Tests
         [Fact()]
         public void MakeNoDeleteListTest()
         {
-            var deletelist = SimpleJsonLd.GetInputGraphAsEntities().MakeDeleteList(aspect_jsonld.GetExistingGraphAsEntities(ImmutableHashSet<IRIReference>.Empty.Add(new IRIReference("http://rdf.equinor.com/ontology/sor#Row1") )));
+            var deletelist = SimpleJsonLd.GetInputGraphAsEntities().MakeDeleteList(aspect_jsonld.GetExistingGraphAsEntities(ImmutableHashSet<IRIReference>.Empty.Add(new IRIReference("http://rdf.equinor.com/ontology/sor#Row1"))));
             Assert.NotNull(deletelist);
             Assert.False(deletelist.Any());
         }
@@ -441,7 +441,7 @@ namespace VersionedObject.Tests
         [Fact]
         public void TestRemoveVersionFromUris()
         {
-            var urilist = ImmutableHashSet<IRIReference>.Empty.Add(new("http://rdf.equinor.com/ontology/sor#Row1") );
+            var urilist = ImmutableHashSet<IRIReference>.Empty.Add(new("http://rdf.equinor.com/ontology/sor#Row1"));
             var removed_versions =
                 JsonLdHelper.RemoveVersionFromObject(urilist)(aspect_persistent_jsonld.RemoveContext());
             Assert.Equal("http://rdf.equinor.com/ontology/sor#Row1", removed_versions["@id"]);

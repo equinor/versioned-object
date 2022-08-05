@@ -73,7 +73,7 @@ namespace VersionedObject.CLI
                         new IRIReference(new string($"http://rdf.equinor.com/ontology/sor#Row{i}")),
                         new JObject()
                         {
-                            ["@type"] = new JArray() {"http://rdf.equinor.com/ontology/mel#MelRow"},
+                            ["@type"] = new JArray() { "http://rdf.equinor.com/ontology/mel#MelRow" },
                             ["rdfs:label"] = "An empty MEL Row",
                         }
                     )
