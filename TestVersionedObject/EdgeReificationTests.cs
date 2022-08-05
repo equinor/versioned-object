@@ -121,7 +121,7 @@ namespace VersionedObject.Tests
         {
             var edged_list = InputEdgeJsonLd.GetInputGraphAsEntities();
 
-            var persistentEntities = GetAllPersistentIris(InputEdgeJsonLd, VersionedObjectTests.aspect_jsonld);
+            var persistentEntities = GetAllPersistentIris(InputEdgeJsonLd, VersionedObjectTests.aspect_jsonld).ToImmutableHashSet();
             var existingJObject = VersionedObjectTests.aspect_jsonld.ToString();
             var existing_list = VersionedObjectTests.aspect_jsonld.GetExistingGraphAsEntities(persistentEntities);
             var refs2 = edged_list.ReifyAllEdges(persistentEntities);
