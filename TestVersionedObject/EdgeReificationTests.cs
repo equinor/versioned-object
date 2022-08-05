@@ -129,7 +129,6 @@ namespace VersionedObject.Tests
             var updateList = refs2.MakeUpdateList(existing_list);
             var reified_update = from j in updateList select j.ToJObject();
             Assert.Equal(2, updateList.Count());
-            //var map =  updateList.Union(existing_list).MakePersistentIriMap();
             var map = existing_list.MakeUpdatedPersistentIriMap(updateList);
             var versionedUpdate = updateList.UpdateEdgeIris(map);
             var versioned_update_json = from j in versionedUpdate select j.ToJObject();

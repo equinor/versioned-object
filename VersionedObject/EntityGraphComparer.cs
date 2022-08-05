@@ -182,7 +182,7 @@ namespace VersionedObject
         /// Similar to a HEAD mapping in aspect api
         /// </summary>
         /// <returns></returns>
-        internal static ImmutableDictionary<IRIReference, VersionedIRIReference> MakePersistentIriMap(
+        public static ImmutableDictionary<IRIReference, VersionedIRIReference> MakePersistentIriMap(
             this IEnumerable<VersionedObject> objectList) =>
             ImmutableDictionary.CreateRange(
                 from obj in objectList
