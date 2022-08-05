@@ -7,8 +7,11 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 
 You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
+
+using System.Collections.Immutable;
 using Newtonsoft.Json.Linq;
 using System.Data.HashFunction.CRC;
+using System.Diagnostics;
 using System.Text;
 using System.Text.RegularExpressions;
 using VDS.RDF;
@@ -50,7 +53,17 @@ namespace VersionedObject
         /// Removes the version suffix from all persistent URIs in the JObject
         /// </summary>
         public static JObject RemoveVersionFromUris(this JObject versionedEntity,
-            IEnumerable<IRIReference> persistentUris) =>
+            ImmutableHashSet<IRIReference> persistentUris) =>
+            versionedEntity
+                .Properties()
+                .Select(o => 
+                    o.Value switch
+                    {
+                        JValue iri => CreateIriReference
+                    }
+
+                )
+
             JObject.Parse(persistentUris
                 .Aggregate(versionedEntity.ToString(),
                     (ent, persistent) =>

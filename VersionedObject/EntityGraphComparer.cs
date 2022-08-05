@@ -43,7 +43,7 @@ namespace VersionedObject
         private static JObject HandleGraphUpdate(this JObject input, JObject existing, Func<IEnumerable<PersistentObjectData>, IEnumerable<VersionedObject>, IEnumerable<VersionedIRIReference>> MakeDeleteList)
         {
             var inputList = input.GetInputGraphAsEntities().ToImmutableList();
-            var persistentEntities = GetAllPersistentIris(input, existing).ToImmutableList();
+            var persistentEntities = GetAllPersistentIris(input, existing).ToImmutableHashSet();
             var reifiedInput = inputList.ReifyAllEdges(persistentEntities).ToImmutableList();
             var existingList = existing.GetExistingGraphAsEntities(persistentEntities).ToImmutableList();
             var updateList = reifiedInput.MakeUpdateList(existingList).ToImmutableList();
@@ -67,7 +67,7 @@ namespace VersionedObject
         /// </summary>
         /// <param name="jsonld"></param>
         /// <param name="persistentUris"></param>
-        public static IEnumerable<VersionedObject> GetExistingGraphAsEntities(this JObject jsonld, IEnumerable<IRIReference> persistentUris) =>
+        public static IEnumerable<VersionedObject> GetExistingGraphAsEntities(this JObject jsonld, ImmutableHashSet<IRIReference> persistentUris) =>
             jsonld.RemoveContext()
                 .GetJsonLdGraph()
                 .Values<JObject>()

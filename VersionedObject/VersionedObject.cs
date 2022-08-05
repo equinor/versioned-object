@@ -5,6 +5,7 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System.Collections.Immutable;
 using Newtonsoft.Json.Linq;
 
 namespace VersionedObject;
@@ -40,7 +41,7 @@ public class VersionedObject
         WasDerivedFrom = wasDerivedFrom;
     }
 
-    public VersionedObject(VersionedIRIReference versionedIri, JObject content, IEnumerable<IRIReference> persistentIris)
+    public VersionedObject(VersionedIRIReference versionedIri, JObject content, ImmutableHashSet<IRIReference> persistentIris)
     {
         Object = new PersistentObjectData(versionedIri.PersistentIRI, content.RemoveVersionFromUris(persistentIris));
         VersionedIri = versionedIri;
