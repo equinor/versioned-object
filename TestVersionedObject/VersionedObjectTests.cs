@@ -442,8 +442,7 @@ namespace VersionedObject.Tests
         public void TestRemoveVersionFromUris()
         {
             var urilist = ImmutableHashSet<IRIReference>.Empty.Add(new("http://rdf.equinor.com/ontology/sor#Row1"));
-            var removed_versions =
-                JsonLdHelper.RemoveVersionFromObject(urilist)(aspect_persistent_jsonld.RemoveContext());
+            var removed_versions = aspect_persistent_jsonld.RemoveContext().RemoveVersionsFromIris(urilist);
             Assert.Equal("http://rdf.equinor.com/ontology/sor#Row1", removed_versions["@id"]);
         }
 

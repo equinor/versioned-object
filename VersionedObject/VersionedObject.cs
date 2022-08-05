@@ -36,14 +36,14 @@ public class VersionedObject
 
     public VersionedObject(VersionedIRIReference versionedIri, JObject content, ImmutableHashSet<IRIReference> persistentIris, VersionedIRIReference wasDerivedFrom)
     {
-        Object = new PersistentObjectData(versionedIri.PersistentIRI, JsonLdHelper.RemoveVersionFromObject(persistentIris)(content));
+        Object = new PersistentObjectData(versionedIri.PersistentIRI, content.RemoveVersionsFromIris(persistentIris));
         VersionedIri = versionedIri;
         WasDerivedFrom = wasDerivedFrom;
     }
 
     public VersionedObject(VersionedIRIReference versionedIri, JObject content, ImmutableHashSet<IRIReference> persistentIris)
     {
-        Object = new PersistentObjectData(versionedIri.PersistentIRI, JsonLdHelper.RemoveVersionFromObject(persistentIris)(content));
+        Object = new PersistentObjectData(versionedIri.PersistentIRI, content.RemoveVersionsFromIris(persistentIris));
         VersionedIri = versionedIri;
         var props = content.Properties();
         var first = content.SelectToken("http://www.w3.org/ns/prov#wasDerivedFrom");

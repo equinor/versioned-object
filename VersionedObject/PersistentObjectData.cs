@@ -7,6 +7,7 @@ You should have received a copy of the GNU General Public License along with thi
 using System;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -33,9 +34,14 @@ namespace VersionedObject
         }
 
         public PersistentObjectData(JToken persistentIRI, JObject content) : this(new IRIReference(persistentIRI.ToString()), content)
-        {
-            ;
-        }
+        {}
+
+        /// <summary>
+        /// Adds versions to all references to persistent IRIs in the map argument
+        /// </summary>
+        public PersistentObjectData(PersistentObjectData orig,
+            ImmutableDictionary<IRIReference, VersionedIRIReference> map) : this(orig.PersistentIRI, new JObject(orig.Content).AddVersionsToUris(map))
+        {}
 
         public bool SamePersistentIRI(PersistentObjectData other) =>
             PersistentIRI.ToString().Equals(other.PersistentIRI.ToString());

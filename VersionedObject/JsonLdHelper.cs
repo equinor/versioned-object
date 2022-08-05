@@ -49,6 +49,37 @@ namespace VersionedObject
             return RdfComparer(oldGraph, inputGraph);
         }
 
+
+        /// <summary>
+        /// Generic functions for applying a function to all JValues in json
+        /// </summary>
+        private static readonly Func<Func<JValue, JValue>, Func<JToken, JToken>> ChangeValuesInToken =
+            valueChanger => token =>
+                token switch
+                {
+                    JArray array => new JArray(array.Select(ChangeValuesInToken(valueChanger))),
+                    JObject obj => ChangeValuesInObject(valueChanger)(obj),
+                    JValue val => valueChanger(val),
+                    _ => throw new InvalidJsonLdException($"Unknown json token {token}")
+                };
+
+        private static readonly Func<Func<JValue, JValue>, Func<JProperty, JProperty>> ChangeValuesInProperty =
+            valueChanger => prop =>
+                new JProperty(prop.Name, ChangeValuesInToken(valueChanger)(prop.Value));
+
+        public static readonly Func<Func<JValue, JValue>, Func<JObject, JObject>> ChangeValuesInObject =
+            valueChanger => versionedEntity =>
+                new JObject(versionedEntity
+                    .Properties()
+                    .Select(ChangeValuesInProperty(valueChanger)));
+
+
+        /// <summary>
+        /// Removes the version suffix from all persistent URIs in the JObject
+        /// </summary>
+        public static JObject RemoveVersionsFromIris(this JObject versionedEntity, ImmutableHashSet<IRIReference> dict) =>
+            ChangeValuesInObject(RemoveVersionFromValue(dict))(versionedEntity);
+
         /// <summary>
         /// Helper functions for removeing versions from objects
         /// </summary>
@@ -70,40 +101,29 @@ namespace VersionedObject
                 }
             };
 
-        private static readonly Func<ImmutableHashSet<IRIReference>, Func<JToken, JToken>> RemoveVersionFromToken =
-            persistentUris => token =>
-                token switch
-                {
-                    JArray array => new JArray(array.Select(RemoveVersionFromToken(persistentUris))),
-                    JObject obj => RemoveVersionFromObject(persistentUris)(obj),
-                    JValue val => RemoveVersionFromValue(persistentUris)(val),
-                    _ => throw new InvalidJsonLdException($"Unknown json token {token}")
-                };
-
-        private static readonly Func<ImmutableHashSet<IRIReference>, Func<JProperty, JProperty>> RemoveVersionFromProperty =
-            persistentUris => prop =>
-                new JProperty(prop.Name, RemoveVersionFromToken(persistentUris)(prop.Value));
-
         /// <summary>
-        /// Removes the version suffix from all persistent URIs in the JObject
+        /// Helper functions for adding versions to objects
         /// </summary>
-        public static readonly Func<ImmutableHashSet<IRIReference>, Func<JObject, JObject>> RemoveVersionFromObject =
-            persistentUris => versionedEntity =>
-                new JObject(versionedEntity
-                    .Properties()
-                    .Select(RemoveVersionFromProperty(persistentUris)));
+        private static readonly Func<ImmutableDictionary<IRIReference, VersionedIRIReference>, Func<JValue, JValue>>
+            AddVersionToValue =
+                uriMap => val =>
+                {
+                    try
+                    {
+                        return uriMap.ContainsKey(val.ToString()) ? uriMap[val.ToString()] : val;
+                    }
+                    catch (UriFormatException)
+                    {
+                        return val;
+                    }
+                };
 
         /// <summary>
         /// Adds the version suffix to all persistent URIs in the JObject
         /// </summary>
-        public static JObject AddVersionToUris(this JObject persistentEntity, IEnumerable<VersionedObject> entities) =>
-            JObject.Parse(entities
-                .Aggregate(persistentEntity.ToString(),
-                    (ent, versioned) =>
-                        new Regex($"{versioned.GetPersistentIRI().ToString().Replace(".", "\\.")}/\\w+")
-                            .Replace(ent, versioned.VersionedIri.ToString())
-                )
-            );
+        public static JObject AddVersionsToUris(this JObject orig,
+            ImmutableDictionary<IRIReference, VersionedIRIReference> map) =>
+            ChangeValuesInObject(AddVersionToValue(map))(orig);
 
         public static byte[] GetHash(this IGraph g)
         {

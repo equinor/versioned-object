@@ -15,6 +15,7 @@ using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 using AngleSharp.Common;
 using VDS.RDF.JsonLd;
+using static VersionedObject.JsonLdHelper;
 
 namespace VersionedObject
 {
@@ -188,24 +189,8 @@ namespace VersionedObject
                 select new KeyValuePair<IRIReference, VersionedIRIReference>(obj.GetPersistentIRI(), obj.VersionedIri)
                 );
 
-        /// <summary>
-        /// Adds versions to all references to persistent IRIs in the map argument
-        /// </summary>
-        /// <param name="orig"></param>
-        /// <param name="map"></param>
-        /// <returns></returns>
-        public static PersistentObjectData CreateVersionedIRIs(this PersistentObjectData orig,
-            ImmutableDictionary<IRIReference, VersionedIRIReference> map) =>
-            new(orig.PersistentIRI,
-                JObject.Parse(
-                    map.Keys
-                        .Aggregate(orig.ToJsonldJObject().ToString(),
-                            (json, uri) => json.Replace(uri.ToString(), map[uri].ToString())
-                            )
-                    )
-                );
         public static VersionedObject CreateVersionedIRIs(this VersionedObject orig, ImmutableDictionary<IRIReference, VersionedIRIReference> map) =>
-            new(orig.Object.CreateVersionedIRIs(map), orig.WasDerivedFrom);
+            new(new PersistentObjectData(orig.Object, map), orig.WasDerivedFrom);
 
         public static IEnumerable<VersionedObject> UpdateEdgeIris(this IEnumerable<VersionedObject> updateList,
             ImmutableDictionary<IRIReference, VersionedIRIReference> map) =>
