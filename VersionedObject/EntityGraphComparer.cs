@@ -47,7 +47,7 @@ namespace VersionedObject
             var reifiedInput = inputList.ReifyAllEdges(persistentEntities);
             var existingList = existing.GetExistingGraphAsEntities(persistentEntities);
             var updateList = reifiedInput.MakeUpdateList(existingList);
-            var versionedIriMap = updateList.Union(existingList).MakePersistentIriMap();
+            var versionedIriMap = existingList.MakeUpdatedPersistentIriMap(updateList);
             var versionedUpdateList = updateList.UpdateEdgeIris(versionedIriMap);
             var deleteList = MakeDeleteList(reifiedInput, existingList);
             return CreateUpdateJObject(versionedUpdateList, deleteList);
@@ -161,12 +161,25 @@ namespace VersionedObject
                 .Select(s => s.id ?? throw new InvalidJsonLdException($"No @id element found in JObject {s.obj}"))
                 .Select(s => new Uri(s));
 
+        public static ImmutableDictionary<IRIReference, VersionedIRIReference> MakeUpdatedPersistentIriMap(
+            this IEnumerable<VersionedObject> existingObjects, IEnumerable<VersionedObject> updateObjects) =>
+            existingObjects.MakePersistentIriMap()
+                .UpdateIriDictionary(updateObjects.MakePersistentIriMap());
+
+
+        ///<summary>
+        /// Makes an updated list of versioned objects, removing those that are being updated
+        /// </summary>
+        internal static ImmutableDictionary<IRIReference, VersionedIRIReference> UpdateIriDictionary(
+            this ImmutableDictionary<IRIReference, VersionedIRIReference> existingDict,
+            ImmutableDictionary<IRIReference, VersionedIRIReference> updateDict) =>
+            updateDict.Aggregate(existingDict, (dict, u) => dict.SetItem(u.Key, u.Value))
+                .ToImmutableDictionary();
+
         /// <summary>
         /// Called on list of versioned objects to get a mapping from persistent to versioned IRIs
         /// Similar to a HEAD mapping in aspect api
         /// </summary>
-        /// <param name="input"></param>
-        /// <param name="existing"></param>
         /// <returns></returns>
         public static ImmutableDictionary<IRIReference, VersionedIRIReference> MakePersistentIriMap(
             this IEnumerable<VersionedObject> objectList) =>
