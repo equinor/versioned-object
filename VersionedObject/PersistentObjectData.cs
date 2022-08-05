@@ -34,14 +34,14 @@ namespace VersionedObject
         }
 
         public PersistentObjectData(JToken persistentIRI, JObject content) : this(new IRIReference(persistentIRI.ToString()), content)
-        {}
+        { }
 
         /// <summary>
         /// Adds versions to all references to persistent IRIs in the map argument
         /// </summary>
         public PersistentObjectData(PersistentObjectData orig,
             ImmutableDictionary<IRIReference, VersionedIRIReference> map) : this(orig.PersistentIRI, new JObject(orig.Content).AddVersionsToUris(map))
-        {}
+        { }
 
         public bool SamePersistentIRI(PersistentObjectData other) =>
             PersistentIRI.ToString().Equals(other.PersistentIRI.ToString());
