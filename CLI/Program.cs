@@ -41,7 +41,7 @@ namespace VersionedObject.CLI
             }
         };
 
-        public static readonly int test_size = 2000;
+        public static readonly int test_size = 3000;
 
         public static readonly JObject LargeInputJsonLd = new()
         {
