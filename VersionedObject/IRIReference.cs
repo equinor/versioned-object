@@ -37,7 +37,7 @@ public class IRIReference : IEquatable<IRIReference>
 
     public override string ToString() => uri.ToString();
 
-    public JValue ToJValue() => new(uri);
+    public JValue ToJValue() => new(ToString());
     public JValue ToJToken() => ToJValue();
 
 
