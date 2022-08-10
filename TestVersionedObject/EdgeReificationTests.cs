@@ -44,7 +44,7 @@ namespace VersionedObject.Tests
             }
         };
 
-        public static readonly int test_size = 10;
+        public static readonly int test_size = 100;
 
         public static readonly JObject LargeInputJsonLd = new()
         {
@@ -121,7 +121,7 @@ namespace VersionedObject.Tests
         {
             var edged_list = InputEdgeJsonLd.GetInputGraphAsEntities();
 
-            var persistentEntities = GetAllPersistentIris(InputEdgeJsonLd, VersionedObjectTests.aspect_jsonld);
+            var persistentEntities = GetAllPersistentIris(InputEdgeJsonLd, VersionedObjectTests.aspect_jsonld).ToImmutableHashSet();
             var existingJObject = VersionedObjectTests.aspect_jsonld.ToString();
             var existing_list = VersionedObjectTests.aspect_jsonld.GetExistingGraphAsEntities(persistentEntities);
             var refs2 = edged_list.ReifyAllEdges(persistentEntities);

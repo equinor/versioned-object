@@ -15,6 +15,7 @@ using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 using AngleSharp.Common;
 using VDS.RDF.JsonLd;
+using static VersionedObject.JsonLdHelper;
 
 namespace VersionedObject
 {
@@ -42,14 +43,14 @@ namespace VersionedObject
 
         private static JObject HandleGraphUpdate(this JObject input, JObject existing, Func<IEnumerable<PersistentObjectData>, IEnumerable<VersionedObject>, IEnumerable<VersionedIRIReference>> MakeDeleteList)
         {
-            var inputList = input.GetInputGraphAsEntities();
-            var persistentEntities = GetAllPersistentIris(input, existing);
-            var reifiedInput = inputList.ReifyAllEdges(persistentEntities);
-            var existingList = existing.GetExistingGraphAsEntities(persistentEntities);
-            var updateList = reifiedInput.MakeUpdateList(existingList);
+            var inputList = input.GetInputGraphAsEntities().ToImmutableList();
+            var persistentEntities = GetAllPersistentIris(input, existing).ToImmutableHashSet();
+            var reifiedInput = inputList.ReifyAllEdges(persistentEntities).ToImmutableList();
+            var existingList = existing.GetExistingGraphAsEntities(persistentEntities).ToImmutableList();
+            var updateList = reifiedInput.MakeUpdateList(existingList).ToImmutableList();
             var versionedIriMap = existingList.MakeUpdatedPersistentIriMap(updateList);
-            var versionedUpdateList = updateList.UpdateEdgeIris(versionedIriMap);
-            var deleteList = MakeDeleteList(reifiedInput, existingList);
+            var versionedUpdateList = updateList.UpdateEdgeIris(versionedIriMap).ToImmutableList();
+            var deleteList = MakeDeleteList(reifiedInput, existingList).ToImmutableList();
             return CreateUpdateJObject(versionedUpdateList, deleteList);
         }
         /// <summary>
@@ -67,7 +68,7 @@ namespace VersionedObject
         /// </summary>
         /// <param name="jsonld"></param>
         /// <param name="persistentUris"></param>
-        public static IEnumerable<VersionedObject> GetExistingGraphAsEntities(this JObject jsonld, IEnumerable<IRIReference> persistentUris) =>
+        public static IEnumerable<VersionedObject> GetExistingGraphAsEntities(this JObject jsonld, ImmutableHashSet<IRIReference> persistentUris) =>
             jsonld.RemoveContext()
                 .GetJsonLdGraph()
                 .Values<JObject>()
@@ -188,24 +189,8 @@ namespace VersionedObject
                 select new KeyValuePair<IRIReference, VersionedIRIReference>(obj.GetPersistentIRI(), obj.VersionedIri)
                 );
 
-        /// <summary>
-        /// Adds versions to all references to persistent IRIs in the map argument
-        /// </summary>
-        /// <param name="orig"></param>
-        /// <param name="map"></param>
-        /// <returns></returns>
-        public static PersistentObjectData CreateVersionedIRIs(this PersistentObjectData orig,
-            ImmutableDictionary<IRIReference, VersionedIRIReference> map) =>
-            new(orig.PersistentIRI,
-                JObject.Parse(
-                    map.Keys
-                        .Aggregate(orig.ToJsonldJObject().ToString(),
-                            (json, uri) => json.Replace(uri.ToString(), map[uri].ToString())
-                            )
-                    )
-                );
         public static VersionedObject CreateVersionedIRIs(this VersionedObject orig, ImmutableDictionary<IRIReference, VersionedIRIReference> map) =>
-            new(orig.Object.CreateVersionedIRIs(map), orig.WasDerivedFrom);
+            new(new PersistentObjectData(orig.Object, map), orig.WasDerivedFrom);
 
         public static IEnumerable<VersionedObject> UpdateEdgeIris(this IEnumerable<VersionedObject> updateList,
             ImmutableDictionary<IRIReference, VersionedIRIReference> map) =>
