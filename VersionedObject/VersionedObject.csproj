@@ -10,7 +10,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 	  <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-	  <Version>$(VersionPrefix)0.0.3</Version>
+	  <Version>$(VersionPrefix)0.0.4</Version>
 	  <Description>A c# library for handling versioned objects and IRIs.</Description>
 	  <Authors>Dag Hovland</Authors>
 	  <Company>Equinor</Company>
@@ -19,7 +19,7 @@
 	  <RepositoryUrl>https://github.com/equinor/versioned-object</RepositoryUrl>
 	  <RepositoryType>git</RepositoryType>
 	  <PackageTags>semantic technology;rdf</PackageTags>
-	  <PackageReleaseNotes>Initial release without edge reification</PackageReleaseNotes>
+	  <PackageReleaseNotes>Improved performance of EntityGraphComparer</PackageReleaseNotes>
 	  <PackageLicenseExpression>LGPL-3.0-only</PackageLicenseExpression>
 	  <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
   </PropertyGroup>
@@ -32,7 +32,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="dotNetRDF" Version="2.7.4" />
+    <PackageReference Include="dotNetRDF" Version="2.7.5" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="System.Data.HashFunction.CRC" Version="2.0.0" />
   </ItemGroup>

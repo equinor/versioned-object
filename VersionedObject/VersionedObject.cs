@@ -5,6 +5,7 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System.Collections.Immutable;
 using Newtonsoft.Json.Linq;
 
 namespace VersionedObject;
@@ -33,16 +34,16 @@ public class VersionedObject
         WasDerivedFrom = provenance;
     }
 
-    public VersionedObject(VersionedIRIReference versionedIri, JObject content, IEnumerable<IRIReference> persistentIris, VersionedIRIReference wasDerivedFrom)
+    public VersionedObject(VersionedIRIReference versionedIri, JObject content, ImmutableHashSet<IRIReference> persistentIris, VersionedIRIReference wasDerivedFrom)
     {
-        Object = new PersistentObjectData(versionedIri.PersistentIRI, content.RemoveVersionFromUris(persistentIris));
+        Object = new PersistentObjectData(versionedIri.PersistentIRI, content.RemoveVersionsFromIris(persistentIris));
         VersionedIri = versionedIri;
         WasDerivedFrom = wasDerivedFrom;
     }
 
-    public VersionedObject(VersionedIRIReference versionedIri, JObject content, IEnumerable<IRIReference> persistentIris)
+    public VersionedObject(VersionedIRIReference versionedIri, JObject content, ImmutableHashSet<IRIReference> persistentIris)
     {
-        Object = new PersistentObjectData(versionedIri.PersistentIRI, content.RemoveVersionFromUris(persistentIris));
+        Object = new PersistentObjectData(versionedIri.PersistentIRI, content.RemoveVersionsFromIris(persistentIris));
         VersionedIri = versionedIri;
         var props = content.Properties();
         var first = content.SelectToken("http://www.w3.org/ns/prov#wasDerivedFrom");
@@ -55,7 +56,7 @@ public class VersionedObject
 
     }
 
-    public VersionedObject(JToken versionedIri, JObject content, IEnumerable<IRIReference> persistentIris, VersionedIRIReference wasDerivedFrom) : this(new VersionedIRIReference(versionedIri.ToString()), content, persistentIris, wasDerivedFrom)
+    public VersionedObject(JToken versionedIri, JObject content, ImmutableHashSet<IRIReference> persistentIris, VersionedIRIReference wasDerivedFrom) : this(new VersionedIRIReference(versionedIri.ToString()), content, persistentIris, wasDerivedFrom)
     { }
 
 
