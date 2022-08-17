@@ -19,7 +19,7 @@
 	  <RepositoryUrl>https://github.com/equinor/versioned-object</RepositoryUrl>
 	  <RepositoryType>git</RepositoryType>
 	  <PackageTags>semantic technology;rdf</PackageTags>
-	  <PackageReleaseNotes>Initial release without edge reification</PackageReleaseNotes>
+	  <PackageReleaseNotes>Improved performance of EntityGraphComparer</PackageReleaseNotes>
 	  <PackageLicenseExpression>LGPL-3.0-only</PackageLicenseExpression>
 	  <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
   </PropertyGroup>
