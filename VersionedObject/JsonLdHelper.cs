@@ -73,7 +73,7 @@ namespace VersionedObject
                     .Properties()
                     .Select(ChangeValuesInProperty(valueChanger)));
 
-
+        //select: Func<Func<I,O>, Func<IEnumerable<I>,IEnumerable<O>> 
         /// <summary>
         /// Removes the version suffix from all persistent URIs in the JObject
         /// </summary>
