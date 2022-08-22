@@ -2,6 +2,7 @@ using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Text.Json.Serialization;
 using Xunit;
 using static VersionedObject.EntityGraphComparer;
 using static VersionedObject.JsonLdHelper;
@@ -64,6 +65,309 @@ namespace VersionedObject.Tests
                         ["rdfs:label"] = "An empty MEL Row"
                     }
                 },
+            ["@context"] = new JObject()
+            {
+                ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",
+                ["@vocab"] = "http://rdf.equinor.com/ontology/mel#",
+                ["sor"] = "http://rdf.equinor.com/ontology/sor#",
+                ["@version"] = "1.1"
+            }
+        };
+
+<<<<<<< Updated upstream
+=======
+        public static readonly JObject BlankNodeJsonLd = new()
+        {
+            ["@graph"] = new JArray()
+            {
+                new JObject()
+                {
+                    ["@id"] = "sor:Row1",
+                    ["@type"] = "MelRow",
+                    ["rdfs:label"] = "An empty MEL Row",
+                    ["http://rds.posccaesar.org/ontology/lis14/rdl/hasPhysicalQuantity"] = new JObject()
+                    {
+                        ["@type"] = "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003589",
+                        ["rdfs:label"] = "Weight of object",
+                        ["http://rds.posccaesar.org/ontology/lis14/rdl/qualityQuantifiedAs"] = new JArray(){
+                            new JObject()
+                        {
+                            ["@type"] = new JArray("http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003620", "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100004048"),
+                            ["rdfs:label"] = "Weight specified",
+                            ["http://rds.posccaesar.org/ontology/lis14/rdl/datumValue"] = "12345",
+                            ["http://rds.posccaesar.org/ontology/lis14/rdl/datumUOM"] = "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003684"
+                        },
+                            new JObject(){
+                                ["@type"] = new JArray("http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003620", "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100004048"),
+                                ["rdfs:label"] = "Weight specified",
+                                ["http://rds.posccaesar.org/ontology/lis14/rdl/datumValue"] = "23456",
+                                ["http://rds.posccaesar.org/ontology/lis14/rdl/datumUOM"] = "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003684"
+                                }
+                            }
+                    }
+                }
+            },
+            ["@context"] = new JObject()
+            {
+                ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",
+                ["@vocab"] = "http://rdf.equinor.com/ontology/mel#",
+                ["sor"] = "http://rdf.equinor.com/ontology/sor#",
+                ["@version"] = "1.1"
+            }
+        };
+
+        public static readonly JObject BlankNodeJsonLd2 = new()
+        {
+            ["@graph"] = new JArray()
+            {
+                new JObject()
+                {
+                    ["@id"] = "sor:Row1",
+                    ["@type"] = "MelRow",
+                    ["rdfs:label"] = "An empty MEL Row",
+                    ["http://rds.posccaesar.org/ontology/lis14/rdl/hasPhysicalQuantity"] = new JObject()
+                    {
+                        ["@type"] = "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003589",
+                        ["@id"] = "_:1234",
+                        ["rdfs:label"] = "Weight of object",
+                        ["http://rds.posccaesar.org/ontology/lis14/rdl/qualityQuantifiedAs"] = new JArray(){ new JObject()
+                        {
+                            ["@type"] = new JArray("http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003620", "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100004048"),
+                            ["@id"] = "_:212",
+                            ["rdfs:label"] = "Weight specified",
+                            ["http://rds.posccaesar.org/ontology/lis14/rdl/datumValue"] = "12345",
+                            ["http://rds.posccaesar.org/ontology/lis14/rdl/datumUOM"] = "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003684"
+                        },
+                            new JObject(){
+                                ["@type"] = new JArray("http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003620", "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100004048"),
+                                ["rdfs:label"] = "Weight specified",
+                                ["http://rds.posccaesar.org/ontology/lis14/rdl/datumValue"] = "23456",
+                                ["http://rds.posccaesar.org/ontology/lis14/rdl/datumUOM"] = "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003684"
+                            }
+                        }
+                    }
+                }
+            },
+            ["@context"] = new JObject()
+            {
+                ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",
+                ["@vocab"] = "http://rdf.equinor.com/ontology/mel#",
+                ["sor"] = "http://rdf.equinor.com/ontology/sor#",
+                ["@version"] = "1.1"
+            }
+        };
+
+        public static readonly JObject BlankNodeJsonLd2a = new()
+        {
+            ["@graph"] = new JArray()
+            {
+                new JObject()
+                {
+                    ["@id"] = "sor:Row1",
+                    ["@type"] = "MelRow",
+                    ["rdfs:label"] = "An empty MEL Row",
+                    ["http://rds.posccaesar.org/ontology/lis14/rdl/hasPhysicalQuantity"] = new JObject()
+                    {
+                        ["@type"] = "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003589",
+                        ["@id"] = "_:1234",
+                        ["rdfs:label"] = "Weight of object",
+                        ["http://rds.posccaesar.org/ontology/lis14/rdl/qualityQuantifiedAs"] = new JArray(){
+                            new JObject(){
+                                ["@type"] = new JArray("http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003620", "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100004048"),
+                                ["rdfs:label"] = "Weight specified",
+                                ["http://rds.posccaesar.org/ontology/lis14/rdl/datumValue"] = "23456",
+                                ["http://rds.posccaesar.org/ontology/lis14/rdl/datumUOM"] = "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003684"
+                            },
+                            new JObject()
+                        {
+                            ["@type"] = new JArray("http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003620", "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100004048"),
+                            ["@id"] = "_:strangeweightid",
+                            ["rdfs:label"] = "Weight specified",
+                            ["http://rds.posccaesar.org/ontology/lis14/rdl/datumValue"] = "12345",
+                            ["http://rds.posccaesar.org/ontology/lis14/rdl/datumUOM"] = "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003684"
+                        }
+                        }
+                    }
+                }
+            },
+            ["@context"] = new JObject()
+            {
+                ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",
+                ["@vocab"] = "http://rdf.equinor.com/ontology/mel#",
+                ["sor"] = "http://rdf.equinor.com/ontology/sor#",
+                ["@version"] = "1.1"
+            }
+        };
+
+        public static readonly JObject BlankNodeJsonLd3 = new()
+        {
+            ["@graph"] = new JArray()
+            {
+                new JObject()
+                {
+                    ["@id"] = "sor:Row1",
+                    ["@type"] = "MelRow",
+                    ["rdfs:label"] = "An empty MEL Row",
+                    ["http://rds.posccaesar.org/ontology/lis14/rdl/hasPhysicalQuantity"] = new JObject()
+                    {
+                        ["@type"] = "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003589",
+                        ["@id"] = "_:1",
+                        ["rdfs:label"] = "Weight of object",
+                        ["http://rds.posccaesar.org/ontology/lis14/rdl/qualityQuantifiedAs"] = new JObject()
+                        {
+                            ["@type"] = new JArray("http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003620", "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100004048"),
+                            ["@id"] = "_:2",
+                            ["rdfs:label"] = "Weight specified",
+                            ["http://rds.posccaesar.org/ontology/lis14/rdl/datumValue"] = "12346",
+                            ["http://rds.posccaesar.org/ontology/lis14/rdl/datumUOM"] = "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003684"
+                        }
+                    }
+                }
+            },
+            ["@context"] = new JObject()
+            {
+                ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",
+                ["@vocab"] = "http://rdf.equinor.com/ontology/mel#",
+                ["sor"] = "http://rdf.equinor.com/ontology/sor#",
+                ["@version"] = "1.1"
+            }
+        };
+
+        public static readonly JObject BlankNodeJsonLd4 = new()
+        {
+            ["@graph"] = new JArray()
+            {
+                new JObject()
+                {
+                    ["@id"] = "sor:Row1",
+                    ["@type"] = "MelRow",
+                    ["rdfs:label"] = "An empty MEL Row",
+                    ["http://rds.posccaesar.org/ontology/lis14/rdl/hasPhysicalQuantity"] = new JObject()
+                    {
+                        ["@type"] = "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003589",
+                        ["@id"] = "_:strangelongblankid",
+                        ["rdfs:label"] = "Weight of object",
+                        ["http://rds.posccaesar.org/ontology/lis14/rdl/qualityQuantifiedAs"] = new JObject()
+                        {
+                            ["@type"] = new JArray("http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003620", "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100004048"),
+                            ["@id"] = "_:evenweirderlongblankid",
+                            ["rdfs:label"] = "Weight specified",
+                            ["http://rds.posccaesar.org/ontology/lis14/rdl/datumValue"] = "12346",
+                            ["http://rds.posccaesar.org/ontology/lis14/rdl/datumUOM"] = "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003684"
+                        }
+                    }
+                }
+            },
+            ["@context"] = new JObject()
+            {
+                ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",
+                ["@vocab"] = "http://rdf.equinor.com/ontology/mel#",
+                ["sor"] = "http://rdf.equinor.com/ontology/sor#",
+                ["@version"] = "1.1"
+            }
+        };
+
+        public static readonly JObject ReorderTest1 = new()
+        {
+            ["@graph"] = new JArray()
+            {
+                new JObject()
+                {
+                    ["@id"] = "sor:Row1",
+                    ["@type"] = "MelRow",
+                    ["rdfs:label"] = "An empty MEL Row",
+                    ["http://rds.posccaesar.org/ontology/lis14/rdl/hasPhysicalQuantity"] = new JArray()
+                    {
+                        new JObject()
+                        {
+                            ["@type"] = "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003589",
+                            ["@id"] = "sor:Row2",
+                            ["rdfs:label"] = "Weight of object",
+                            ["http://rds.posccaesar.org/ontology/lis14/rdl/qualityQuantifiedAs"] = new JObject()
+                            {
+                                ["@type"] = new JArray("http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003620",
+                                    "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100004048"),
+                                ["@id"] = "_:2",
+                                ["rdfs:label"] = "Weight specified",
+                                ["http://rds.posccaesar.org/ontology/lis14/rdl/datumValue"] = "1",
+                                ["http://rds.posccaesar.org/ontology/lis14/rdl/datumUOM"] =
+                                    "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003684"
+                            }
+                        },
+                        new JObject()
+                        {
+                            ["@type"] = "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003589",
+                            ["@id"] = "sor:Row3",
+                            ["rdfs:label"] = "Weight of object",
+                            ["http://rds.posccaesar.org/ontology/lis14/rdl/qualityQuantifiedAs"] = new JObject()
+                            {
+                                ["@type"] = new JArray("http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003620",
+                                    "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100004048"),
+                                ["@id"] = "_:2",
+                                ["rdfs:label"] = "Weight specified",
+                                ["http://rds.posccaesar.org/ontology/lis14/rdl/datumValue"] = "2",
+                                ["http://rds.posccaesar.org/ontology/lis14/rdl/datumUOM"] =
+                                    "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003684"
+                            }
+                        }
+                    }
+                }
+            },
+            ["@context"] = new JObject()
+            {
+                ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",
+                ["@vocab"] = "http://rdf.equinor.com/ontology/mel#",
+                ["sor"] = "http://rdf.equinor.com/ontology/sor#",
+                ["@version"] = "1.1"
+            }
+        };
+
+        public static readonly JObject ReorderTest2 = new()
+        {
+            ["@graph"] = new JArray()
+            {
+                new JObject()
+                {
+                    ["@id"] = "sor:Row1",
+                    ["@type"] = "MelRow",
+                    ["rdfs:label"] = "An empty MEL Row",
+                    ["http://rds.posccaesar.org/ontology/lis14/rdl/hasPhysicalQuantity"] = new JArray()
+                    {
+                        new JObject()
+                        {
+                            ["@type"] = "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003589",
+                            ["@id"] = "sor:Row3",
+                            ["rdfs:label"] = "Weight of object",
+                            ["http://rds.posccaesar.org/ontology/lis14/rdl/qualityQuantifiedAs"] = new JObject()
+                            {
+                                ["@type"] = new JArray("http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003620",
+                                    "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100004048"),
+                                ["@id"] = "_:2",
+                                ["rdfs:label"] = "Weight specified",
+                                ["http://rds.posccaesar.org/ontology/lis14/rdl/datumValue"] = "1",
+                                ["http://rds.posccaesar.org/ontology/lis14/rdl/datumUOM"] =
+                                    "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003684"
+                            }
+                        },
+                        new JObject()
+                        {
+                            ["@type"] = "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003589",
+                            ["@id"] = "sor:Row2",
+                            ["rdfs:label"] = "Weight of object",
+                            ["http://rds.posccaesar.org/ontology/lis14/rdl/qualityQuantifiedAs"] = new JObject()
+                            {
+                                ["@type"] = new JArray("http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003620",
+                                    "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100004048"),
+                                ["@id"] = "_:2",
+                                ["rdfs:label"] = "Weight specified",
+                                ["http://rds.posccaesar.org/ontology/lis14/rdl/datumValue"] = "2",
+                                ["http://rds.posccaesar.org/ontology/lis14/rdl/datumUOM"] =
+                                    "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003684"
+                            }
+                        }
+                    }
+                }
+            },
             ["@context"] = new JObject()
             {
                 ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",
@@ -292,6 +596,13 @@ namespace VersionedObject.Tests
             var deletelist = SimpleJsonLd.GetInputGraphAsEntities().MakeDeleteList(aspect_jsonld.GetExistingGraphAsEntities(ImmutableHashSet<IRIReference>.Empty.Add(new IRIReference("http://rdf.equinor.com/ontology/sor#Row1"))));
             Assert.NotNull(deletelist);
             Assert.False(deletelist.Any());
+        }
+        [Fact]
+        public void TestMinorReordering()
+        {
+            var hash1 = ParseJsonLdString(ReorderTest1.ToString()).GetHash();
+            var hash2 = ParseJsonLdString(ReorderTest2.ToString()).GetHash();
+            Assert.NotEqual(hash1, hash2);
         }
 
         [Fact()]
