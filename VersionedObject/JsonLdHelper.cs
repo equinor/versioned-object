@@ -130,7 +130,7 @@ namespace VersionedObject
         {
             var writer = new NTriplesWriter();
             var graphString = VDS.RDF.Writing.StringWriter.Write(g, writer);
-            var hasher = SHA256.Create();
+            var hasher = SHA1.Create();
             var triplesHash = graphString
                 .Split(new[] { '\r', '\n' }, System.StringSplitOptions.RemoveEmptyEntries)
                 .Select(x => (IEnumerable<byte>)hasher.ComputeHash(Encoding.UTF8.GetBytes(x)))
