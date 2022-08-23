@@ -16,6 +16,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using VDS.RDF;
 using VDS.RDF.Writing;
+using System;
+using System.Xml.Linq;
 
 namespace VersionedObject
 {
@@ -26,9 +28,12 @@ namespace VersionedObject
         /// Adds the type and version information to the input object from the old object, 
         /// simulating the version control that should be in the clients
         /// </summary>
-        public static bool RdfEqualsHash(IGraph old, IGraph input) =>
+        public static bool RdfEqualsHash(JObject old, JObject input) =>
             input.GetHash()
                 .SequenceEqual(old.GetHash());
+
+        public static bool RdfEqualsTriples(JObject old, JObject input) =>
+            RdfEqualsTriples(ParseJsonLdString(old.ToString()), ParseJsonLdString(input.ToString()));
 
         /// <summary>
         /// Compares two json-ld objects by checking the triples are the same
@@ -42,43 +47,38 @@ namespace VersionedObject
         /// Adds the type and version information to the input object from the old object, 
         /// simulating the version control that should be in the clients
         /// </summary>
-        public static bool AspectEquals(this JObject old, JObject input, System.Func<IGraph, IGraph, bool> RdfComparer)
-        {
-            var oldGraph = ParseJsonLdString(old.ToString());
-            var inputGraph = ParseJsonLdString(input.ToString());
-            return RdfComparer(oldGraph, inputGraph);
-        }
-
+        public static bool AspectEquals(this JObject old, JObject input, System.Func<JObject, JObject, bool> RdfComparer) =>
+            RdfComparer(old, input);
 
         /// <summary>
         /// Generic functions for applying a function to all JValues in json
         /// </summary>
-        private static readonly Func<Func<JValue, JValue>, Func<JToken, JToken>> ChangeValuesInToken =
-            valueChanger => token =>
+        private static readonly Func<Func<JObject, JObject>, Func<JValue, JValue>, Func<JToken, JToken>> ChangeValuesInToken =
+            (objectChanger, valueChanger) => token =>
                 token switch
                 {
-                    JArray array => new JArray(array.Select(ChangeValuesInToken(valueChanger))),
-                    JObject obj => ChangeValuesInObject(valueChanger)(obj),
+                    JArray array => new JArray(array.Select(ChangeValuesInToken(objectChanger, valueChanger))),
+                    JObject obj => ChangeValuesInObject(objectChanger, valueChanger)(obj),
                     JValue val => valueChanger(val),
                     _ => throw new InvalidJsonLdException($"Unknown json token {token}")
                 };
 
-        private static readonly Func<Func<JValue, JValue>, Func<JProperty, JProperty>> ChangeValuesInProperty =
-            valueChanger => prop =>
-                new JProperty(prop.Name, ChangeValuesInToken(valueChanger)(prop.Value));
+        private static readonly Func<Func<JObject, JObject>, Func<JValue, JValue>, Func<JProperty, JProperty>> ChangeValuesInProperty =
+            (objectChanger, valueChanger) => prop =>
+                new JProperty(prop.Name, ChangeValuesInToken(objectChanger, valueChanger)(prop.Value));
 
-        public static readonly Func<Func<JValue, JValue>, Func<JObject, JObject>> ChangeValuesInObject =
-            valueChanger => versionedEntity =>
-                new JObject(versionedEntity
+        public static readonly Func<Func<JObject, JObject>, Func<JValue, JValue>, Func<JObject, JObject>> ChangeValuesInObject =
+            (objectChanger, valueChanger) => versionedEntity =>
+                objectChanger(new JObject(versionedEntity
                     .Properties()
-                    .Select(ChangeValuesInProperty(valueChanger)));
+                    .Select(ChangeValuesInProperty(objectChanger, valueChanger))));
 
         //select: Func<Func<I,O>, Func<IEnumerable<I>,IEnumerable<O>> 
         /// <summary>
         /// Removes the version suffix from all persistent URIs in the JObject
         /// </summary>
         public static JObject RemoveVersionsFromIris(this JObject versionedEntity, ImmutableHashSet<IRIReference> dict) =>
-            ChangeValuesInObject(RemoveVersionFromValue(dict))(versionedEntity);
+            ChangeValuesInObject(x=>x, RemoveVersionFromValue(dict))(versionedEntity);
 
         /// <summary>
         /// Helper functions for removeing versions from objects
@@ -123,10 +123,49 @@ namespace VersionedObject
         /// </summary>
         public static JObject AddVersionsToUris(this JObject orig,
             ImmutableDictionary<IRIReference, VersionedIRIReference> map) =>
-            ChangeValuesInObject(AddVersionToValue(map))(orig);
+            ChangeValuesInObject(x => x, AddVersionToValue(map))(orig);
 
-        public static byte[] GetHash(this IGraph g)
+        public static string BlankNodeMarker =
+            new("https://github.com/equinor/versioned-object/blob/develop/VersionedObject/docs/blanknode.md");
+
+        public static JObject AddBlankNodeId(JObject orig) =>
+            orig.IsBlankNode() ? orig.ReplaceIdValue(orig.HashWithoutId()) : orig;
+        
+
+        public static bool IsBlankNode(this JObject orig) =>
+            orig.SelectToken("@id") switch
+            {
+                JValue s => s.ToString().StartsWith("_:"),
+                null => false,
+                _ => throw new InvalidJsonLdException("Only JValue is allowed at \"@id\".")
+            };
+
+        public static JObject HashBlankNodes(this JObject orig) =>
+            ChangeValuesInObject(AddBlankNodeId, x => x)(orig);
+
+        /// <summary>
+        /// replaces "@id" with the newId in the object
+        /// </summary>
+        /// <param name="orig"></param>
+        /// <param name="newId"></param>
+        /// <returns></returns>
+        public static JObject ReplaceIdValue(this JObject orig, string newId) =>
+            new(orig.Properties()
+                .Where(p => !p.Name.Equals("@id"))
+                .Append(new JProperty("@id", new JValue(newId)))
+            );
+
+        public static string HashWithoutId(this JObject obj) =>
+            string.Join(
+                "", 
+                obj.ReplaceIdValue(BlankNodeMarker).GetHash()
+                );
+
+        public static byte[] GetHash(this JObject obj)
         {
+            obj.HashBlankNodes();
+            var g = ParseJsonLdString(obj.ToString());
+
             var writer = new NTriplesWriter();
             var graphString = VDS.RDF.Writing.StringWriter.Write(g, writer);
             var crcFactory = CRCFactory.Instance;
@@ -158,8 +197,7 @@ namespace VersionedObject
         */
         public static byte[] GetHash(this PersistentObjectData @object)
         {
-            var graph = ParseJsonLdString(@object.ToJsonldGraph().ToString());
-            return graph.GetHash();
+            return @object.ToJsonldGraph().GetHash();
         }
 
         public static IRIReference GetIRIReference(this JToken jsonld) =>

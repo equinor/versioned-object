@@ -420,6 +420,33 @@ namespace VersionedObject.Tests
         }
 
         [Fact]
+        public void TestIsBlankNode()
+        {
+            var bnode = new JObject()
+            {
+                ["@type"] = "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003589",
+                ["@id"] = "_:1234",
+                ["rdfs:label"] = "Weight of object"
+            };
+        Assert.True(bnode.IsBlankNode());
+
+        var bnode2 = new JObject()
+        {
+            ["@type"] = "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003589",
+            ["rdfs:label"] = "Weight of object"
+        };
+        Assert.True(bnode.IsBlankNode());
+
+        var normal_node = new JObject()
+        {
+            ["@type"] = "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003589",
+            ["@id"] = "http://example.com/id/_1",
+            ["rdfs:label"] = "Weight of object"
+        };
+        Assert.False(normal_node.IsBlankNode());
+        }
+
+        [Fact]
         public void BlankNodeTest()
         {
             var obj1 = BlankNodeJsonLd.GetInputGraphAsEntities().First();
@@ -504,20 +531,20 @@ namespace VersionedObject.Tests
         [Fact()]
         public void TestHashTriples()
         {
-            var simple_graph = ParseJsonLdString(SimpleJsonLd.ToString());
-            var aspect_persistent_graph = ParseJsonLdString(aspect_persistent_jsonld.ToString());
-            var simple_aspect_graph = ParseJsonLdString(SimpleJsonLd.ToString());
-            var aspect_graph = ParseJsonLdString(aspect_jsonld.ToString());
+            var simple_graph = SimpleJsonLd;
+            var aspect_persistent_graph = aspect_persistent_jsonld;
+            var simple_aspect_graph = SimpleJsonLd;
+            var aspect_graph = aspect_jsonld;
             var simple_expanded = SimpleJsonLd.RemoveContext();
             var aspet_persistent_expanded = aspect_persistent_jsonld.RemoveContext();
             Assert.True(simple_expanded.AspectEquals(aspet_persistent_expanded, RdfEqualsHash));
 
             var simple_hash = simple_graph.GetHash();
             var simple_aspect_hash = simple_aspect_graph.GetHash();
-            var different_hash = ParseJsonLdString(DifferentJsonLd.ToString()).GetHash();
+            var different_hash = DifferentJsonLd.GetHash();
             var aspect_hash = aspect_graph.GetHash();
             var aspect_persistent_hash = aspect_persistent_graph.GetHash();
-            var row2_hash = ParseJsonLdString(Row2JsonLd.ToString()).GetHash();
+            var row2_hash = Row2JsonLd.GetHash();
             Assert.NotEqual(simple_hash, different_hash);
             Assert.NotEqual(aspect_hash, different_hash);
             Assert.NotEqual(row2_hash, different_hash);
