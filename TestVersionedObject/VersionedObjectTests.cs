@@ -464,7 +464,7 @@ namespace VersionedObject.Tests
 
             Assert.Equal(obj2.GetHash(), obj1.GetHash());
             Assert.NotEqual(obj2.GetHash(), obj2a.GetHash());
-            Assert.Equal(obj2b.GetHash(), obj2a.GetHash());
+             Assert.Equal(obj2b.GetHash(), obj2a.GetHash());
             Assert.Equal(obj3.GetHash(), obj4.GetHash());
             Assert.NotEqual(obj1.GetHash(), obj3.GetHash());
             Assert.NotEqual(obj2.GetHash(), obj4.GetHash());

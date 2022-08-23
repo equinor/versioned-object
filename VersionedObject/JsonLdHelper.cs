@@ -161,10 +161,10 @@ namespace VersionedObject
                 obj.ReplaceIdValue(BlankNodeMarker).GetHash()
                 );
 
-        public static byte[] GetHash(this JObject obj)
+        public static byte[] GetHash(this JObject orig)
         {
-            obj.HashBlankNodes();
-            var g = ParseJsonLdString(obj.ToString());
+            var hashed = orig.HashBlankNodes();
+            var g = ParseJsonLdString(orig.ToString());
 
             var writer = new NTriplesWriter();
             var graphString = VDS.RDF.Writing.StringWriter.Write(g, writer);
