@@ -558,20 +558,20 @@ namespace VersionedObject.Tests
         [Fact()]
         public void TestHashTriples()
         {
-            var simple_graph = SimpleJsonLd;
-            var aspect_persistent_graph = aspect_persistent_jsonld;
-            var simple_aspect_graph = SimpleJsonLd;
-            var aspect_graph = aspect_jsonld;
+            var simple_graph = SimpleJsonLd.GetInputGraphAsEntities().First();
+            var aspect_persistent_graph = aspect_persistent_jsonld.GetInputGraphAsEntities().First();
+            var simple_aspect_graph = SimpleJsonLd.GetInputGraphAsEntities().First();
+            var aspect_graph = aspect_jsonld.GetInputGraphAsEntities().First();
             var simple_expanded = SimpleJsonLd.RemoveContext();
             var aspet_persistent_expanded = aspect_persistent_jsonld.RemoveContext();
             Assert.True(simple_expanded.AspectEquals(aspet_persistent_expanded, RdfEqualsHash));
 
             var simple_hash = simple_graph.GetHash();
             var simple_aspect_hash = simple_aspect_graph.GetHash();
-            var different_hash = DifferentJsonLd.GetHash();
+            var different_hash = DifferentJsonLd.GetInputGraphAsEntities().First().GetHash();
             var aspect_hash = aspect_graph.GetHash();
             var aspect_persistent_hash = aspect_persistent_graph.GetHash();
-            var row2_hash = Row2JsonLd.GetHash();
+            var row2_hash = Row2JsonLd.GetInputGraphAsEntities().First().GetHash();
             Assert.NotEqual(simple_hash, different_hash);
             Assert.NotEqual(aspect_hash, different_hash);
             Assert.NotEqual(row2_hash, different_hash);

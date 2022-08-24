@@ -132,11 +132,11 @@ namespace VersionedObject
             ImmutableDictionary<IRIReference, VersionedIRIReference> map) =>
             ChangeValuesInObject(x => x, AddVersionToValue(map))(orig);
 
-        public static string BlankNodeMarker =
+        public static IRIReference BlankNodeMarker =
             new("https://github.com/equinor/versioned-object/blob/develop/VersionedObject/docs/blanknode.md");
 
         public static JObject AddBlankNodeId(JObject orig) =>
-            orig.IsBlankNode() ? orig.ReplaceIdValue(orig.HashWithoutId()) : orig;
+            orig.IsBlankNode() ? orig.ReplaceIdValue(new IRIReference($"{BlankNodeMarker}#{orig.HashWithoutId()}")) : orig;
         
         public static bool IsBlankNode(this JObject orig) =>
             orig.SelectToken("@id") switch
@@ -169,10 +169,10 @@ namespace VersionedObject
         /// <summary>
         /// replaces "@id" with the newId in the object
         /// </summary>
-        public static JObject ReplaceIdValue(this JObject orig, string newId) =>
+        public static JObject ReplaceIdValue(this JObject orig, IRIReference newId) =>
             new(orig.Properties()
                 .Where(p => !p.Name.Equals("@id"))
-                .Append(new JProperty("@id", new JValue(newId)))
+                .Append(new JProperty("@id", newId.ToJValue()))
             );
 
         public static string HashWithoutId(this JObject obj) =>
@@ -221,9 +221,15 @@ namespace VersionedObject
         {
             var parser = new VDS.RDF.Parsing.JsonLdParser();
             using var store = new TripleStore();
-
-            using (TextReader reader = new StringReader(jsonLdGraph.ToString()))
-                parser.Load(store, reader);
+            try
+            {
+                using (TextReader reader = new StringReader(jsonLdGraph.ToString()))
+                    parser.Load(store, reader);
+            }
+            catch (NullReferenceException e)
+            {
+                throw new InvalidJsonLdException($"Invalid JSON-LD in {jsonLdGraph.ToString()}");
+            }
 
             if (store.Graphs.Count != 1)
                 throw new InvalidDataException("Input JSON contained more than one graph, this is an error");
