@@ -85,7 +85,7 @@ namespace VersionedObject
         /// Removes the version suffix from all persistent URIs in the JObject
         /// </summary>
         public static JObject RemoveVersionsFromIris(this JObject versionedEntity, ImmutableHashSet<IRIReference> dict) =>
-            ChangeValuesInObject(x=>x, RemoveVersionFromValue(dict))(versionedEntity);
+            ChangeValuesInObject(x => x, RemoveVersionFromValue(dict))(versionedEntity);
 
         /// <summary>
         /// Helper functions for removeing versions from objects
@@ -137,7 +137,7 @@ namespace VersionedObject
 
         public static JObject AddBlankNodeId(JObject orig) =>
             orig.IsBlankNode() ? orig.ReplaceIdValue(new IRIReference($"{BlankNodeMarker}#{orig.HashWithoutId()}")) : orig;
-        
+
         public static bool IsBlankNode(this JObject orig) =>
             orig.SelectToken("@id") switch
             {
@@ -177,7 +177,7 @@ namespace VersionedObject
 
         public static string HashWithoutId(this JObject obj) =>
             string.Join(
-                "", 
+                "",
                 obj.ReplaceIdValue(BlankNodeMarker).GetHash()
                 );
 
@@ -217,7 +217,7 @@ namespace VersionedObject
         /// <summary>
         /// Parses a string describing a json-ld graph into dotnet IGraph
         /// </summary>
-         public static IGraph ParseJsonLdGraph(JObject jsonLdGraph)
+        public static IGraph ParseJsonLdGraph(JObject jsonLdGraph)
         {
             var parser = new VDS.RDF.Parsing.JsonLdParser();
             using var store = new TripleStore();

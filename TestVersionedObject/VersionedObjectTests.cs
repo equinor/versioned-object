@@ -182,7 +182,7 @@ namespace VersionedObject.Tests
                             ["http://rds.posccaesar.org/ontology/lis14/rdl/datumValue"] = "22",
                             ["http://rds.posccaesar.org/ontology/lis14/rdl/datumUOM"] = "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003684"
                         },
-                            
+
                             new JObject()
                             {
                                 ["@type"] = new JArray("http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003620", "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100004048"),
@@ -428,22 +428,22 @@ namespace VersionedObject.Tests
                 ["@id"] = "_:1234",
                 ["rdfs:label"] = "Weight of object"
             };
-        Assert.True(bnode.IsBlankNode());
+            Assert.True(bnode.IsBlankNode());
 
-        var bnode2 = new JObject()
-        {
-            ["@type"] = "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003589",
-            ["rdfs:label"] = "Weight of object"
-        };
-        Assert.True(bnode.IsBlankNode());
+            var bnode2 = new JObject()
+            {
+                ["@type"] = "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003589",
+                ["rdfs:label"] = "Weight of object"
+            };
+            Assert.True(bnode.IsBlankNode());
 
-        var normal_node = new JObject()
-        {
-            ["@type"] = "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003589",
-            ["@id"] = "http://example.com/id/_1",
-            ["rdfs:label"] = "Weight of object"
-        };
-        Assert.False(normal_node.IsBlankNode());
+            var normal_node = new JObject()
+            {
+                ["@type"] = "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003589",
+                ["@id"] = "http://example.com/id/_1",
+                ["rdfs:label"] = "Weight of object"
+            };
+            Assert.False(normal_node.IsBlankNode());
         }
 
         [Fact]
@@ -508,7 +508,7 @@ namespace VersionedObject.Tests
         [Fact()]
         public void LoadStringGraphTest()
         {
-            var graph = ParseJsonLdGraph(JObject.Parse( @"{
+            var graph = ParseJsonLdGraph(JObject.Parse(@"{
                 ""@graph"": [
                     {
                         ""@id"": ""sor:Row1"",
