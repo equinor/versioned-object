@@ -447,6 +447,33 @@ namespace VersionedObject.Tests
         }
 
         [Fact]
+        public void AddBlankNodeIdTest()
+        {
+            var bnode = new JObject()
+            {
+                ["@type"] = "http://example.com/type"
+            };
+            var new_node = AddBlankNodeId(bnode);
+            Assert.True(bnode.IsBlankNode());
+            Assert.NotEqual(new_node, bnode);
+            Assert.NotNull(new_node["@id"]);
+
+        }
+
+        [Fact]
+        public void HashBlankNodesTest()
+        {
+            var hashed = BlankNodeJsonLd2a["@graph"].First().Value<JObject>().HashBlankNodes();
+            Assert.NotEqual(hashed, BlankNodeJsonLd2a);
+            var bnode = new JObject()
+            {
+                ["@type"] = "http://example.com/type"
+            };
+            var new_node = AddBlankNodeId(bnode);
+            var hashed_bnode = bnode.HashBlankNodes();
+        }
+
+        [Fact]
         public void BlankNodeTest()
         {
             var obj1 = BlankNodeJsonLd.GetInputGraphAsEntities().First();
@@ -463,8 +490,8 @@ namespace VersionedObject.Tests
             var hash4 = obj4.GetHash();
 
             Assert.Equal(obj2.GetHash(), obj1.GetHash());
-            Assert.NotEqual(obj2.GetHash(), obj2a.GetHash());
-             Assert.Equal(obj2b.GetHash(), obj2a.GetHash());
+            Assert.NotEqual(obj2a.GetHash(), obj2.GetHash());
+            Assert.Equal(obj2a.GetHash(), obj2b.GetHash());
             Assert.Equal(obj3.GetHash(), obj4.GetHash());
             Assert.NotEqual(obj1.GetHash(), obj3.GetHash());
             Assert.NotEqual(obj2.GetHash(), obj4.GetHash());
@@ -473,7 +500,7 @@ namespace VersionedObject.Tests
         [Fact()]
         public void LoadGraphTest()
         {
-            var graph = ParseJsonLdString(SimpleJsonLd.ToString());
+            var graph = ParseJsonLdGraph(SimpleJsonLd);
             Assert.NotNull(graph);
             Assert.False(graph.IsEmpty);
         }
@@ -481,7 +508,7 @@ namespace VersionedObject.Tests
         [Fact()]
         public void LoadStringGraphTest()
         {
-            var graph = ParseJsonLdString(@"{
+            var graph = ParseJsonLdGraph(JObject.Parse( @"{
                 ""@graph"": [
                     {
                         ""@id"": ""sor:Row1"",
@@ -495,7 +522,7 @@ namespace VersionedObject.Tests
                     ""sor"": ""http://rdf.equinor.com/ontology/sor#"",
                     ""@version"": ""1.1""
                 }
-            }");
+            }"));
             Assert.NotNull(graph);
             Assert.False(graph.IsEmpty);
         }
@@ -503,7 +530,7 @@ namespace VersionedObject.Tests
         [Fact()]
         public void LoadMarkusGraphTest()
         {
-            var graph = ParseJsonLdString(@"{
+            var graph = ParseJsonLdGraph(JObject.Parse(@"{
                 ""@graph"":[
                     {
                         ""@id"": ""https://example.com/yo"",
@@ -514,7 +541,7 @@ namespace VersionedObject.Tests
                 ""@context"": {
                     ""@version"": ""1.1""
                 }
-            }");
+            }"));
             Assert.NotNull(graph);
             Assert.False(graph.IsEmpty);
         }

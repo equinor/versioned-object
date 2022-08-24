@@ -18,6 +18,7 @@ using VDS.RDF;
 using VDS.RDF.Writing;
 using System;
 using System.Xml.Linq;
+using VDS.RDF.Query.Algebra;
 
 namespace VersionedObject
 {
@@ -32,8 +33,14 @@ namespace VersionedObject
             input.GetHash()
                 .SequenceEqual(old.GetHash());
 
+        /// <summary>
+        /// Checks Equality of two JSON-LD Objects (Not graphs)
+        /// </summary>
+        /// <param name="old"></param>
+        /// <param name="input"></param>
+        /// <returns></returns>
         public static bool RdfEqualsTriples(JObject old, JObject input) =>
-            RdfEqualsTriples(ParseJsonLdString(old.ToString()), ParseJsonLdString(input.ToString()));
+            RdfEqualsTriples(ParseJsonLdObject(old), ParseJsonLdObject(input));
 
         /// <summary>
         /// Compares two json-ld objects by checking the triples are the same
@@ -131,24 +138,37 @@ namespace VersionedObject
         public static JObject AddBlankNodeId(JObject orig) =>
             orig.IsBlankNode() ? orig.ReplaceIdValue(orig.HashWithoutId()) : orig;
         
-
         public static bool IsBlankNode(this JObject orig) =>
             orig.SelectToken("@id") switch
             {
                 JValue s => s.ToString().StartsWith("_:"),
-                null => false,
+                null => true,
                 _ => throw new InvalidJsonLdException("Only JValue is allowed at \"@id\".")
             };
 
+        /// <summary>
+        /// Creates hashes to put in the "@id" position of all blank nodes of a top-level JSON-LD object
+        /// </summary>
+        /// <param name="orig">A JSON-Ld object</param>
         public static JObject HashBlankNodes(this JObject orig) =>
             ChangeValuesInObject(AddBlankNodeId, x => x)(orig);
 
         /// <summary>
+        /// Creates hashes to put in the "@id" position of all blank nodes in a json-ld graph
+        /// </summary>
+        /// <param name="orig">A JSON-Ld graph</param>
+        //public static JObject HashBlankNodesInGraph(this JObject orig) =>
+        //    orig["@graph"] switch
+        //    {
+        //        null => ChangeValuesInObject(AddBlankNodeId, x => x)(orig),
+        //        var graph => new JObject()
+        //            {["@graph"] = ChangeValuesInToken(AddBlankNodeId, x => x)(graph)}
+        //    };
+
+
+        /// <summary>
         /// replaces "@id" with the newId in the object
         /// </summary>
-        /// <param name="orig"></param>
-        /// <param name="newId"></param>
-        /// <returns></returns>
         public static JObject ReplaceIdValue(this JObject orig, string newId) =>
             new(orig.Properties()
                 .Where(p => !p.Name.Equals("@id"))
@@ -161,10 +181,13 @@ namespace VersionedObject
                 obj.ReplaceIdValue(BlankNodeMarker).GetHash()
                 );
 
+        /// <summary>
+        /// Gets the hash on a JSON-LD Top-level object
+        /// </summary>
         public static byte[] GetHash(this JObject orig)
         {
             var hashed = orig.HashBlankNodes();
-            var g = ParseJsonLdString(orig.ToString());
+            var g = ParseJsonLdObject(hashed);
 
             var writer = new NTriplesWriter();
             var graphString = VDS.RDF.Writing.StringWriter.Write(g, writer);
@@ -178,12 +201,28 @@ namespace VersionedObject
 
         }
 
-        public static IGraph ParseJsonLdString(string jsonLdString)
+        /// <summary>
+        /// Parses a JSON-LD Object (not graph) into a dotnet IGraph
+        /// </summary>
+        /// <param name="jsonLdObject"></param>
+        /// <returns></returns>
+        public static IGraph ParseJsonLdObject(JObject jsonLdObject) =>
+            ParseJsonLdGraph(new()
+            {
+                ["@graph"] = new JArray()
+                    {jsonLdObject}
+            }
+            );
+
+        /// <summary>
+        /// Parses a string describing a json-ld graph into dotnet IGraph
+        /// </summary>
+         public static IGraph ParseJsonLdGraph(JObject jsonLdGraph)
         {
             var parser = new VDS.RDF.Parsing.JsonLdParser();
             using var store = new TripleStore();
 
-            using (TextReader reader = new StringReader(jsonLdString))
+            using (TextReader reader = new StringReader(jsonLdGraph.ToString()))
                 parser.Load(store, reader);
 
             if (store.Graphs.Count != 1)
@@ -197,7 +236,7 @@ namespace VersionedObject
         */
         public static byte[] GetHash(this PersistentObjectData @object)
         {
-            return @object.ToJsonldGraph().GetHash();
+            return @object.ToJsonldJObject().GetHash();
         }
 
         public static IRIReference GetIRIReference(this JToken jsonld) =>
