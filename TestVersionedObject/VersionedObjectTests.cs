@@ -500,8 +500,8 @@ namespace VersionedObject.Tests
         [Fact]
         public void TestMinorReordering()
         {
-            var hash1 = ParseJsonLdString(ReorderTest1.ToString()).GetHash();
-            var hash2 = ParseJsonLdString(ReorderTest2.ToString()).GetHash();
+            var hash1 = ReorderTest1.GetInputGraphAsEntities().First().GetHash();
+            var hash2 = ReorderTest2.GetInputGraphAsEntities().First().GetHash();
             Assert.NotEqual(hash1, hash2);
         }
 
