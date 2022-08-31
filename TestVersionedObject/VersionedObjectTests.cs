@@ -157,7 +157,7 @@ namespace VersionedObject.Tests
                 }
             },
             ["@context"] = context
-                };
+        };
 
         public static JObject GetWeightDatumObject(int weight, string id) =>
             new(GetWeightDatumObject(weight).Properties().Append(new JProperty("@id", id)));
