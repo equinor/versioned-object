@@ -13,39 +13,19 @@ namespace VersionedObject.Tests
 {
     public class VersionedObjectTests
     {
-
-
-        public VersionedObjectTests()
-        {
-            var object1 = new
+        
+        public static JObject row1_maker(string? id = "sor:Row1", string? type = "MelRow", string? label = "An empty MEL Row") =>
+            new JObject()
             {
-                id = "sow:Row1",
-                type = "MelRow",
-                label = "A different MEL Row"
+                ["@id"] = id,
+                ["@type"] = type,
+                ["rdfs:label"] = label
             };
-        }
 
-        public static readonly JObject row1 = new JObject()
-        {
-            ["@id"] = "sor:Row1",
-            ["@type"] = "MelRow",
-            ["rdfs:label"] = "An empty MEL Row"
-        };
-
-        public static readonly JObject different_row1 = new()
-        {
-            ["@id"] = "sor:Row1",
-            ["@type"] = "MelRow",
-            ["rdfs:label"] = "A different MEL Row"
-        };
-
-        public static readonly JObject row2 = new()
-        {
-            ["@id"] = "sor:Row2",
-            ["@type"] = "MelRow",
-            ["rdfs:label"] = "The second MEL Row"
-        };
-
+        public static readonly JObject row1 = row1_maker();
+        public static readonly JObject different_row1 = row1_maker(label: "A different MEL Row");
+        public static readonly JObject row2 = row1_maker(id: "sor:Row2", label: "The second MEL Row");
+    
         public static readonly JObject context = new()
         {
             ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",
@@ -133,69 +113,14 @@ namespace VersionedObject.Tests
 
         public static readonly JObject BlankNodeJsonLd3 = new()
         {
-            ["@graph"] = new JArray() { 
-                new JObject()
-                {
-                    ["@id"] = "sor:Row1",
-                    ["@type"] = "MelRow",
-                    ["rdfs:label"] = "An empty MEL Row",
-                    ["http://rds.posccaesar.org/ontology/lis14/rdl/hasPhysicalQuantity"] = new JObject()
-                    {
-                        ["@type"] = "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003589",
-                        ["@id"] = "_:1",
-                        ["rdfs:label"] = "Weight of object",
-                        ["http://rds.posccaesar.org/ontology/lis14/rdl/qualityQuantifiedAs"] = new JObject()
-                        {
-                            ["@type"] = new JArray("http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003620", "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100004048"),
-                            ["@id"] = "_:2",
-                            ["rdfs:label"] = "Weight specified",
-                            ["http://rds.posccaesar.org/ontology/lis14/rdl/datumValue"] = "12346",
-                            ["http://rds.posccaesar.org/ontology/lis14/rdl/datumUOM"] = "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003684"
-                        }
-                    }
-                }
-            },
-            ["@context"] = new JObject()
-            {
-                ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",
-                ["@vocab"] = "http://rdf.equinor.com/ontology/mel#",
-                ["sor"] = "http://rdf.equinor.com/ontology/sor#",
-                ["@version"] = "1.1"
-            }
+            ["@graph"] = new JArray() { GetRow1WithWeights(GetWeightQualityObject(new JArray(){ GetWeightDatumObject(12346) }, "_:1")) },
+            ["@context"] = context
         };
 
         public static readonly JObject BlankNodeJsonLd4 = new()
         {
-            ["@graph"] = new JArray()
-            {
-                new JObject()
-                {
-                    ["@id"] = "sor:Row1",
-                    ["@type"] = "MelRow",
-                    ["rdfs:label"] = "An empty MEL Row",
-                    ["http://rds.posccaesar.org/ontology/lis14/rdl/hasPhysicalQuantity"] = new JObject()
-                    {
-                        ["@type"] = "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003589",
-                        ["@id"] = "_:strangelongblankid",
-                        ["rdfs:label"] = "Weight of object",
-                        ["http://rds.posccaesar.org/ontology/lis14/rdl/qualityQuantifiedAs"] = new JObject()
-                        {
-                            ["@type"] = new JArray("http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003620", "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100004048"),
-                            ["@id"] = "_:evenweirderlongblankid",
-                            ["rdfs:label"] = "Weight specified",
-                            ["http://rds.posccaesar.org/ontology/lis14/rdl/datumValue"] = "12346",
-                            ["http://rds.posccaesar.org/ontology/lis14/rdl/datumUOM"] = "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003684"
-                        }
-                    }
-                }
-            },
-            ["@context"] = new JObject()
-            {
-                ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",
-                ["@vocab"] = "http://rdf.equinor.com/ontology/mel#",
-                ["sor"] = "http://rdf.equinor.com/ontology/sor#",
-                ["@version"] = "1.1"
-            }
+            ["@graph"] = new JArray(){ GetRow1WithWeights(GetWeightQualityObject(new JArray(GetWeightDatumObject(12346, "_:evenweirderlongblankid")){}, "_:strangelongblankid"))},
+            ["@context"] = context
         };
 
         public static readonly JObject aspect_jsonld = new()
@@ -210,32 +135,19 @@ namespace VersionedObject.Tests
                         [VersionedObject.ProvWasDerivedFrom] = VersionedObject.NoProvenance.ToString()
                     }
                 },
-            ["@context"] = new JObject()
-            {
-                ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",
-                ["@vocab"] = "http://rdf.equinor.com/ontology/mel#",
-                ["sor"] = "http://rdf.equinor.com/ontology/sor#",
-                ["@version"] = "1.1"
-            }
+            ["@context"] = context
         };
         public static readonly JObject aspect_persistent_jsonld = new()
         {
             ["@graph"] = new JArray()
-                {
-                    new JObject()
+                { new JObject()
                     {
                         ["@id"] = "sor:Row1",
                         ["@type"] = new JArray(){ "http://rdf.equinor.com/ontology/mel#MelRow" },
                         ["rdfs:label"] = "An empty MEL Row"
                     }
                 },
-            ["@context"] = new JObject()
-            {
-                ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",
-                ["@vocab"] = "http://rdf.equinor.com/ontology/mel#",
-                ["sor"] = "http://rdf.equinor.com/ontology/sor#",
-                ["@version"] = "1.1"
-            }
+            ["@context"] = context
         };
         public static readonly JObject expanded_jsonld = new()
         {
@@ -249,13 +161,7 @@ namespace VersionedObject.Tests
                         ["http://www.w3.org/ns/prov#wasDerivedFrom"] = VersionedObject.NoProvenance.ToString()
                     }
                 },
-            ["@context"] = new JObject()
-            {
-                ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",
-                ["@vocab"] = "http://rdf.equinor.com/ontology/mel#",
-                ["sor"] = "http://rdf.equinor.com/ontology/sor#",
-                ["@version"] = "1.1"
-            }
+            ["@context"] = context
         };
 
         [Fact()]
