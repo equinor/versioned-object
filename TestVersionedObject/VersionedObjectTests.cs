@@ -2,6 +2,7 @@ using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Text.Json.Serialization;
 using Xunit;
 using static VersionedObject.EntityGraphComparer;
 using static VersionedObject.JsonLdHelper;
@@ -62,6 +63,101 @@ namespace VersionedObject.Tests
                 ["http://rds.posccaesar.org/ontology/lis14/rdl/datumUOM"] =
                     "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003684"
             };
+
+
+        public static readonly JObject ReorderTest1 = new()
+        {
+            ["@graph"] = new JArray()
+            {
+                new JObject()
+                {
+                    ["@id"] = "sor:Row1",
+                    ["@type"] = "MelRow",
+                    ["rdfs:label"] = "An empty MEL Row",
+                    ["http://rds.posccaesar.org/ontology/lis14/rdl/hasPhysicalQuantity"] = new JArray()
+                    {
+                        new JObject()
+                        {
+                            ["@type"] = "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003589",
+                            ["@id"] = "sor:Row2",
+                            ["rdfs:label"] = "Weight of object",
+                            ["http://rds.posccaesar.org/ontology/lis14/rdl/qualityQuantifiedAs"] = new JObject()
+                            {
+                                ["@type"] = new JArray("http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003620",
+                                    "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100004048"),
+                                ["rdfs:label"] = "Weight specified",
+                                ["http://rds.posccaesar.org/ontology/lis14/rdl/datumValue"] = "1",
+                                ["http://rds.posccaesar.org/ontology/lis14/rdl/datumUOM"] =
+                                    "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003684"
+                            }
+                        },
+                        new JObject()
+                        {
+                            ["@type"] = "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003589",
+                            ["@id"] = "sor:Row3",
+                            ["rdfs:label"] = "Weight of object",
+                            ["http://rds.posccaesar.org/ontology/lis14/rdl/qualityQuantifiedAs"] = new JObject()
+                            {
+                                ["@type"] = new JArray("http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003620",
+                                    "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100004048"),
+                                ["rdfs:label"] = "Weight specified",
+                                ["http://rds.posccaesar.org/ontology/lis14/rdl/datumValue"] = "2",
+                                ["http://rds.posccaesar.org/ontology/lis14/rdl/datumUOM"] =
+                                    "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003684"
+                            }
+                        }
+                    }
+                }
+            },
+            ["@context"] = context
+        };
+
+        public static readonly JObject ReorderTest2 = new()
+        {
+            ["@graph"] = new JArray()
+            {
+                new JObject()
+                {
+                    ["@id"] = "sor:Row1",
+                    ["@type"] = "MelRow",
+                    ["rdfs:label"] = "An empty MEL Row",
+                    ["http://rds.posccaesar.org/ontology/lis14/rdl/hasPhysicalQuantity"] = new JArray()
+                    {
+                        new JObject()
+                        {
+                            ["@type"] = "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003589",
+                            ["@id"] = "sor:Row3",
+                            ["rdfs:label"] = "Weight of object",
+                            ["http://rds.posccaesar.org/ontology/lis14/rdl/qualityQuantifiedAs"] = new JObject()
+                            {
+                                ["@type"] = new JArray("http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003620",
+                                    "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100004048"),
+                                ["rdfs:label"] = "Weight specified",
+                                ["http://rds.posccaesar.org/ontology/lis14/rdl/datumValue"] = "1",
+                                ["http://rds.posccaesar.org/ontology/lis14/rdl/datumUOM"] =
+                                    "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003684"
+                            }
+                        },
+                        new JObject()
+                        {
+                            ["@type"] = "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003589",
+                            ["@id"] = "sor:Row2",
+                            ["rdfs:label"] = "Weight of object",
+                            ["http://rds.posccaesar.org/ontology/lis14/rdl/qualityQuantifiedAs"] = new JObject()
+                            {
+                                ["@type"] = new JArray("http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003620",
+                                    "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100004048"),
+                                ["rdfs:label"] = "Weight specified",
+                                ["http://rds.posccaesar.org/ontology/lis14/rdl/datumValue"] = "2",
+                                ["http://rds.posccaesar.org/ontology/lis14/rdl/datumUOM"] =
+                                    "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003684"
+                            }
+                        }
+                    }
+                }
+            },
+            ["@context"] = context
+                };
 
         public static JObject GetWeightDatumObject(int weight, string id) =>
             new(GetWeightDatumObject(weight).Properties().Append(new JProperty("@id", id)));
@@ -129,7 +225,7 @@ namespace VersionedObject.Tests
                 {
                     new JObject()
                     {
-                        ["@id"] = "sor:Row1/version/29110145432144214285/2022-05-01",
+                        ["@id"] = "sor:Row1/version/1751071271629382521911924116422912024981172691178/2022-05-01",
                         ["@type"] = new JArray(){ "http://rdf.equinor.com/ontology/mel#MelRow" },
                         ["rdfs:label"] = "An empty MEL Row",
                         [VersionedObject.ProvWasDerivedFrom] = VersionedObject.NoProvenance.ToString()
@@ -155,7 +251,7 @@ namespace VersionedObject.Tests
                 {
                     new JObject()
                     {
-                        ["@id"] = "http://rdf.equinor.com/ontology/sor#Row1/version/29110145432144214285/2022-05-01",
+                        ["@id"] = "http://rdf.equinor.com/ontology/sor#Row1/version/1751071271629382521911924116422912024981172691178/2022-05-01",
                         ["@type"] = new JArray(){ "http://rdf.equinor.com/ontology/mel#MelRow" },
                         ["rdfs:label"] = "An empty MEL Row",
                         ["http://www.w3.org/ns/prov#wasDerivedFrom"] = VersionedObject.NoProvenance.ToString()
@@ -401,6 +497,13 @@ namespace VersionedObject.Tests
             Assert.NotNull(deletelist);
             Assert.False(deletelist.Any());
         }
+        [Fact]
+        public void TestMinorReordering()
+        {
+            var hash1 = ParseJsonLdString(ReorderTest1.ToString()).GetHash();
+            var hash2 = ParseJsonLdString(ReorderTest2.ToString()).GetHash();
+            Assert.NotEqual(hash1, hash2);
+        }
 
         [Fact()]
         public void MakeInputGrahEntitiesTest()
@@ -436,7 +539,7 @@ namespace VersionedObject.Tests
             Assert.NotNull(deletelist);
             Assert.True(deletelist.Any());
             Assert.Single(deletelist);
-            Assert.Equal(new IRIReference("http://rdf.equinor.com/ontology/sor#Row1/version/29110145432144214285/2022-05-01").ToString(), deletelist.First().ToString());
+            Assert.Equal(new IRIReference("http://rdf.equinor.com/ontology/sor#Row1/version/1751071271629382521911924116422912024981172691178/2022-05-01").ToString(), deletelist.First().ToString());
         }
 
         [Fact()]
@@ -481,7 +584,7 @@ namespace VersionedObject.Tests
             persistentIris = expanded_jsonld.GetAllEntityIds();
             Assert.NotNull(persistentIris);
             Assert.Single(persistentIris);
-            Assert.Contains("http://rdf.equinor.com/ontology/sor#Row1/version/29110145432144214285/2022-05-01", persistentIris.Select(x => x.ToString()));
+            Assert.Contains("http://rdf.equinor.com/ontology/sor#Row1/version/1751071271629382521911924116422912024981172691178/2022-05-01", persistentIris.Select(x => x.ToString()));
 
         }
 
