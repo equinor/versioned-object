@@ -13,7 +13,7 @@ namespace VersionedObject.Tests
 {
     public class VersionedObjectTests
     {
-        
+
         public static JObject row1_maker(string? id = "sor:Row1", string? type = "MelRow", string? label = "An empty MEL Row") =>
             new JObject()
             {
@@ -25,7 +25,7 @@ namespace VersionedObject.Tests
         public static readonly JObject row1 = row1_maker();
         public static readonly JObject different_row1 = row1_maker(label: "A different MEL Row");
         public static readonly JObject row2 = row1_maker(id: "sor:Row2", label: "The second MEL Row");
-    
+
         public static readonly JObject context = new()
         {
             ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",
@@ -67,7 +67,7 @@ namespace VersionedObject.Tests
             new(GetWeightDatumObject(weight).Properties().Append(new JProperty("@id", id)));
 
         public static JObject GetWeightQualityObject(JArray weights) =>
-            new ()
+            new()
             {
                 ["@type"] = "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003589",
                 ["rdfs:label"] = "Weight of object",
@@ -89,37 +89,37 @@ namespace VersionedObject.Tests
 
         public static readonly JObject BlankNodeJsonLd = new()
         {
-            ["@graph"] = new JArray() { GetRow1WithWeights(GetWeightQualityObject(new JArray() {GetWeightDatumObject(12345), GetWeightDatumObject(23456)})) },
+            ["@graph"] = new JArray() { GetRow1WithWeights(GetWeightQualityObject(new JArray() { GetWeightDatumObject(12345), GetWeightDatumObject(23456) })) },
             ["@context"] = context
         };
 
         public static readonly JObject BlankNodeJsonLd2 = new()
         {
-            ["@graph"] = new JArray() { GetRow1WithWeights(GetWeightQualityObject(new JArray(){GetWeightDatumObject(12345, "_:212"), GetWeightDatumObject(23456)}, "_:1234")) },
+            ["@graph"] = new JArray() { GetRow1WithWeights(GetWeightQualityObject(new JArray() { GetWeightDatumObject(12345, "_:212"), GetWeightDatumObject(23456) }, "_:1234")) },
             ["@context"] = context
         };
 
         public static readonly JObject BlankNodeJsonLd2a = new()
         {
-            ["@graph"] = new JArray(){ GetRow1WithWeights(GetWeightQualityObject(new JArray(){GetWeightDatumObject(1), GetWeightDatumObject(22), GetWeightDatumObject(333)}, "_:1234"))},
+            ["@graph"] = new JArray() { GetRow1WithWeights(GetWeightQualityObject(new JArray() { GetWeightDatumObject(1), GetWeightDatumObject(22), GetWeightDatumObject(333) }, "_:1234")) },
             ["@context"] = context
         };
 
         public static readonly JObject BlankNodeJsonLd2b = new()
         {
-            ["@graph"] = new JArray(){ GetRow1WithWeights(GetWeightQualityObject(new JArray(){ GetWeightDatumObject(333), GetWeightDatumObject(1), GetWeightDatumObject(22)}, "_:1234"))},
+            ["@graph"] = new JArray() { GetRow1WithWeights(GetWeightQualityObject(new JArray() { GetWeightDatumObject(333), GetWeightDatumObject(1), GetWeightDatumObject(22) }, "_:1234")) },
             ["@context"] = context
         };
 
         public static readonly JObject BlankNodeJsonLd3 = new()
         {
-            ["@graph"] = new JArray() { GetRow1WithWeights(GetWeightQualityObject(new JArray(){ GetWeightDatumObject(12346) }, "_:1")) },
+            ["@graph"] = new JArray() { GetRow1WithWeights(GetWeightQualityObject(new JArray() { GetWeightDatumObject(12346) }, "_:1")) },
             ["@context"] = context
         };
 
         public static readonly JObject BlankNodeJsonLd4 = new()
         {
-            ["@graph"] = new JArray(){ GetRow1WithWeights(GetWeightQualityObject(new JArray(GetWeightDatumObject(12346, "_:evenweirderlongblankid")){}, "_:strangelongblankid"))},
+            ["@graph"] = new JArray() { GetRow1WithWeights(GetWeightQualityObject(new JArray(GetWeightDatumObject(12346, "_:evenweirderlongblankid")) { }, "_:strangelongblankid")) },
             ["@context"] = context
         };
 
