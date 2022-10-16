@@ -14,65 +14,56 @@ namespace VersionedObject.Tests
 {
     public class VersionedObjectTests
     {
+
+        public static JObject row1_maker(string? id = "sor:Row1", string? type = "MelRow", string? label = "An empty MEL Row") =>
+            new JObject()
+            {
+                ["@id"] = id,
+                ["@type"] = type,
+                ["rdfs:label"] = label
+            };
+
+        public static readonly JObject row1 = row1_maker();
+        public static readonly JObject different_row1 = row1_maker(label: "A different MEL Row");
+        public static readonly JObject row2 = row1_maker(id: "sor:Row2", label: "The second MEL Row");
+
+        public static readonly JObject context = new()
+        {
+            ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",
+            ["@vocab"] = "http://rdf.equinor.com/ontology/mel#",
+            ["sor"] = "http://rdf.equinor.com/ontology/sor#",
+            ["@version"] = "1.1"
+        };
+
         public static readonly JObject DifferentJsonLd = new()
         {
-            ["@graph"] = new JArray()
-                {
-                    new JObject()
-                    {
-                        ["@id"] = "sor:Row1",
-                        ["@type"] = "MelRow",
-                        ["rdfs:label"] = "A different MEL Row"
-                    }
-                },
-            ["@context"] = new JObject()
-            {
-                ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",
-                ["@vocab"] = "http://rdf.equinor.com/ontology/mel#",
-                ["sor"] = "http://rdf.equinor.com/ontology/sor#",
-                ["@version"] = "1.1"
-            }
+            ["@graph"] = new JArray() { different_row1 },
+            ["@context"] = context
         };
 
         public static readonly JObject Row2JsonLd = new()
         {
-            ["@graph"] = new JArray()
-                {
-                    new JObject()
-                    {
-                        ["@id"] = "sor:Row2",
-                        ["@type"] = "MelRow",
-                        ["rdfs:label"] = "The second MEL Row"
-                    }
-                },
-            ["@context"] = new JObject()
-            {
-                ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",
-                ["@vocab"] = "http://rdf.equinor.com/ontology/mel#",
-                ["sor"] = "http://rdf.equinor.com/ontology/sor#",
-                ["@version"] = "1.1"
-            }
+            ["@graph"] = new JArray() { row2 },
+            ["@context"] = context
         };
 
         public static readonly JObject SimpleJsonLd = new()
         {
-            ["@graph"] = new JArray()
-            {
-                new JObject()
-                {
-                    ["@id"] = "sor:Row1",
-                    ["@type"] = "MelRow",
-                    ["rdfs:label"] = "An empty MEL Row"
-                }
-            },
-            ["@context"] = new JObject()
-            {
-                ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",
-                ["@vocab"] = "http://rdf.equinor.com/ontology/mel#",
-                ["sor"] = "http://rdf.equinor.com/ontology/sor#",
-                ["@version"] = "1.1"
-            }
+            ["@graph"] = new JArray() { row1 },
+            ["@context"] = context
         };
+
+        public static JObject GetWeightDatumObject(int weight) =>
+            new()
+            {
+                ["@type"] = new JArray("http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003620",
+                    "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100004048"),
+                ["rdfs:label"] = "Weight specified",
+                ["http://rds.posccaesar.org/ontology/lis14/rdl/datumValue"] = weight.ToString(),
+                ["http://rds.posccaesar.org/ontology/lis14/rdl/datumUOM"] =
+                    "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003684"
+            };
+
 
         public static readonly JObject ReorderTest1 = new()
         {
@@ -118,13 +109,7 @@ namespace VersionedObject.Tests
                     }
                 }
             },
-            ["@context"] = new JObject()
-            {
-                ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",
-                ["@vocab"] = "http://rdf.equinor.com/ontology/mel#",
-                ["sor"] = "http://rdf.equinor.com/ontology/sor#",
-                ["@version"] = "1.1"
-            }
+            ["@context"] = context
         };
 
         public static readonly JObject ReorderTest2 = new()
@@ -171,13 +156,67 @@ namespace VersionedObject.Tests
                     }
                 }
             },
-            ["@context"] = new JObject()
+            ["@context"] = context
+        };
+
+        public static JObject GetWeightDatumObject(int weight, string id) =>
+            new(GetWeightDatumObject(weight).Properties().Append(new JProperty("@id", id)));
+
+        public static JObject GetWeightQualityObject(JArray weights) =>
+            new()
             {
-                ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",
-                ["@vocab"] = "http://rdf.equinor.com/ontology/mel#",
-                ["sor"] = "http://rdf.equinor.com/ontology/sor#",
-                ["@version"] = "1.1"
-            }
+                ["@type"] = "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003589",
+                ["rdfs:label"] = "Weight of object",
+                ["http://rds.posccaesar.org/ontology/lis14/rdl/qualityQuantifiedAs"] = weights
+            };
+
+        public static JObject GetWeightQualityObject(JArray weights, string id) =>
+            new(GetWeightQualityObject(weights).Properties().Append(new JProperty("@id", id)));
+
+        public static JObject GetRow1WithWeights(JObject quality) =>
+            new(row1
+                .Properties()
+                .Append(new JProperty(
+                    "http://rds.posccaesar.org/ontology/lis14/rdl/hasPhysicalQuantity",
+                    quality
+                    )
+                )
+            );
+
+        public static readonly JObject BlankNodeJsonLd = new()
+        {
+            ["@graph"] = new JArray() { GetRow1WithWeights(GetWeightQualityObject(new JArray() { GetWeightDatumObject(12345), GetWeightDatumObject(23456) })) },
+            ["@context"] = context
+        };
+
+        public static readonly JObject BlankNodeJsonLd2 = new()
+        {
+            ["@graph"] = new JArray() { GetRow1WithWeights(GetWeightQualityObject(new JArray() { GetWeightDatumObject(12345, "_:212"), GetWeightDatumObject(23456) }, "_:1234")) },
+            ["@context"] = context
+        };
+
+        public static readonly JObject BlankNodeJsonLd2a = new()
+        {
+            ["@graph"] = new JArray() { GetRow1WithWeights(GetWeightQualityObject(new JArray() { GetWeightDatumObject(1), GetWeightDatumObject(22), GetWeightDatumObject(333) }, "_:1234")) },
+            ["@context"] = context
+        };
+
+        public static readonly JObject BlankNodeJsonLd2b = new()
+        {
+            ["@graph"] = new JArray() { GetRow1WithWeights(GetWeightQualityObject(new JArray() { GetWeightDatumObject(333), GetWeightDatumObject(1), GetWeightDatumObject(22) }, "_:1234")) },
+            ["@context"] = context
+        };
+
+        public static readonly JObject BlankNodeJsonLd3 = new()
+        {
+            ["@graph"] = new JArray() { GetRow1WithWeights(GetWeightQualityObject(new JArray() { GetWeightDatumObject(12346) }, "_:1")) },
+            ["@context"] = context
+        };
+
+        public static readonly JObject BlankNodeJsonLd4 = new()
+        {
+            ["@graph"] = new JArray() { GetRow1WithWeights(GetWeightQualityObject(new JArray(GetWeightDatumObject(12346, "_:evenweirderlongblankid")) { }, "_:strangelongblankid")) },
+            ["@context"] = context
         };
 
         public static readonly JObject aspect_jsonld = new()
@@ -192,32 +231,19 @@ namespace VersionedObject.Tests
                         [VersionedObject.ProvWasDerivedFrom] = VersionedObject.NoProvenance.ToString()
                     }
                 },
-            ["@context"] = new JObject()
-            {
-                ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",
-                ["@vocab"] = "http://rdf.equinor.com/ontology/mel#",
-                ["sor"] = "http://rdf.equinor.com/ontology/sor#",
-                ["@version"] = "1.1"
-            }
+            ["@context"] = context
         };
         public static readonly JObject aspect_persistent_jsonld = new()
         {
             ["@graph"] = new JArray()
-                {
-                    new JObject()
+                { new JObject()
                     {
                         ["@id"] = "sor:Row1",
                         ["@type"] = new JArray(){ "http://rdf.equinor.com/ontology/mel#MelRow" },
                         ["rdfs:label"] = "An empty MEL Row"
                     }
                 },
-            ["@context"] = new JObject()
-            {
-                ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",
-                ["@vocab"] = "http://rdf.equinor.com/ontology/mel#",
-                ["sor"] = "http://rdf.equinor.com/ontology/sor#",
-                ["@version"] = "1.1"
-            }
+            ["@context"] = context
         };
         public static readonly JObject expanded_jsonld = new()
         {
@@ -231,13 +257,7 @@ namespace VersionedObject.Tests
                         ["http://www.w3.org/ns/prov#wasDerivedFrom"] = VersionedObject.NoProvenance.ToString()
                     }
                 },
-            ["@context"] = new JObject()
-            {
-                ["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#",
-                ["@vocab"] = "http://rdf.equinor.com/ontology/mel#",
-                ["sor"] = "http://rdf.equinor.com/ontology/sor#",
-                ["@version"] = "1.1"
-            }
+            ["@context"] = context
         };
 
         [Fact()]
@@ -279,11 +299,88 @@ namespace VersionedObject.Tests
             Assert.Equal(aspectHashCode, aspectFirst.VersionedIri.VersionHash);
         }
 
+        [Fact]
+        public void TestIsBlankNode()
+        {
+            var bnode = new JObject()
+            {
+                ["@type"] = "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003589",
+                ["@id"] = "_:1234",
+                ["rdfs:label"] = "Weight of object"
+            };
+            Assert.True(bnode.IsBlankNode());
+
+            var bnode2 = new JObject()
+            {
+                ["@type"] = "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003589",
+                ["rdfs:label"] = "Weight of object"
+            };
+            Assert.True(bnode.IsBlankNode());
+
+            var normal_node = new JObject()
+            {
+                ["@type"] = "http://rds.posccaesar.org/ontology/plm/rdl/PCA_100003589",
+                ["@id"] = "http://example.com/id/_1",
+                ["rdfs:label"] = "Weight of object"
+            };
+            Assert.False(normal_node.IsBlankNode());
+        }
+
+        [Fact]
+        public void AddBlankNodeIdTest()
+        {
+            var bnode = new JObject()
+            {
+                ["@type"] = "http://example.com/type"
+            };
+            var new_node = AddBlankNodeId(bnode);
+            Assert.True(bnode.IsBlankNode());
+            Assert.NotEqual(new_node, bnode);
+            Assert.NotNull(new_node["@id"]);
+
+        }
+
+        [Fact]
+        public void HashBlankNodesTest()
+        {
+            var hashed = BlankNodeJsonLd2a["@graph"].First().Value<JObject>().HashBlankNodes();
+            Assert.NotEqual(hashed, BlankNodeJsonLd2a);
+            var bnode = new JObject()
+            {
+                ["@type"] = "http://example.com/type"
+            };
+            var new_node = AddBlankNodeId(bnode);
+            var hashed_bnode = bnode.HashBlankNodes();
+        }
+
+        [Fact]
+        public void BlankNodeTest()
+        {
+            var obj1 = BlankNodeJsonLd.GetInputGraphAsEntities().First();
+            var hash1 = obj1.GetHash();
+            var obj2 = BlankNodeJsonLd2.GetInputGraphAsEntities().First();
+            var hash2 = obj2.GetHash();
+            var obj2a = BlankNodeJsonLd2a.GetInputGraphAsEntities().First();
+            var hash2a = obj2a.GetHash();
+            var obj2b = BlankNodeJsonLd2b.GetInputGraphAsEntities().First();
+            var hash2b = obj2b.GetHash();
+            var obj3 = BlankNodeJsonLd3.GetInputGraphAsEntities().First();
+            var hash3 = obj3.GetHash();
+            var obj4 = BlankNodeJsonLd4.GetInputGraphAsEntities().First();
+            var hash4 = obj4.GetHash();
+
+            Assert.Equal(obj2.GetHash(), obj1.GetHash());
+            Assert.NotEqual(obj2a.GetHash(), obj2.GetHash());
+            Assert.Equal(obj2a.GetHash(), obj2b.GetHash());
+            Assert.Equal(obj3.GetHash(), obj4.GetHash());
+            Assert.NotEqual(obj1.GetHash(), obj3.GetHash());
+            Assert.NotEqual(obj2.GetHash(), obj4.GetHash());
+        }
 
         [Fact()]
         public void LoadGraphTest()
         {
-            var graph = ParseJsonLdString(SimpleJsonLd.ToString());
+            var graph = ParseJsonLdGraph(SimpleJsonLd);
             Assert.NotNull(graph);
             Assert.False(graph.IsEmpty);
         }
@@ -291,7 +388,7 @@ namespace VersionedObject.Tests
         [Fact()]
         public void LoadStringGraphTest()
         {
-            var graph = ParseJsonLdString(@"{
+            var graph = ParseJsonLdGraph(JObject.Parse(@"{
                 ""@graph"": [
                     {
                         ""@id"": ""sor:Row1"",
@@ -305,7 +402,7 @@ namespace VersionedObject.Tests
                     ""sor"": ""http://rdf.equinor.com/ontology/sor#"",
                     ""@version"": ""1.1""
                 }
-            }");
+            }"));
             Assert.NotNull(graph);
             Assert.False(graph.IsEmpty);
         }
@@ -313,7 +410,7 @@ namespace VersionedObject.Tests
         [Fact()]
         public void LoadMarkusGraphTest()
         {
-            var graph = ParseJsonLdString(@"{
+            var graph = ParseJsonLdGraph(JObject.Parse(@"{
                 ""@graph"":[
                     {
                         ""@id"": ""https://example.com/yo"",
@@ -324,7 +421,7 @@ namespace VersionedObject.Tests
                 ""@context"": {
                     ""@version"": ""1.1""
                 }
-            }");
+            }"));
             Assert.NotNull(graph);
             Assert.False(graph.IsEmpty);
         }
@@ -341,20 +438,20 @@ namespace VersionedObject.Tests
         [Fact()]
         public void TestHashTriples()
         {
-            var simple_graph = ParseJsonLdString(SimpleJsonLd.ToString());
-            var aspect_persistent_graph = ParseJsonLdString(aspect_persistent_jsonld.ToString());
-            var simple_aspect_graph = ParseJsonLdString(SimpleJsonLd.ToString());
-            var aspect_graph = ParseJsonLdString(aspect_jsonld.ToString());
+            var simple_graph = SimpleJsonLd.GetInputGraphAsEntities().First();
+            var aspect_persistent_graph = aspect_persistent_jsonld.GetInputGraphAsEntities().First();
+            var simple_aspect_graph = SimpleJsonLd.GetInputGraphAsEntities().First();
+            var aspect_graph = aspect_jsonld.GetInputGraphAsEntities().First();
             var simple_expanded = SimpleJsonLd.RemoveContext();
             var aspet_persistent_expanded = aspect_persistent_jsonld.RemoveContext();
             Assert.True(simple_expanded.AspectEquals(aspet_persistent_expanded, RdfEqualsHash));
 
             var simple_hash = simple_graph.GetHash();
             var simple_aspect_hash = simple_aspect_graph.GetHash();
-            var different_hash = ParseJsonLdString(DifferentJsonLd.ToString()).GetHash();
+            var different_hash = DifferentJsonLd.GetInputGraphAsEntities().First().GetHash();
             var aspect_hash = aspect_graph.GetHash();
             var aspect_persistent_hash = aspect_persistent_graph.GetHash();
-            var row2_hash = ParseJsonLdString(Row2JsonLd.ToString()).GetHash();
+            var row2_hash = Row2JsonLd.GetInputGraphAsEntities().First().GetHash();
             Assert.NotEqual(simple_hash, different_hash);
             Assert.NotEqual(aspect_hash, different_hash);
             Assert.NotEqual(row2_hash, different_hash);
@@ -403,8 +500,8 @@ namespace VersionedObject.Tests
         [Fact]
         public void TestMinorReordering()
         {
-            var hash1 = ParseJsonLdString(ReorderTest1.ToString()).GetHash();
-            var hash2 = ParseJsonLdString(ReorderTest2.ToString()).GetHash();
+            var hash1 = ReorderTest1.GetInputGraphAsEntities().First().GetHash();
+            var hash2 = ReorderTest2.GetInputGraphAsEntities().First().GetHash();
             Assert.NotEqual(hash1, hash2);
         }
 
