@@ -1,5 +1,7 @@
 # versioned-object
-Library for handling and creating versioned objects and IRIs for use with the Aspect API
+Library for handling and creating versioned objects and IRIs for use with the Bravo API
+
+Because of practical problems in actual use, we are switching to a similar, but syntactically different concept and this repo is therefore archived. 
 
 The library consists of three parts that can to some extent be used separately:
 
