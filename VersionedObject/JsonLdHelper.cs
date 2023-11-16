@@ -12,10 +12,14 @@ using System.Collections.Immutable;
 using Newtonsoft.Json.Linq;
 using System.Data.HashFunction.CRC;
 using System.Diagnostics;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using VDS.RDF;
 using VDS.RDF.Writing;
+using System;
+using System.Xml.Linq;
+using VDS.RDF.Query.Algebra;
 
 namespace VersionedObject
 {
@@ -26,9 +30,18 @@ namespace VersionedObject
         /// Adds the type and version information to the input object from the old object, 
         /// simulating the version control that should be in the clients
         /// </summary>
-        public static bool RdfEqualsHash(IGraph old, IGraph input) =>
+        public static bool RdfEqualsHash(JObject old, JObject input) =>
             input.GetHash()
                 .SequenceEqual(old.GetHash());
+
+        /// <summary>
+        /// Checks Equality of two JSON-LD Objects (Not graphs)
+        /// </summary>
+        /// <param name="old"></param>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public static bool RdfEqualsTriples(JObject old, JObject input) =>
+            RdfEqualsTriples(ParseJsonLdObject(old), ParseJsonLdObject(input));
 
         /// <summary>
         /// Compares two json-ld objects by checking the triples are the same
@@ -42,43 +55,38 @@ namespace VersionedObject
         /// Adds the type and version information to the input object from the old object, 
         /// simulating the version control that should be in the clients
         /// </summary>
-        public static bool AspectEquals(this JObject old, JObject input, System.Func<IGraph, IGraph, bool> RdfComparer)
-        {
-            var oldGraph = ParseJsonLdString(old.ToString());
-            var inputGraph = ParseJsonLdString(input.ToString());
-            return RdfComparer(oldGraph, inputGraph);
-        }
-
+        public static bool AspectEquals(this JObject old, JObject input, System.Func<JObject, JObject, bool> RdfComparer) =>
+            RdfComparer(old, input);
 
         /// <summary>
         /// Generic functions for applying a function to all JValues in json
         /// </summary>
-        private static readonly Func<Func<JValue, JValue>, Func<JToken, JToken>> ChangeValuesInToken =
-            valueChanger => token =>
+        private static readonly Func<Func<JObject, JObject>, Func<JValue, JValue>, Func<JToken, JToken>> ChangeValuesInToken =
+            (objectChanger, valueChanger) => token =>
                 token switch
                 {
-                    JArray array => new JArray(array.Select(ChangeValuesInToken(valueChanger))),
-                    JObject obj => ChangeValuesInObject(valueChanger)(obj),
+                    JArray array => new JArray(array.Select(ChangeValuesInToken(objectChanger, valueChanger))),
+                    JObject obj => ChangeValuesInObject(objectChanger, valueChanger)(obj),
                     JValue val => valueChanger(val),
                     _ => throw new InvalidJsonLdException($"Unknown json token {token}")
                 };
 
-        private static readonly Func<Func<JValue, JValue>, Func<JProperty, JProperty>> ChangeValuesInProperty =
-            valueChanger => prop =>
-                new JProperty(prop.Name, ChangeValuesInToken(valueChanger)(prop.Value));
+        private static readonly Func<Func<JObject, JObject>, Func<JValue, JValue>, Func<JProperty, JProperty>> ChangeValuesInProperty =
+            (objectChanger, valueChanger) => prop =>
+                new JProperty(prop.Name, ChangeValuesInToken(objectChanger, valueChanger)(prop.Value));
 
-        public static readonly Func<Func<JValue, JValue>, Func<JObject, JObject>> ChangeValuesInObject =
-            valueChanger => versionedEntity =>
-                new JObject(versionedEntity
+        public static readonly Func<Func<JObject, JObject>, Func<JValue, JValue>, Func<JObject, JObject>> ChangeValuesInObject =
+            (objectChanger, valueChanger) => versionedEntity =>
+                objectChanger(new JObject(versionedEntity
                     .Properties()
-                    .Select(ChangeValuesInProperty(valueChanger)));
+                    .Select(ChangeValuesInProperty(objectChanger, valueChanger))));
 
-
+        //select: Func<Func<I,O>, Func<IEnumerable<I>,IEnumerable<O>> 
         /// <summary>
         /// Removes the version suffix from all persistent URIs in the JObject
         /// </summary>
         public static JObject RemoveVersionsFromIris(this JObject versionedEntity, ImmutableHashSet<IRIReference> dict) =>
-            ChangeValuesInObject(RemoveVersionFromValue(dict))(versionedEntity);
+            ChangeValuesInObject(x => x, RemoveVersionFromValue(dict))(versionedEntity);
 
         /// <summary>
         /// Helper functions for removeing versions from objects
@@ -123,29 +131,105 @@ namespace VersionedObject
         /// </summary>
         public static JObject AddVersionsToUris(this JObject orig,
             ImmutableDictionary<IRIReference, VersionedIRIReference> map) =>
-            ChangeValuesInObject(AddVersionToValue(map))(orig);
+            ChangeValuesInObject(x => x, AddVersionToValue(map))(orig);
 
-        public static byte[] GetHash(this IGraph g)
+        public static IRIReference BlankNodeMarker =
+            new("https://github.com/equinor/versioned-object/blob/develop/VersionedObject/docs/blanknode.md");
+
+        public static JObject AddBlankNodeId(JObject orig) =>
+            orig.IsBlankNode() ? orig.ReplaceIdValue(new IRIReference($"{BlankNodeMarker}#{orig.HashWithoutId()}")) : orig;
+
+        public static bool IsBlankNode(this JObject orig) =>
+            orig.SelectToken("@id") switch
+            {
+                JValue s => s.ToString().StartsWith("_:"),
+                null => true,
+                _ => throw new InvalidJsonLdException("Only JValue is allowed at \"@id\".")
+            };
+
+        /// <summary>
+        /// Creates hashes to put in the "@id" position of all blank nodes of a top-level JSON-LD object
+        /// </summary>
+        /// <param name="orig">A JSON-Ld object</param>
+        public static JObject HashBlankNodes(this JObject orig) =>
+            ChangeValuesInObject(AddBlankNodeId, x => x)(orig);
+
+        /// <summary>
+        /// Creates hashes to put in the "@id" position of all blank nodes in a json-ld graph
+        /// </summary>
+        /// <param name="orig">A JSON-Ld graph</param>
+        //public static JObject HashBlankNodesInGraph(this JObject orig) =>
+        //    orig["@graph"] switch
+        //    {
+        //        null => ChangeValuesInObject(AddBlankNodeId, x => x)(orig),
+        //        var graph => new JObject()
+        //            {["@graph"] = ChangeValuesInToken(AddBlankNodeId, x => x)(graph)}
+        //    };
+
+
+        /// <summary>
+        /// replaces "@id" with the newId in the object
+        /// </summary>
+        public static JObject ReplaceIdValue(this JObject orig, IRIReference newId) =>
+            new(orig.Properties()
+                .Where(p => !p.Name.Equals("@id"))
+                .Append(new JProperty("@id", newId.ToJValue()))
+            );
+
+        public static string HashWithoutId(this JObject obj) =>
+            string.Join(
+                "",
+                obj.ReplaceIdValue(BlankNodeMarker).GetHash()
+                );
+
+        /// <summary>
+        /// Gets the hash on a JSON-LD Top-level object
+        /// </summary>
+        public static byte[] GetHash(this JObject orig)
         {
+            var hashed = orig.HashBlankNodes();
+            var g = ParseJsonLdObject(hashed);
+
             var writer = new NTriplesWriter();
             var graphString = VDS.RDF.Writing.StringWriter.Write(g, writer);
-            var crcFactory = CRCFactory.Instance;
-            var hasher = crcFactory.Create(CRCConfig.CRC64);
+            var hasher = SHA1.Create();
             var triplesHash = graphString
                 .Split(new[] { '\r', '\n' }, System.StringSplitOptions.RemoveEmptyEntries)
-                .Select(x => (IEnumerable<byte>)hasher.ComputeHash(Encoding.UTF8.GetBytes(x)).Hash)
+                .Select(x => (IEnumerable<byte>)hasher.ComputeHash(Encoding.UTF8.GetBytes(x)))
                 .Aggregate((x, y) => x.Zip(y, (l1, l2) => (byte)(l1 ^ l2)));
             return triplesHash.ToArray();
 
         }
 
-        public static IGraph ParseJsonLdString(string jsonLdString)
+        /// <summary>
+        /// Parses a JSON-LD Object (not graph) into a dotnet IGraph
+        /// </summary>
+        /// <param name="jsonLdObject"></param>
+        /// <returns></returns>
+        public static IGraph ParseJsonLdObject(JObject jsonLdObject) =>
+            ParseJsonLdGraph(new()
+            {
+                ["@graph"] = new JArray()
+                    {jsonLdObject}
+            }
+            );
+
+        /// <summary>
+        /// Parses a string describing a json-ld graph into dotnet IGraph
+        /// </summary>
+        public static IGraph ParseJsonLdGraph(JObject jsonLdGraph)
         {
             var parser = new VDS.RDF.Parsing.JsonLdParser();
             using var store = new TripleStore();
-
-            using (TextReader reader = new StringReader(jsonLdString))
-                parser.Load(store, reader);
+            try
+            {
+                using (TextReader reader = new StringReader(jsonLdGraph.ToString()))
+                    parser.Load(store, reader);
+            }
+            catch (NullReferenceException e)
+            {
+                throw new InvalidJsonLdException($"Invalid JSON-LD in {jsonLdGraph.ToString()}");
+            }
 
             if (store.Graphs.Count != 1)
                 throw new InvalidDataException("Input JSON contained more than one graph, this is an error");
@@ -158,8 +242,7 @@ namespace VersionedObject
         */
         public static byte[] GetHash(this PersistentObjectData @object)
         {
-            var graph = ParseJsonLdString(@object.ToJsonldGraph().ToString());
-            return graph.GetHash();
+            return @object.ToJsonldJObject().GetHash();
         }
 
         public static IRIReference GetIRIReference(this JToken jsonld) =>
